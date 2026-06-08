@@ -1,0 +1,451 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">{{ title }}</h1>
+            <p class="mb-0 text-muted">Preencha os dados do imóvel</p>
+        </div>
+        <a href="{% url 'imoveis:listar' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Identificação -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Identificação</h5>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.codigo.label }} <span class="text-danger">*</span></label>
+                                {{ form.codigo }}
+                                {% if form.codigo.errors %}
+                                    <div class="text-danger small mt-1">{{ form.codigo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.proprietario.label }} <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    {{ form.proprietario }}
+                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalCadastroProprietario" title="Cadastrar novo proprietário">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                                {% if form.proprietario.errors %}
+                                    <div class="text-danger small mt-1">{{ form.proprietario.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.tipo.label }} <span class="text-danger">*</span></label>
+                                {{ form.tipo }}
+                                {% if form.tipo.errors %}
+                                    <div class="text-danger small mt-1">{{ form.tipo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Endereço -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Endereço</h5>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.endereco.label }} <span class="text-danger">*</span></label>
+                                {{ form.endereco }}
+                                {% if form.endereco.errors %}
+                                    <div class="text-danger small mt-1">{{ form.endereco.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ form.numero.label }} <span class="text-danger">*</span></label>
+                                {{ form.numero }}
+                                {% if form.numero.errors %}
+                                    <div class="text-danger small mt-1">{{ form.numero.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.complemento.label }}</label>
+                                {{ form.complemento }}
+                                {% if form.complemento.errors %}
+                                    <div class="text-danger small mt-1">{{ form.complemento.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.bairro.label }} <span class="text-danger">*</span></label>
+                                {{ form.bairro }}
+                                {% if form.bairro.errors %}
+                                    <div class="text-danger small mt-1">{{ form.bairro.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.cidade.label }} <span class="text-danger">*</span></label>
+                                {{ form.cidade }}
+                                {% if form.cidade.errors %}
+                                    <div class="text-danger small mt-1">{{ form.cidade.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ form.estado.label }} <span class="text-danger">*</span></label>
+                                {{ form.estado }}
+                                {% if form.estado.errors %}
+                                    <div class="text-danger small mt-1">{{ form.estado.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ form.cep.label }} <span class="text-danger">*</span></label>
+                                {{ form.cep }}
+                                {% if form.cep.errors %}
+                                    <div class="text-danger small mt-1">{{ form.cep.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Características -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Características</h5>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.finalidade.label }}</label>
+                                {{ form.finalidade }}
+                                {% if form.finalidade.errors %}
+                                    <div class="text-danger small mt-1">{{ form.finalidade.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.area_total.label }}</label>
+                                {{ form.area_total }}
+                                {% if form.area_total.errors %}
+                                    <div class="text-danger small mt-1">{{ form.area_total.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.area_construida.label }}</label>
+                                {{ form.area_construida }}
+                                {% if form.area_construida.errors %}
+                                    <div class="text-danger small mt-1">{{ form.area_construida.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.status.label }}</label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="text-danger small mt-1">{{ form.status.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ form.quartos.label }}</label>
+                                {{ form.quartos }}
+                                {% if form.quartos.errors %}
+                                    <div class="text-danger small mt-1">{{ form.quartos.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ form.banheiros.label }}</label>
+                                {{ form.banheiros }}
+                                {% if form.banheiros.errors %}
+                                    <div class="text-danger small mt-1">{{ form.banheiros.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ form.vagas_garagem.label }}</label>
+                                {{ form.vagas_garagem }}
+                                {% if form.vagas_garagem.errors %}
+                                    <div class="text-danger small mt-1">{{ form.vagas_garagem.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mt-4">
+                                    {{ form.mobiliado }}
+                                    <label class="form-check-label" for="{{ form.mobiliado.id_for_label }}">
+                                        {{ form.mobiliado.label }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Valores -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Valores Mensais</h5>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.valor_aluguel.label }} <span class="text-danger">*</span></label>
+                                {{ form.valor_aluguel }}
+                                {% if form.valor_aluguel.errors %}
+                                    <div class="text-danger small mt-1">{{ form.valor_aluguel.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.valor_condominio.label }}</label>
+                                {{ form.valor_condominio }}
+                                {% if form.valor_condominio.errors %}
+                                    <div class="text-danger small mt-1">{{ form.valor_condominio.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.valor_iptu.label }}</label>
+                                {{ form.valor_iptu }}
+                                {% if form.valor_iptu.errors %}
+                                    <div class="text-danger small mt-1">{{ form.valor_iptu.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.valor_seguro.label }}</label>
+                                {{ form.valor_seguro }}
+                                {% if form.valor_seguro.errors %}
+                                    <div class="text-danger small mt-1">{{ form.valor_seguro.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Documentação -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Documentação</h5>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.inscricao_municipal.label }}</label>
+                                {{ form.inscricao_municipal }}
+                                {% if form.inscricao_municipal.errors %}
+                                    <div class="text-danger small mt-1">{{ form.inscricao_municipal.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.matricula.label }}</label>
+                                {{ form.matricula }}
+                                {% if form.matricula.errors %}
+                                    <div class="text-danger small mt-1">{{ form.matricula.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{{ form.descricao.label }}</label>
+                                {{ form.descricao }}
+                                {% if form.descricao.errors %}
+                                    <div class="text-danger small mt-1">{{ form.descricao.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Botões -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{% url 'imoveis:listar' %}" class="btn btn-secondary">
+                                        <i class="bi bi-x-circle"></i> Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle"></i> Salvar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Cadastro Rápido de Proprietário -->
+<div class="modal fade" id="modalCadastroProprietario" tabindex="-1" aria-labelledby="modalCadastroProprietarioLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCadastroProprietarioLabel">
+                    <i class="bi bi-person-plus"></i> Cadastro Rápido de Proprietário
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCadastroRapidoProprietario">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label">Nome Completo <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="modal_nome" name="nome" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Tipo <span class="text-danger">*</span></label>
+                            <select class="form-select" id="modal_tipo" name="tipo" required>
+                                <option value="">Selecione...</option>
+                                <option value="PF">Pessoa Física</option>
+                                <option value="PJ">Pessoa Jurídica</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">CPF/CNPJ <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="modal_cpf_cnpj" name="cpf_cnpj" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Telefone <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="modal_telefone" name="telefone" required>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">E-mail <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="modal_email" name="email" required>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Endereço <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="modal_endereco" name="endereco" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">CEP <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="modal_cep" name="cep" required>
+                        </div>
+                        <div class="col-md-5 mb-3">
+                            <label class="form-label">Cidade <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="modal_cidade" name="cidade" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Estado <span class="text-danger">*</span></label>
+                            <select class="form-select" id="modal_estado" name="estado" required>
+                                <option value="">UF</option>
+                                <option value="AC">AC</option>
+                                <option value="AL">AL</option>
+                                <option value="AP">AP</option>
+                                <option value="AM">AM</option>
+                                <option value="BA">BA</option>
+                                <option value="CE">CE</option>
+                                <option value="DF">DF</option>
+                                <option value="ES">ES</option>
+                                <option value="GO">GO</option>
+                                <option value="MA">MA</option>
+                                <option value="MT">MT</option>
+                                <option value="MS">MS</option>
+                                <option value="MG">MG</option>
+                                <option value="PA">PA</option>
+                                <option value="PB">PB</option>
+                                <option value="PR">PR</option>
+                                <option value="PE">PE</option>
+                                <option value="PI">PI</option>
+                                <option value="RJ">RJ</option>
+                                <option value="RN">RN</option>
+                                <option value="RS">RS</option>
+                                <option value="RO">RO</option>
+                                <option value="RR">RR</option>
+                                <option value="SC">SC</option>
+                                <option value="SP">SP</option>
+                                <option value="SE">SE</option>
+                                <option value="TO">TO</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" id="btnSalvarProprietario">
+                    <i class="bi bi-check-circle"></i> Cadastrar Proprietário
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Máscara para CEP
+document.addEventListener('DOMContentLoaded', function() {
+    const cepInput = document.getElementById('id_cep');
+    if (cepInput) {
+        cepInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 5) {
+                value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            }
+            e.target.value = value;
+        });
+    }
+
+    // Cadastro rápido de proprietário
+    const btnSalvarProprietario = document.getElementById('btnSalvarProprietario');
+    if (btnSalvarProprietario) {
+        btnSalvarProprietario.addEventListener('click', function() {
+            const form = document.getElementById('formCadastroRapidoProprietario');
+            const formData = new FormData(form);
+            
+            // Validação básica
+            const nome = document.getElementById('modal_nome').value.trim();
+            const tipo = document.getElementById('modal_tipo').value;
+            const cpf_cnpj = document.getElementById('modal_cpf_cnpj').value.trim();
+            const telefone = document.getElementById('modal_telefone').value.trim();
+            const email = document.getElementById('modal_email').value.trim();
+            const endereco = document.getElementById('modal_endereco').value.trim();
+            const cep = document.getElementById('modal_cep').value.trim();
+            const cidade = document.getElementById('modal_cidade').value.trim();
+            const estado = document.getElementById('modal_estado').value;
+            
+            if (!nome || !tipo || !cpf_cnpj || !telefone || !email || !endereco || !cep || !cidade || !estado) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            // Desabilitar botão durante o envio
+            btnSalvarProprietario.disabled = true;
+            btnSalvarProprietario.innerHTML = '<i class="bi bi-hourglass-split"></i> Cadastrando...';
+            
+            // Enviar dados via AJAX
+            fetch('{% url "core:cadastrar_proprietario" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Adicionar nova opção ao select de proprietário
+                    const selectProprietario = document.getElementById('id_proprietario');
+                    const newOption = new Option(data.proprietario.nome, data.proprietario.id, true, true);
+                    selectProprietario.add(newOption);
+                    
+                    // Fechar modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalCadastroProprietario'));
+                    modal.hide();
+                    
+                    // Limpar formulário
+                    form.reset();
+                    
+                    // Mostrar mensagem de sucesso
+                    alert('Proprietário cadastrado com sucesso!');
+                } else {
+                    let errorMessage = data.message || 'Erro desconhecido';
+                    if (data.errors) {
+                        const errorDetails = Object.keys(data.errors)
+                            .map(field => `${field}: ${data.errors[field].map(err => err.message).join(', ')}`)
+                            .join('\n');
+                        errorMessage += '\n\nDetalhes:\n' + errorDetails;
+                    }
+                    alert('Erro ao cadastrar proprietário: ' + errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao cadastrar proprietário. Tente novamente.');
+            })
+            .finally(() => {
+                // Reabilitar botão
+                btnSalvarProprietario.disabled = false;
+                btnSalvarProprietario.innerHTML = '<i class="bi bi-check-circle"></i> Cadastrar Proprietário';
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

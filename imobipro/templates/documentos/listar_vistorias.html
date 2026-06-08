@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - ImobilPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        {{ title }}
+                    </h4>
+                    <a href="{% url 'documentos:agendar_vistoria' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>
+                        Agendar Nova Vistoria
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Filtros -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <form method="get" class="row g-3">
+                                <div class="col-md-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select name="status" id="status" class="form-select">
+                                        <option value="">Todos os status</option>
+                                        {% for value, label in status_choices %}
+                                            <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="tipo" class="form-label">Tipo</label>
+                                    <select name="tipo" id="tipo" class="form-select">
+                                        <option value="">Todos os tipos</option>
+                                        {% for value, label in tipo_choices %}
+                                            <option value="{{ value }}" {% if request.GET.tipo == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="search" class="form-label">Buscar</label>
+                                    <input type="text" name="search" id="search" class="form-control" 
+                                           placeholder="Código do imóvel, endereço, responsável..." 
+                                           value="{{ request.GET.search }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">&nbsp;</label>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            <i class="fas fa-search me-1"></i>
+                                            Filtrar
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    {% if vistorias %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Imóvel</th>
+                                        <th>Tipo</th>
+                                        <th>Data Agendamento</th>
+                                        <th>Responsável</th>
+                                        <th>Status</th>
+                                        <th>Contrato</th>
+                                        <th class="text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for vistoria in vistorias %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ vistoria.imovel.codigo }}</strong><br>
+                                                <small class="text-muted">{{ vistoria.imovel.endereco|truncatechars:40 }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ vistoria.get_tipo_display }}</span>
+                                            </td>
+                                            <td>
+                                                {{ vistoria.data_agendamento|date:"d/m/Y H:i" }}
+                                            </td>
+                                            <td>{{ vistoria.responsavel }}</td>
+                                            <td>
+                                                {% if vistoria.status == 'AGENDADA' %}
+                                                    <span class="badge bg-warning">{{ vistoria.get_status_display }}</span>
+                                                {% elif vistoria.status == 'REALIZADA' %}
+                                                    <span class="badge bg-success">{{ vistoria.get_status_display }}</span>
+                                                {% elif vistoria.status == 'CANCELADA' %}
+                                                    <span class="badge bg-danger">{{ vistoria.get_status_display }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">{{ vistoria.get_status_display }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if vistoria.contrato %}
+                                                    <small>{{ vistoria.contrato.numero }}</small>
+                                                {% else %}
+                                                    <small class="text-muted">-</small>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="btn-group btn-group-sm" role="group">
+                                                    <a href="{% url 'documentos:detalhar_vistoria' vistoria.pk %}" 
+                                                       class="btn btn-outline-primary" title="Ver detalhes">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    {% if vistoria.status == 'AGENDADA' %}
+                                                        <a href="{% url 'documentos:editar_vistoria' vistoria.pk %}" 
+                                                           class="btn btn-outline-warning" title="Editar">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <a href="{% url 'documentos:realizar_vistoria' vistoria.pk %}" 
+                                                           class="btn btn-outline-success" title="Marcar como realizada"
+                                                           onclick="return confirm('Confirma que a vistoria foi realizada?')">
+                                                            <i class="fas fa-check"></i>
+                                                        </a>
+                                                        <a href="{% url 'documentos:cancelar_vistoria' vistoria.pk %}" 
+                                                           class="btn btn-outline-danger" title="Cancelar"
+                                                           onclick="return confirm('Confirma o cancelamento desta vistoria?')">
+                                                            <i class="fas fa-times"></i>
+                                                        </a>
+                                                    {% endif %}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Paginação -->
+                        {% if vistorias.has_other_pages %}
+                            <nav aria-label="Navegação de páginas">
+                                <ul class="pagination justify-content-center">
+                                    {% if vistorias.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                                                Primeira
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ vistorias.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                                                Anterior
+                                            </a>
+                                        </li>
+                                    {% endif %}
+
+                                    <li class="page-item active">
+                                        <span class="page-link">
+                                            Página {{ vistorias.number }} de {{ vistorias.paginator.num_pages }}
+                                        </span>
+                                    </li>
+
+                                    {% if vistorias.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ vistorias.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                                                Próxima
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ vistorias.paginator.num_pages }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                                                Última
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Nenhuma vistoria encontrada</h5>
+                            <p class="text-muted">Não há vistorias agendadas com os filtros aplicados.</p>
+                            <a href="{% url 'documentos:agendar_vistoria' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>
+                                Agendar Primeira Vistoria
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

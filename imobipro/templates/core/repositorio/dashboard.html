@@ -1,0 +1,498 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Repositório Digital - Sistema Imobiliário{% endblock %}
+
+{% block extra_css %}
+<style>
+    .repo-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 25px;
+        color: white;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        border: none;
+    }
+    
+    .repo-card:hover {
+        transform: translateY(-5px);
+        text-decoration: none;
+        color: white;
+    }
+    
+    .repo-card.success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+    
+    .repo-card.warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .repo-card.info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .repo-card.danger {
+        background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+    }
+    
+    .repo-stat-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .repo-stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .document-item {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border-left: 4px solid #007bff;
+        transition: all 0.3s ease;
+    }
+    
+    .document-item:hover {
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    
+    .document-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .category-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        color: white;
+    }
+    
+    .file-size {
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+    
+    .repo-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .btn-repo {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 25px;
+        color: white;
+        font-weight: bold;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-repo:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .quick-actions {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    
+    .action-btn {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 10px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #495057;
+        transition: all 0.3s ease;
+    }
+    
+    .action-btn:hover {
+        border-color: #007bff;
+        background: #f8f9fa;
+        color: #007bff;
+        text-decoration: none;
+    }
+    
+    .recent-activity {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        max-height: 400px;
+        overflow-y: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header do Repositório -->
+    <div class="repo-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2">
+                    <i class="fas fa-folder-open me-3"></i>
+                    Repositório Digital
+                </h1>
+                <p class="mb-0">Gerencie todos os documentos do seu sistema imobiliário de forma segura e organizada</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'core:upload_documento' %}" class="btn btn-repo">
+                    <i class="fas fa-cloud-upload-alt me-2"></i>
+                    Enviar Documento
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6">
+            <a href="{% url 'core:listar_documentos' %}" class="repo-card info">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="repo-stat-value">{{ total_documentos }}</div>
+                        <div class="repo-stat-label">Total de Documentos</div>
+                    </div>
+                    <div>
+                        <i class="fas fa-file-alt fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+            <a href="{% url 'core:listar_documentos' %}?aprovado=false" class="repo-card warning">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="repo-stat-value">{{ documentos_pendentes }}</div>
+                        <div class="repo-stat-label">Pendentes de Aprovação</div>
+                    </div>
+                    <div>
+                        <i class="fas fa-clock fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+            <a href="{% url 'core:gerenciar_categorias' %}" class="repo-card success">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="repo-stat-value">{{ categorias_ativas }}</div>
+                        <div class="repo-stat-label">Categorias Ativas</div>
+                    </div>
+                    <div>
+                        <i class="fas fa-tags fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+            <a href="{% url 'core:listar_documentos' %}?favoritos=true" class="repo-card danger">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="repo-stat-value">{{ favoritos|length }}</div>
+                        <div class="repo-stat-label">Meus Favoritos</div>
+                    </div>
+                    <div>
+                        <i class="fas fa-heart fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Documentos Recentes -->
+        <div class="col-lg-6">
+            <div class="recent-activity">
+                <h5 class="mb-4">
+                    <i class="fas fa-history me-2 text-primary"></i>
+                    Documentos Recentes
+                </h5>
+                
+                {% for documento in documentos_recentes %}
+                <div class="document-item">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="document-icon" style="background-color: {{ documento.categoria.cor }};">
+                                <i class="{{ documento.categoria.icone }}"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h6 class="mb-1">
+                                <a href="{% url 'core:detalhes_documento' documento.id %}" class="text-decoration-none">
+                                    {{ documento.titulo }}
+                                </a>
+                            </h6>
+                            <div class="d-flex align-items-center">
+                                <span class="category-badge me-2" style="background-color: {{ documento.categoria.cor }};">
+                                    {{ documento.categoria.nome }}
+                                </span>
+                                <small class="text-muted">
+                                    {{ documento.criado_em|date:"d/m/Y H:i" }} por {{ documento.criado_por.get_full_name|default:documento.criado_por.username }}
+                                </small>
+                            </div>
+                            <div class="file-size mt-1">
+                                {{ documento.tamanho_formatado }} • {{ documento.get_tipo_documento_display }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'core:detalhes_documento' documento.id %}">
+                                        <i class="fas fa-eye me-2"></i>Visualizar
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'core:download_documento' documento.id %}">
+                                        <i class="fas fa-download me-2"></i>Download
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'core:compartilhar_documento' documento.id %}">
+                                        <i class="fas fa-share me-2"></i>Compartilhar
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-4">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Nenhum documento encontrado</p>
+                    <a href="{% url 'core:upload_documento' %}" class="btn btn-primary">
+                        Enviar Primeiro Documento
+                    </a>
+                </div>
+                {% endfor %}
+                
+                {% if documentos_recentes %}
+                <div class="text-center mt-3">
+                    <a href="{% url 'core:listar_documentos' %}" class="btn btn-outline-primary">
+                        Ver Todos os Documentos
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Ações Rápidas e Categorias -->
+        <div class="col-lg-6">
+            <!-- Ações Rápidas -->
+            <div class="quick-actions mb-4">
+                <h5 class="mb-4">
+                    <i class="fas fa-bolt me-2 text-warning"></i>
+                    Ações Rápidas
+                </h5>
+                
+                <a href="{% url 'core:upload_documento' %}" class="action-btn">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-cloud-upload-alt me-3 text-primary"></i>
+                        <div>
+                            <strong>Enviar Documento</strong>
+                            <br><small class="text-muted">Adicionar novo arquivo ao repositório</small>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="{% url 'core:listar_documentos' %}" class="action-btn">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-search me-3 text-success"></i>
+                        <div>
+                            <strong>Buscar Documentos</strong>
+                            <br><small class="text-muted">Encontrar arquivos específicos</small>
+                        </div>
+                    </div>
+                </a>
+                
+                <a href="{% url 'core:gerenciar_categorias' %}" class="action-btn">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-tags me-3 text-info"></i>
+                        <div>
+                            <strong>Gerenciar Categorias</strong>
+                            <br><small class="text-muted">Organizar tipos de documentos</small>
+                        </div>
+                    </div>
+                </a>
+                
+                {% if user.is_superuser %}
+                <a href="{% url 'core:configuracoes_repositorio' %}" class="action-btn">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-cog me-3 text-secondary"></i>
+                        <div>
+                            <strong>Configurações</strong>
+                            <br><small class="text-muted">Ajustar parâmetros do repositório</small>
+                        </div>
+                    </div>
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Documentos por Categoria -->
+            <div class="quick-actions">
+                <h5 class="mb-4">
+                    <i class="fas fa-chart-pie me-2 text-info"></i>
+                    Documentos por Categoria
+                </h5>
+                
+                {% for categoria in documentos_por_categoria %}
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="document-icon me-3" style="background-color: {{ categoria.cor }}; width: 30px; height: 30px; font-size: 0.9rem;">
+                            <i class="{{ categoria.icone }}"></i>
+                        </div>
+                        <div>
+                            <strong>{{ categoria.nome }}</strong>
+                            {% if categoria.descricao %}
+                            <br><small class="text-muted">{{ categoria.descricao|truncatechars:50 }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-primary rounded-pill">{{ categoria.total_documentos }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-3">
+                    <i class="fas fa-tags fa-2x text-muted mb-2"></i>
+                    <p class="text-muted mb-0">Nenhuma categoria criada</p>
+                </div>
+                {% endfor %}
+                
+                {% if documentos_por_categoria %}
+                <div class="text-center mt-3">
+                    <a href="{% url 'core:gerenciar_categorias' %}" class="btn btn-outline-info btn-sm">
+                        Gerenciar Categorias
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Meus Favoritos -->
+    {% if favoritos %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="recent-activity">
+                <h5 class="mb-4">
+                    <i class="fas fa-heart me-2 text-danger"></i>
+                    Meus Documentos Favoritos
+                </h5>
+                
+                <div class="row">
+                    {% for favorito in favoritos %}
+                    <div class="col-lg-6">
+                        <div class="document-item">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <div class="document-icon" style="background-color: {{ favorito.documento.categoria.cor }};">
+                                        <i class="{{ favorito.documento.categoria.icone }}"></i>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <h6 class="mb-1">
+                                        <a href="{% url 'core:detalhes_documento' favorito.documento.id %}" class="text-decoration-none">
+                                            {{ favorito.documento.titulo }}
+                                        </a>
+                                    </h6>
+                                    <div class="d-flex align-items-center">
+                                        <span class="category-badge me-2" style="background-color: {{ favorito.documento.categoria.cor }};">
+                                            {{ favorito.documento.categoria.nome }}
+                                        </span>
+                                        <small class="text-muted">
+                                            {{ favorito.documento.tamanho_formatado }}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <a href="{% url 'core:detalhes_documento' favorito.documento.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-refresh das estatísticas a cada 5 minutos
+setInterval(() => {
+    if (document.hidden === false) {
+        // Atualizar apenas as estatísticas via AJAX
+        fetch('{% url "core:repositorio_dashboard" %}')
+            .then(response => response.text())
+            .then(html => {
+                // Atualizar apenas os números das estatísticas
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Atualizar valores das estatísticas
+                const statValues = document.querySelectorAll('.repo-stat-value');
+                const newStatValues = doc.querySelectorAll('.repo-stat-value');
+                
+                statValues.forEach((element, index) => {
+                    if (newStatValues[index]) {
+                        element.textContent = newStatValues[index].textContent;
+                    }
+                });
+            })
+            .catch(error => console.log('Erro ao atualizar estatísticas:', error));
+    }
+}, 300000); // 5 minutos
+
+// Animação de entrada dos cards
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.repo-card, .document-item');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

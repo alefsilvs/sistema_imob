@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Sangria - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Editar Sangria</h1>
+            <p class="mb-0 text-muted">{{ sangria.descricao }}</p>
+        </div>
+        <div>
+            <a href="{% url 'financeiro:detalhes_sangria' sangria.id %}" class="btn btn-info me-2">
+                <i class="bi bi-eye"></i> Detalhes
+            </a>
+            <a href="{% url 'financeiro:listar_sangrias' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Editar Informações</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.descricao.id_for_label }}" class="form-label">{{ form.descricao.label }}</label>
+                                    {{ form.descricao }}
+                                    {% if form.descricao.errors %}
+                                        <div class="text-danger small">{{ form.descricao.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.categoria.id_for_label }}" class="form-label">{{ form.categoria.label }}</label>
+                                    {{ form.categoria }}
+                                    {% if form.categoria.errors %}
+                                        <div class="text-danger small">{{ form.categoria.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.valor.id_for_label }}" class="form-label">{{ form.valor.label }}</label>
+                                    {{ form.valor }}
+                                    {% if form.valor.errors %}
+                                        <div class="text-danger small">{{ form.valor.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.data_vencimento.id_for_label }}" class="form-label">{{ form.data_vencimento.label }}</label>
+                                    {{ form.data_vencimento }}
+                                    {% if form.data_vencimento.errors %}
+                                        <div class="text-danger small">{{ form.data_vencimento.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.forma_pagamento.id_for_label }}" class="form-label">{{ form.forma_pagamento.label }}</label>
+                                    {{ form.forma_pagamento }}
+                                    {% if form.forma_pagamento.errors %}
+                                        <div class="text-danger small">{{ form.forma_pagamento.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.status.id_for_label }}" class="form-label">{{ form.status.label }}</label>
+                                    {{ form.status }}
+                                    {% if form.status.errors %}
+                                        <div class="text-danger small">{{ form.status.errors.0 }}</div>
+                                    {% endif %}
+                                    {% if sangria.status == 'pago' %}
+                                        <small class="form-text text-warning">
+                                            <i class="bi bi-exclamation-triangle"></i> Esta sangria já foi paga
+                                        </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.imovel.id_for_label }}" class="form-label">{{ form.imovel.label }}</label>
+                                    {{ form.imovel }}
+                                    {% if form.imovel.errors %}
+                                        <div class="text-danger small">{{ form.imovel.errors.0 }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Opcional - Selecione se a despesa está relacionada a um imóvel específico</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.contrato.id_for_label }}" class="form-label">{{ form.contrato.label }}</label>
+                                    {{ form.contrato }}
+                                    {% if form.contrato.errors %}
+                                        <div class="text-danger small">{{ form.contrato.errors.0 }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Opcional - Selecione se a despesa está relacionada a um contrato específico</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.observacoes.id_for_label }}" class="form-label">{{ form.observacoes.label }}</label>
+                            {{ form.observacoes }}
+                            {% if form.observacoes.errors %}
+                                <div class="text-danger small">{{ form.observacoes.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'financeiro:detalhes_sangria' sangria.id %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Salvar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-info">Status Atual</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Status</label>
+                        <p class="form-control-plaintext">
+                            {% if sangria.status == 'pendente' %}
+                                <span class="badge bg-warning">{{ sangria.get_status_display }}</span>
+                            {% elif sangria.status == 'pago' %}
+                                <span class="badge bg-success">{{ sangria.get_status_display }}</span>
+                            {% elif sangria.status == 'cancelado' %}
+                                <span class="badge bg-danger">{{ sangria.get_status_display }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    {% if sangria.data_pagamento %}
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Data de Pagamento</label>
+                            <p class="form-control-plaintext small">{{ sangria.data_pagamento|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Última Atualização</label>
+                        <p class="form-control-plaintext small">{{ sangria.data_atualizacao|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-warning">Atenção</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h6><i class="bi bi-exclamation-triangle"></i> Importante</h6>
+                        <ul class="mb-0 small">
+                            <li>Verifique os dados antes de salvar</li>
+                            <li>Alterações em sangrias pagas podem afetar relatórios</li>
+                            <li>Mantenha as informações sempre atualizadas</li>
+                        </ul>
+                    </div>
+
+                    {% if sangria.status == 'pendente' %}
+                        <div class="alert alert-info">
+                            <h6><i class="bi bi-info-circle"></i> Ações Disponíveis</h6>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'financeiro:marcar_sangria_paga' sangria.id %}" class="btn btn-success btn-sm">
+                                    <i class="bi bi-check"></i> Marcar como Paga
+                                </a>
+                                <a href="{% url 'financeiro:cancelar_sangria' sangria.id %}" class="btn btn-warning btn-sm">
+                                    <i class="bi bi-x"></i> Cancelar Sangria
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Máscara para o campo de valor
+    const valorInput = document.getElementById('{{ form.valor.id_for_label }}');
+    if (valorInput) {
+        valorInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = (value / 100).toFixed(2);
+            e.target.value = value;
+        });
+    }
+});
+</script>
+{% endblock %}

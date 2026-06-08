@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Período gratuito expirado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+        .alert {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 5px;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: #007bff;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        .planos {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .plano {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .plano.destaque {
+            border: 2px solid #007bff;
+            background: #f8f9ff;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .urgente {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⏰ Período Gratuito Expirado</h1>
+        <p>{{ tenant.nome_empresa }}</p>
+    </div>
+    
+    <div class="content">
+        <div class="alert">
+            <strong>🚨 Acesso Suspenso!</strong> 
+            Seu período gratuito de 7 dias expirou e o acesso ao sistema foi temporariamente suspenso.
+        </div>
+        
+        <h2>🔄 Reative sua conta agora!</h2>
+        
+        <p>Olá, <strong>{{ tenant.usuario_admin.first_name }}</strong>!</p>
+        
+        <p>Seu período gratuito de 7 dias do <strong>Sistema Imobiliário ImobilPro</strong> expirou. Para continuar aproveitando todas as funcionalidades, escolha um de nossos planos.</p>
+        
+        <div class="urgente">
+            <h3>⚡ Oferta Especial - Apenas hoje!</h3>
+            <p><strong>20% de desconto</strong> no primeiro mês de qualquer plano</p>
+            <p><small>Use o código: <strong>VOLTA20</strong></small></p>
+        </div>
+        
+        <div class="planos">
+            <h3>📋 Escolha seu Plano</h3>
+            {% for plano in planos_disponiveis %}
+                <div class="plano {% if forloop.counter == 2 %}destaque{% endif %}">
+                    <div>
+                        <strong>{{ plano.nome }}</strong>
+                        {% if forloop.counter == 2 %}<span style="background: #007bff; color: white; padding: 2px 8px; border-radius: 3px; font-size: 12px; margin-left: 10px;">MAIS POPULAR</span>{% endif %}
+                        <br>
+                        <small>Múltiplos usuários • Gestão de imóveis • Armazenamento seguro • Integração via API</small>
+                        {% if plano.suporte_prioritario %}<br><small>✅ Suporte prioritário</small>{% endif %}
+                        {% if plano.backup_automatico %}<br><small>✅ Backup automático</small>{% endif %}
+                    </div>
+                    <div>
+                        <strong>R$ {{ plano.preco_mensal }}/mês</strong>
+                        {% if plano.preco_anual %}
+                            <br><small>ou R$ {{ plano.preco_anual }}/ano</small>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{ url_planos }}" class="btn btn-primary">🛒 Reativar Conta Agora</a>
+            <a href="{{ url_suporte }}" class="btn btn-warning">💬 Falar com Suporte</a>
+        </div>
+        
+        <h3>🔒 Seus dados estão seguros!</h3>
+        <p>Não se preocupe! Todos os seus dados estão seguros e serão restaurados assim que você escolher um plano:</p>
+        <ul>
+            <li>📊 Todos os seus imóveis cadastrados</li>
+            <li>📄 Contratos e documentos</li>
+            <li>💰 Histórico financeiro</li>
+            <li>👥 Dados de clientes e inquilinos</li>
+            <li>⚙️ Configurações personalizadas</li>
+        </ul>
+        
+        <div style="background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <h4>💡 Por que escolher o ImobilPro?</h4>
+            <ul style="margin: 0;">
+                <li>🚀 Sistema completo para imobiliárias</li>
+                <li>📱 Acesso via web e mobile</li>
+                <li>🔐 Segurança de dados garantida</li>
+                <li>📈 Relatórios avançados</li>
+                <li>🤝 Suporte técnico especializado</li>
+                <li>🔄 Atualizações automáticas</li>
+            </ul>
+        </div>
+        
+        <p><strong>⏰ Ação limitada:</strong> A oferta de 20% de desconto é válida apenas por 24 horas!</p>
+    </div>
+    
+    <div class="footer">
+        <p>Este email foi enviado automaticamente pelo Sistema Imobiliário ImobilPro.</p>
+        <p>Tem dúvidas? Nossa equipe está pronta para ajudar!</p>
+        <p>© 2024 ImobilPro - Todos os direitos reservados</p>
+    </div>
+</body>
+</html>

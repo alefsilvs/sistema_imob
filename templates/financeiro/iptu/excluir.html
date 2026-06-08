@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Excluir IPTU - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Excluir IPTU</h1>
+            <p class="mb-0 text-muted">{{ iptu.imovel.codigo }} - Ano {{ iptu.ano_exercicio }}</p>
+        </div>
+        <div>
+            <a href="{% url 'financeiro:detalhar_iptu' iptu.pk %}" class="btn btn-outline-info me-2">
+                <i class="bi bi-eye"></i> Ver Detalhes
+            </a>
+            <a href="{% url 'financeiro:listar_iptus' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Confirmar Exclusão
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">Atenção!</h6>
+                        <p class="mb-0">Esta ação não pode ser desfeita. Ao excluir este IPTU, todas as parcelas relacionadas também serão removidas permanentemente.</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Dados do IPTU:</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Imóvel:</strong> {{ iptu.imovel.codigo }}</li>
+                                <li><strong>Endereço:</strong> {{ iptu.imovel.endereco }}</li>
+                                <li><strong>Ano de Exercício:</strong> {{ iptu.ano_exercicio }}</li>
+                                <li><strong>Valor Total:</strong> R$ {{ iptu.valor_total|floatformat:2 }}</li>
+                                <li><strong>Status:</strong> {{ iptu.get_status_display }}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Informações Adicionais:</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Forma de Pagamento:</strong> {{ iptu.get_forma_pagamento_display }}</li>
+                                <li><strong>Número de Parcelas:</strong> {{ iptu.numero_parcelas }}</li>
+                                {% if iptu.valor_desconto_vista > 0 %}
+                                    <li><strong>Desconto à Vista:</strong> R$ {{ iptu.valor_desconto_vista|floatformat:2 }}</li>
+                                {% endif %}
+                                <li><strong>Data de Vencimento:</strong> {{ iptu.data_vencimento_vista|date:"d/m/Y" }}</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {% if iptu.parcelas_iptu.exists %}
+                        <div class="mt-3">
+                            <h6>Parcelas que serão excluídas:</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Parcela</th>
+                                            <th>Vencimento</th>
+                                            <th>Valor</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for parcela in iptu.parcelas_iptu.all %}
+                                            <tr>
+                                                <td>{{ parcela.numero_parcela }}/{{ iptu.numero_parcelas }}</td>
+                                                <td>{{ parcela.data_vencimento|date:"d/m/Y" }}</td>
+                                                <td>R$ {{ parcela.valor_parcela|floatformat:2 }}</td>
+                                                <td>
+                                                    {% if parcela.status == 'PAGO' %}
+                                                        <span class="badge bg-success">{{ parcela.get_status_display }}</span>
+                                                    {% elif parcela.status == 'VENCIDO' %}
+                                                        <span class="badge bg-danger">{{ parcela.get_status_display }}</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">{{ parcela.get_status_display }}</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <a href="{% url 'financeiro:listar_iptus' %}" class="btn btn-secondary me-2">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir este IPTU? Esta ação não pode ser desfeita.')">
+                                <i class="bi bi-trash"></i> Confirmar Exclusão
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

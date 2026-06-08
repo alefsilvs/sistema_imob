@@ -1,0 +1,447 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard de Indicadores - Sistema Imobiliário{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css" rel="stylesheet">
+<style>
+    .indicator-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 20px;
+        color: white;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .indicator-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .indicator-card.success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+    
+    .indicator-card.warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .indicator-card.danger {
+        background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+    }
+    
+    .indicator-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .indicator-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .indicator-change {
+        font-size: 0.8rem;
+        margin-top: 10px;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .btn-update {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 10px 25px;
+        color: white;
+        font-weight: bold;
+    }
+    
+    .btn-update:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .status-badge {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-atingida {
+        background: #38ef7d;
+        color: #11998e;
+    }
+    
+    .status-proxima {
+        background: #ffeaa7;
+        color: #fdcb6e;
+    }
+    
+    .status-media {
+        background: #fab1a0;
+        color: #e17055;
+    }
+    
+    .status-baixa {
+        background: #fd79a8;
+        color: #e84393;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header do Dashboard -->
+    <header class="dashboard-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2">
+                    <i class="fas fa-chart-line me-3"></i>
+                    Dashboard de Indicadores
+                </h1>
+                <p class="mb-0">Acompanhe os principais indicadores do seu negócio imobiliário</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="mb-3">
+                    <label for="data_referencia" class="form-label">Data de Referência:</label>
+                    <input type="month" id="data_referencia" class="form-control" 
+                           value="{{ data_referencia|date:'Y-m' }}" 
+                           onchange="atualizarDashboard()">
+                </div>
+                <button class="btn btn-update" onclick="forcarAtualizacao()">
+                    <i class="fas fa-sync-alt me-2"></i>
+                    Atualizar Dados
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Indicadores Principais -->
+    <section class="indicators-section">
+        <div class="row">
+            <!-- Indicador de Inadimplência -->
+            {% if indicadores.inadimplencia %}
+            <div class="col-lg-4 col-md-6">
+                <div class="indicator-card {% if indicadores.inadimplencia.percentual_inadimplencia <= 5 %}success{% elif indicadores.inadimplencia.percentual_inadimplencia <= 10 %}warning{% else %}danger{% endif %}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="indicator-value">{{ indicadores.inadimplencia.percentual_inadimplencia|floatformat:1 }}%</div>
+                            <div class="indicator-label">Taxa de Inadimplência</div>
+                            <div class="indicator-change">
+                                <small>{{ indicadores.inadimplencia.contratos_inadimplentes }} de {{ indicadores.inadimplencia.total_contratos }} contratos</small>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
+                            <div class="mt-2">
+                                <small>R$ {{ indicadores.inadimplencia.valor_inadimplente|floatformat:2 }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'indicadores:inadimplencia_detalhes' indicadores.inadimplencia.data_referencia %}" 
+                           class="btn btn-sm btn-outline-light">
+                            Ver Detalhes
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        <!-- Indicador Imobiliário -->
+        {% if indicadores.imobiliario %}
+        <div class="col-lg-4 col-md-6">
+            <div class="indicator-card {% if indicadores.imobiliario.taxa_ocupacao >= 90 %}success{% elif indicadores.imobiliario.taxa_ocupacao >= 75 %}warning{% else %}danger{% endif %}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="indicator-value">{{ indicadores.imobiliario.taxa_ocupacao|floatformat:1 }}%</div>
+                        <div class="indicator-label">Taxa de Ocupação</div>
+                        <div class="indicator-change">
+                            <small>{{ indicadores.imobiliario.imoveis_ocupados }} de {{ indicadores.imobiliario.total_imoveis }} imóveis</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <i class="fas fa-home fa-2x opacity-75"></i>
+                        <div class="mt-2">
+                            <small>{{ indicadores.imobiliario.imoveis_vagos }} vagos</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="{% url 'indicadores:imobiliario_detalhes' indicadores.imobiliario.data_referencia %}" 
+                       class="btn btn-sm btn-outline-light">
+                        Ver Detalhes
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Indicador Financeiro -->
+        {% if indicadores.financeiro %}
+        <div class="col-lg-4 col-md-6">
+            <div class="indicator-card {% if indicadores.financeiro.margem_lucro >= 20 %}success{% elif indicadores.financeiro.margem_lucro >= 10 %}warning{% else %}danger{% endif %}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="indicator-value">{{ indicadores.financeiro.margem_lucro|floatformat:1 }}%</div>
+                        <div class="indicator-label">Margem de Lucro</div>
+                        <div class="indicator-change">
+                            <small>R$ {{ indicadores.financeiro.lucro_liquido|floatformat:2 }}</small>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                        <div class="mt-2">
+                            <small>R$ {{ indicadores.financeiro.receita_total|floatformat:2 }}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="{% url 'indicadores:financeiro_detalhes' indicadores.financeiro.data_referencia %}" 
+                       class="btn btn-sm btn-outline-light">
+                        Ver Detalhes
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        </div>
+    </section>
+
+    <!-- Gráficos -->
+    <section class="charts-section">
+        <div class="row">
+            <!-- Gráfico de Inadimplência -->
+            <div class="col-lg-6">
+                <div class="chart-container">
+                    <h5 class="mb-4">
+                        <i class="fas fa-chart-line me-2 text-primary"></i>
+                        Evolução da Inadimplência
+                    </h5>
+                    <canvas id="chartInadimplencia" height="300"></canvas>
+                </div>
+            </div>
+
+        <!-- Gráfico Financeiro -->
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <h5 class="mb-4">
+                    <i class="fas fa-chart-bar me-2 text-success"></i>
+                    Receitas vs Despesas
+                </h5>
+                <canvas id="chartFinanceiro" height="300"></canvas>
+            </div>
+        </div>
+
+        <!-- Gráfico de Ocupação -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="chart-container">
+                    <h5 class="mb-4">
+                        <i class="fas fa-chart-area me-2 text-info"></i>
+                        Taxa de Ocupação dos Imóveis
+                    </h5>
+                    <canvas id="chartOcupacao" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Indicadores Gerais -->
+    {% if indicadores_gerais %}
+    <section class="general-indicators-section">
+        <div class="row">
+            <div class="col-12">
+                <div class="chart-container">
+                    <h5 class="mb-4">
+                        <i class="fas fa-tachometer-alt me-2 text-warning"></i>
+                        Indicadores Gerais
+                    </h5>
+                    <div class="row">
+                        {% for indicador in indicadores_gerais %}
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">{{ indicador.nome }}</h6>
+                                    <h4 class="text-primary">{{ indicador.valor_atual }}{{ indicador.unidade }}</h4>
+                                    <div class="progress mb-2" style="height: 8px;">
+                                        <div class="progress-bar bg-{{ indicador.status_meta }}" 
+                                             style="width: {{ indicador.percentual_meta }}%"></div>
+                                    </div>
+                                    <small class="text-muted">Meta: {{ indicador.valor_meta }}{{ indicador.unidade }}</small>
+                                    <div class="mt-2">
+                                        <span class="status-badge status-{{ indicador.status_meta }}">
+                                            {{ indicador.get_status_meta_display|default:indicador.status_meta }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+    
+</div> <!-- Fechamento da div container-fluid -->
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+// Configuração dos gráficos
+const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            position: 'top',
+        }
+    },
+    scales: {
+        y: {
+            beginAtZero: true
+        }
+    }
+};
+
+// Dados para os gráficos
+const dadosInadimplencia = [
+    {% for item in historico_inadimplencia %}
+    {
+        data: '{{ item.data_referencia|date:"M/Y" }}',
+        valor: {{ item.percentual_inadimplencia|default:0 }}
+    },
+    {% endfor %}
+];
+
+const dadosFinanceiro = [
+    {% for item in historico_financeiro %}
+    {
+        data: '{{ item.data_referencia|date:"M/Y" }}',
+        receita: {{ item.receita_total|default:0 }},
+        despesa: {{ item.despesa_total|default:0 }},
+        lucro: {{ item.lucro_liquido|default:0 }}
+    },
+    {% endfor %}
+];
+
+const dadosOcupacao = [
+    {% for item in historico_ocupacao %}
+    {
+        data: '{{ item.data_referencia|date:"M/Y" }}',
+        ocupacao: {{ item.taxa_ocupacao|default:0 }}
+    },
+    {% endfor %}
+];
+
+// Gráfico de Inadimplência
+const ctxInadimplencia = document.getElementById('chartInadimplencia').getContext('2d');
+new Chart(ctxInadimplencia, {
+    type: 'line',
+    data: {
+        labels: dadosInadimplencia.map(item => item.data),
+        datasets: [{
+            label: 'Taxa de Inadimplência (%)',
+            data: dadosInadimplencia.map(item => item.valor),
+            borderColor: '#fc466b',
+            backgroundColor: 'rgba(252, 70, 107, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: chartOptions
+});
+
+// Gráfico Financeiro
+const ctxFinanceiro = document.getElementById('chartFinanceiro').getContext('2d');
+new Chart(ctxFinanceiro, {
+    type: 'bar',
+    data: {
+        labels: dadosFinanceiro.map(item => item.data),
+        datasets: [
+            {
+                label: 'Receitas',
+                data: dadosFinanceiro.map(item => item.receita),
+                backgroundColor: '#38ef7d'
+            },
+            {
+                label: 'Despesas',
+                data: dadosFinanceiro.map(item => item.despesa),
+                backgroundColor: '#fc466b'
+            },
+            {
+                label: 'Lucro Líquido',
+                data: dadosFinanceiro.map(item => item.lucro),
+                backgroundColor: '#667eea'
+            }
+        ]
+    },
+    options: chartOptions
+});
+
+// Gráfico de Ocupação
+const ctxOcupacao = document.getElementById('chartOcupacao').getContext('2d');
+new Chart(ctxOcupacao, {
+    type: 'area',
+    data: {
+        labels: dadosOcupacao.map(item => item.data),
+        datasets: [{
+            label: 'Taxa de Ocupação (%)',
+            data: dadosOcupacao.map(item => item.ocupacao),
+            borderColor: '#17a2b8',
+            backgroundColor: 'rgba(23, 162, 184, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        ...chartOptions,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100
+            }
+        }
+    }
+});
+
+// Funções de controle
+function atualizarDashboard() {
+    const dataReferencia = document.getElementById('data_referencia').value;
+    window.location.href = `?data_referencia=${dataReferencia}-01`;
+}
+
+function forcarAtualizacao() {
+    const dataReferencia = document.getElementById('data_referencia').value;
+    window.location.href = `?data_referencia=${dataReferencia}-01&atualizar=1`;
+}
+
+// Auto-refresh a cada 5 minutos
+setInterval(() => {
+    if (document.hidden === false) {
+        location.reload();
+    }
+}, 300000);
+</script>
+{% endblock %}

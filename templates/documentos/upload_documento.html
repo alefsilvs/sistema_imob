@@ -1,0 +1,547 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Upload de Documento - Repositório Digital{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-area {
+        border: 2px dashed #007bff;
+        border-radius: 15px;
+        background: #f8f9ff;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        min-height: 200px;
+    }
+    
+    .upload-area:hover {
+        border-color: #0056b3;
+        background: #e6f0ff;
+    }
+    
+    .upload-area.dragover {
+        border-color: #28a745;
+        background: #e8f5e8;
+    }
+    
+    .upload-icon {
+        font-size: 3rem;
+        color: #007bff;
+    }
+    
+    .file-preview {
+        background: white;
+        border-radius: 10px;
+        border: 1px solid #e9ecef;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .file-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    
+    .progress-container {
+        display: none;
+    }
+    
+    .form-section {
+        background: white;
+        border-radius: 10px;
+        border: 1px solid #e9ecef;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .section-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+    
+    .file-size {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .upload-tips {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="bi bi-cloud-upload"></i>
+                        Upload de Documento
+                    </h2>
+                    <p class="text-muted mb-0">Adicione um novo documento ao repositório</p>
+                </div>
+                <div>
+                    <a href="{% url 'documentos:listar_documentos' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Voltar à Lista
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dicas de Upload -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="upload-tips">
+                <h6 class="mb-2">
+                    <i class="bi bi-lightbulb text-warning"></i>
+                    Dicas para Upload
+                </h6>
+                <ul class="mb-0 small">
+                    <li>Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, TXT</li>
+                    <li>Tamanho máximo: 50MB por arquivo</li>
+                    <li>Use nomes descritivos para facilitar a busca</li>
+                    <li>Adicione tags para melhor organização</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="uploadForm">
+        {% csrf_token %}
+        
+        <!-- Área de Upload -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="form-section">
+                    <h5 class="section-title">
+                        <i class="bi bi-file-earmark-arrow-up"></i>
+                        Selecionar Arquivo
+                    </h5>
+                    
+                    <div class="upload-area d-flex flex-column align-items-center justify-content-center p-4" id="uploadArea" onclick="document.getElementById('id_arquivo').click()">
+                        <i class="bi bi-cloud-upload upload-icon mb-3"></i>
+                        <h5 class="mb-2">Clique aqui ou arraste o arquivo</h5>
+                        <p class="text-muted mb-0">Solte o arquivo aqui para fazer upload</p>
+                        {{ form.arquivo }}
+                    </div>
+                    
+                    <!-- Preview do arquivo selecionado -->
+                    <div id="filePreview" style="display: none;">
+                        <div class="file-preview mt-3">
+                            <div class="d-flex align-items-center">
+                                <div class="file-icon bg-primary bg-opacity-10 text-primary me-3" id="fileIcon">
+                                    <i class="bi bi-file-earmark"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1" id="fileName">arquivo.pdf</h6>
+                                    <div class="file-size" id="fileSize">0 KB</div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile()">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Barra de progresso -->
+                            <div class="progress-container mt-3">
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="text-muted mt-1">Fazendo upload...</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações Básicas -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="form-section">
+                    <h5 class="section-title">
+                        <i class="bi bi-info-circle"></i>
+                        Informações Básicas
+                    </h5>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.nome_arquivo.id_for_label }}" class="form-label required-field">
+                            Nome do Arquivo
+                        </label>
+                        {{ form.nome_arquivo }}
+                        {% if form.nome_arquivo.errors %}
+                            <div class="text-danger small">{{ form.nome_arquivo.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.descricao.id_for_label }}" class="form-label">
+                            Descrição
+                        </label>
+                        {{ form.descricao }}
+                        {% if form.descricao.errors %}
+                            <div class="text-danger small">{{ form.descricao.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.tags.id_for_label }}" class="form-label">
+                            Tags
+                        </label>
+                        {{ form.tags }}
+                        <small class="form-text text-muted">Separe as tags com vírgulas</small>
+                        {% if form.tags.errors %}
+                            <div class="text-danger small">{{ form.tags.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="form-section">
+                    <h5 class="section-title">
+                        <i class="bi bi-gear"></i>
+                        Configurações
+                    </h5>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.tipo.id_for_label }}" class="form-label required-field">
+                            Tipo de Documento
+                        </label>
+                        {{ form.tipo }}
+                        {% if form.tipo.errors %}
+                            <div class="text-danger small">{{ form.tipo.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.confidencialidade.id_for_label }}" class="form-label">
+                            Nível de Confidencialidade
+                        </label>
+                        {{ form.confidencialidade }}
+                        {% if form.confidencialidade.errors %}
+                            <div class="text-danger small">{{ form.confidencialidade.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Datas e Vencimento -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="form-section">
+                    <h5 class="section-title">
+                        <i class="bi bi-calendar"></i>
+                        Datas
+                    </h5>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.data_documento.id_for_label }}" class="form-label">
+                            Data do Documento
+                        </label>
+                        {{ form.data_documento }}
+                        {% if form.data_documento.errors %}
+                            <div class="text-danger small">{{ form.data_documento.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.data_validade.id_for_label }}" class="form-label">
+                            Data de Vencimento
+                        </label>
+                        {{ form.data_validade }}
+                        <small class="form-text text-muted">Deixe em branco se não houver vencimento</small>
+                        {% if form.data_validade.errors %}
+                            <div class="text-danger small">{{ form.data_validade.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="form-section">
+                    <h5 class="section-title">
+                        <i class="bi bi-link-45deg"></i>
+                        Relacionamentos
+                    </h5>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.imovel.id_for_label }}" class="form-label">
+                            Imóvel Relacionado
+                        </label>
+                        {{ form.imovel }}
+                        {% if form.imovel.errors %}
+                            <div class="text-danger small">{{ form.imovel.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.contrato.id_for_label }}" class="form-label">
+                            Contrato Relacionado
+                        </label>
+                        {{ form.contrato }}
+                        {% if form.contrato.errors %}
+                            <div class="text-danger small">{{ form.contrato.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'documentos:listar_documentos' %}" class="btn btn-secondary">
+                        <i class="bi bi-x"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="bi bi-cloud-upload"></i>
+                        Fazer Upload
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('id_arquivo');
+    const filePreview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const fileIcon = document.getElementById('fileIcon');
+    const nomeArquivoInput = document.getElementById('id_nome_arquivo');
+
+    // Drag and drop
+    if (uploadArea) {
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect(files[0]);
+            }
+        });
+    }
+
+    // File input change
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+    }
+
+    function handleFileSelect(file) {
+        // Mostrar preview
+        filePreview.style.display = 'block';
+        uploadArea.style.display = 'none';
+        
+        // Atualizar informações do arquivo
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        
+        // Preencher nome do arquivo automaticamente se estiver vazio
+        if (!nomeArquivoInput.value) {
+            nomeArquivoInput.value = file.name.split('.').slice(0, -1).join('.');
+        }
+        
+        // Atualizar ícone baseado no tipo
+        updateFileIcon(file.name);
+        
+        // Validar arquivo
+        validateFile(file);
+    }
+
+    function updateFileIcon(filename) {
+        const extension = filename.split('.').pop().toLowerCase();
+        let iconClass = 'bi-file-earmark';
+        let bgClass = 'bg-primary';
+        
+        switch(extension) {
+            case 'pdf':
+                iconClass = 'bi-file-pdf';
+                bgClass = 'bg-danger';
+                break;
+            case 'doc':
+            case 'docx':
+                iconClass = 'bi-file-word';
+                bgClass = 'bg-primary';
+                break;
+            case 'xls':
+            case 'xlsx':
+                iconClass = 'bi-file-excel';
+                bgClass = 'bg-success';
+                break;
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+                iconClass = 'bi-file-image';
+                bgClass = 'bg-info';
+                break;
+            case 'txt':
+                iconClass = 'bi-file-text';
+                bgClass = 'bg-secondary';
+                break;
+        }
+        
+        fileIcon.className = `file-icon ${bgClass} bg-opacity-10 text-${bgClass.replace('bg-', '')} me-3`;
+        fileIcon.innerHTML = `<i class="bi ${iconClass}"></i>`;
+    }
+
+    function validateFile(file) {
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        const allowedTypes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'image/jpeg',
+            'image/png',
+            'text/plain'
+        ];
+        
+        if (file.size > maxSize) {
+            alert('Arquivo muito grande. O tamanho máximo é 50MB.');
+            removeFile();
+            return false;
+        }
+        
+        if (!allowedTypes.includes(file.type)) {
+            alert('Tipo de arquivo não permitido.');
+            removeFile();
+            return false;
+        }
+        
+        return true;
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Form submission
+    const uploadForm = document.getElementById('uploadForm');
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            const progressContainer = document.querySelector('.progress-container');
+            
+            if (!fileInput.files.length) {
+                e.preventDefault();
+                alert('Por favor, selecione um arquivo.');
+                return;
+            }
+            
+            // Mostrar progresso
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Enviando...';
+            }
+            if (progressContainer) {
+                progressContainer.style.display = 'block';
+            }
+            
+            // Simular progresso (em uma implementação real, isso seria feito via AJAX)
+            let progress = 0;
+            const progressBar = document.querySelector('.progress-bar');
+            if (progressBar) {
+                const interval = setInterval(function() {
+                    progress += 10;
+                    progressBar.style.width = progress + '%';
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                    }
+                }, 200);
+            }
+        });
+    }
+});
+
+function removeFile() {
+    const filePreview = document.getElementById('filePreview');
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('id_arquivo');
+    const progressContainer = document.querySelector('.progress-container');
+    
+    if (filePreview) filePreview.style.display = 'none';
+    if (uploadArea) uploadArea.style.display = 'flex';
+    if (fileInput) fileInput.value = '';
+    if (progressContainer) progressContainer.style.display = 'none';
+}
+
+// Atualizar contratos baseado no imóvel selecionado
+const imovelSelect = document.getElementById('id_imovel');
+if (imovelSelect) {
+    imovelSelect.addEventListener('change', function() {
+        const imovelId = this.value;
+        const contratoSelect = document.getElementById('id_contrato');
+        
+        if (contratoSelect && imovelId) {
+            fetch(`/api/contratos-por-imovel/${imovelId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    contratoSelect.innerHTML = '<option value="">---------</option>';
+                    data.contratos.forEach(contrato => {
+                        contratoSelect.innerHTML += `<option value="${contrato.id}">${contrato.numero} - ${contrato.inquilino}</option>`;
+                    });
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar contratos:', error);
+                });
+        } else if (contratoSelect) {
+            contratoSelect.innerHTML = '<option value="">---------</option>';
+        }
+    });
+}
+</script>
+{% endblock %}

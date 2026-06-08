@@ -1,0 +1,471 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Relatórios de Segurança - Sistema Seguro{% endblock %}
+
+{% block extra_css %}
+<style>
+.report-card {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.metric-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.metric-number {
+    font-size: 2.5em;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.metric-label {
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+.threat-item {
+    background: #f8f9fa;
+    border-left: 4px solid #dc3545;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 0 5px 5px 0;
+}
+
+.chart-container {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    height: 400px;
+}
+
+.severity-high {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.severity-critical {
+    color: #721c24;
+    font-weight: bold;
+    background: #f8d7da;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.severity-medium {
+    color: #856404;
+    font-weight: bold;
+}
+
+.severity-low {
+    color: #155724;
+}
+
+.report-filters {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.timeline-item {
+    border-left: 3px solid #007bff;
+    padding-left: 15px;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #007bff;
+}
+
+.timeline-date {
+    font-weight: bold;
+    color: #495057;
+    margin-bottom: 5px;
+}
+
+.export-buttons {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.json-viewer {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85em;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.tab-content {
+    padding: 20px 0;
+}
+
+.nav-tabs .nav-link {
+    color: #495057;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-chart-line"></i> Relatórios de Segurança</h2>
+                <div class="export-buttons">
+                    <a href="?{{ request.GET.urlencode }}&export=json" class="btn btn-outline-primary">
+                        <i class="fas fa-download"></i> Exportar JSON
+                    </a>
+                    <button class="btn btn-outline-secondary" onclick="window.print()">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros de Relatório -->
+    <div class="report-filters">
+        <form method="get">
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="start_date" class="form-label">Data Inicial</label>
+                    <input type="date" name="start_date" id="start_date" class="form-control" 
+                           value="{{ start_date }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="end_date" class="form-label">Data Final</label>
+                    <input type="date" name="end_date" id="end_date" class="form-control" 
+                           value="{{ end_date }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="type" class="form-label">Tipo de Relatório</label>
+                    <select name="type" id="type" class="form-select">
+                        {% for value, label in available_types %}
+                            <option value="{{ value }}" {% if report_type == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-sync-alt"></i> Atualizar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Conteúdo do Relatório -->
+    {% if report_type == 'summary' %}
+        <!-- Resumo Geral -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span class="metric-number">{{ report_data.total_events }}</span>
+                    <span class="metric-label">Total de Eventos</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span class="metric-number">{{ report_data.critical_events }}</span>
+                    <span class="metric-label">Eventos Críticos</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span class="metric-number">{{ report_data.unique_ips }}</span>
+                    <span class="metric-label">IPs Únicos</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span class="metric-number">{{ report_data.blocked_ips }}</span>
+                    <span class="metric-label">IPs Bloqueados</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="report-card">
+                    <h5><i class="fas fa-exclamation-triangle"></i> Distribuição por Severidade</h5>
+                    {% for severity, count in report_data.severity_breakdown.items %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="severity-{{ severity|lower }}">{{ severity }}</span>
+                            <span class="badge bg-secondary">{{ count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="report-card">
+                    <h5><i class="fas fa-list"></i> Tipos de Eventos</h5>
+                    {% for event_type, count in report_data.event_types.items %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>{{ event_type }}</span>
+                            <span class="badge bg-info">{{ count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    {% elif report_type == 'threats' %}
+        <!-- Análise de Ameaças -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="report-card">
+                    <h5><i class="fas fa-shield-alt"></i> Top IPs Atacantes</h5>
+                    {% for ip_data in report_data.top_attacking_ips %}
+                        <div class="threat-item">
+                            <strong>{{ ip_data.ip_address }}</strong>
+                            <span class="badge bg-danger float-end">{{ ip_data.count }} tentativas</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="report-card">
+                    <h5><i class="fas fa-robot"></i> User Agents Suspeitos</h5>
+                    {% for agent_data in report_data.suspicious_user_agents %}
+                        <div class="threat-item">
+                            <small>{{ agent_data.user_agent|truncatechars:60 }}</small>
+                            <span class="badge bg-warning float-end">{{ agent_data.count }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <span class="metric-number">{{ report_data.brute_force_attempts }}</span>
+                    <span class="metric-label">Ataques de Força Bruta</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <span class="metric-number">{{ report_data.sql_injection_attempts }}</span>
+                    <span class="metric-label">Tentativas de SQL Injection</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <span class="metric-number">{{ report_data.xss_attempts }}</span>
+                    <span class="metric-label">Tentativas de XSS</span>
+                </div>
+            </div>
+        </div>
+
+    {% elif report_type == 'performance' %}
+        <!-- Métricas de Performance -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span class="metric-number">{{ report_data.detection_rate }}%</span>
+                    <span class="metric-label">Taxa de Detecção</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span class="metric-number">{{ report_data.total_blocks }}</span>
+                    <span class="metric-label">Total de Bloqueios</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span class="metric-number">{{ report_data.average_response_time }}</span>
+                    <span class="metric-label">Tempo de Resposta</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <span class="metric-number">{{ report_data.system_uptime }}</span>
+                    <span class="metric-label">Uptime do Sistema</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="report-card">
+            <h5><i class="fas fa-exclamation-circle"></i> Falsos Positivos Estimados</h5>
+            <p class="mb-0">{{ report_data.false_positives }} eventos podem ter sido falsos positivos baseado em análise heurística.</p>
+        </div>
+
+    {% elif report_type == 'compliance' %}
+        <!-- Conformidade e Auditoria -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <span class="metric-number">{{ report_data.admin_activities }}</span>
+                    <span class="metric-label">Atividades Administrativas</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <span class="metric-number">{{ report_data.master_user_activities }}</span>
+                    <span class="metric-label">Atividades de Usuários Master</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric-card">
+                    <span class="metric-number">{{ report_data.unauthorized_attempts }}</span>
+                    <span class="metric-label">Tentativas Não Autorizadas</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="report-card">
+                    <h5><i class="fas fa-database"></i> Acessos a Dados</h5>
+                    <p>{{ report_data.data_access_logs }} eventos de acesso a dados registrados</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="report-card">
+                    <h5><i class="fas fa-save"></i> Eventos de Backup</h5>
+                    <p>{{ report_data.backup_events }} backups realizados no período</p>
+                </div>
+            </div>
+        </div>
+
+    {% elif report_type == 'timeline' %}
+        <!-- Timeline Diária -->
+        <div class="report-card">
+            <h5><i class="fas fa-calendar-alt"></i> Timeline de Eventos</h5>
+            {% for date, data in report_data.items %}
+                <div class="timeline-item">
+                    <div class="timeline-date">{{ date }}</div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <small class="text-muted">
+                                Total: {{ data.total }} | 
+                                Críticos: <span class="severity-critical">{{ data.critical }}</span> | 
+                                Altos: <span class="severity-high">{{ data.high }}</span> | 
+                                Médios: <span class="severity-medium">{{ data.medium }}</span> | 
+                                Baixos: <span class="severity-low">{{ data.low }}</span>
+                            </small>
+                        </div>
+                    </div>
+                    {% if data.events %}
+                        <div class="mt-2">
+                            <small><strong>Eventos Críticos/Altos:</strong></small>
+                            {% for event in data.events %}
+                                <div class="ms-3 mt-1">
+                                    <small>
+                                        <span class="badge bg-secondary">{{ event.time }}</span>
+                                        <span class="severity-{{ event.severity|lower }}">{{ event.type }}</span>
+                                        - {{ event.description }}
+                                    </small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <!-- Relatório Completo (JSON) -->
+        <div class="report-card">
+            <h5><i class="fas fa-file-code"></i> Relatório Completo (JSON)</h5>
+            <div class="json-viewer">
+                <pre>{{ report_data|pprint }}</pre>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Informações do Período -->
+    <div class="report-card">
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fas fa-info-circle"></i> Informações do Relatório</h6>
+                <p class="mb-1"><strong>Período:</strong> {{ start_date }} até {{ end_date }}</p>
+                <p class="mb-1"><strong>Tipo:</strong> {{ report_type|title }}</p>
+                <p class="mb-0"><strong>Gerado em:</strong> {{ "now"|date:"d/m/Y H:i:s" }}</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <small class="text-muted">
+                    <i class="fas fa-shield-alt"></i> Sistema de Segurança Avançado<br>
+                    Relatório gerado automaticamente
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-submit form quando tipo de relatório mudar
+document.getElementById('type').addEventListener('change', function() {
+    this.form.submit();
+});
+
+// Atalhos de teclado
+document.addEventListener('keydown', function(e) {
+    // Ctrl+P para imprimir
+    if (e.ctrlKey && e.key === 'p') {
+        e.preventDefault();
+        window.print();
+    }
+    
+    // Ctrl+E para exportar
+    if (e.ctrlKey && e.key === 'e') {
+        e.preventDefault();
+        const exportUrl = '?{{ request.GET.urlencode }}&export=json';
+        window.open(exportUrl, '_blank');
+    }
+});
+
+// Definir datas padrão se não estiverem definidas
+if (!document.getElementById('start_date').value) {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    document.getElementById('start_date').value = thirtyDaysAgo.toISOString().split('T')[0];
+}
+
+if (!document.getElementById('end_date').value) {
+    const today = new Date();
+    document.getElementById('end_date').value = today.toISOString().split('T')[0];
+}
+</script>
+{% endblock %}

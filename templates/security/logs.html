@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Logs de Segurança - Sistema Seguro{% endblock %}
+
+{% block extra_css %}
+<style>
+.log-entry {
+    border-left: 4px solid #dee2e6;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+    border-radius: 0 5px 5px 0;
+}
+
+.log-entry.low {
+    border-left-color: #28a745;
+}
+
+.log-entry.medium {
+    border-left-color: #ffc107;
+}
+
+.log-entry.high {
+    border-left-color: #fd7e14;
+}
+
+.log-entry.critical {
+    border-left-color: #dc3545;
+    background: #fff5f5;
+}
+
+.severity-badge {
+    font-size: 0.75em;
+    padding: 0.25em 0.5em;
+}
+
+.filter-card {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.log-metadata {
+    background: #e9ecef;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 10px;
+    font-family: monospace;
+    font-size: 0.85em;
+}
+
+.log-details {
+    cursor: pointer;
+}
+
+.log-details:hover {
+    background: #e9ecef;
+}
+
+.pagination {
+    justify-content: center;
+}
+
+.stats-row {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 15px;
+}
+
+.stat-number {
+    font-size: 2em;
+    font-weight: bold;
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-clipboard-list"></i> Logs de Segurança</h2>
+                <div>
+                    <button class="btn btn-outline-primary" onclick="exportLogs()">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="refreshLogs()">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas Rápidas -->
+    <div class="stats-row">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <span class="stat-number">{{ page_obj.paginator.count }}</span>
+                    <span class="stat-label">Total de Logs</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <span class="stat-number">{{ critical_count|default:0 }}</span>
+                    <span class="stat-label">Críticos (24h)</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <span class="stat-number">{{ high_count|default:0 }}</span>
+                    <span class="stat-label">Alta Prioridade (24h)</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <span class="stat-number">{{ unique_ips|default:0 }}</span>
+                    <span class="stat-label">IPs Únicos (24h)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-card">
+        <form method="get" id="filterForm">
+            <div class="row">
+                <div class="col-md-2">
+                    <label for="severity" class="form-label">Severidade</label>
+                    <select name="severity" id="severity" class="form-select">
+                        <option value="">Todas</option>
+                        {% for value, label in severity_choices %}
+                            <option value="{{ value }}" {% if current_filters.severity == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="action" class="form-label">Ação</label>
+                    <input type="text" name="action" id="action" class="form-control" 
+                           value="{{ current_filters.action }}" placeholder="Tipo de ação">
+                </div>
+                <div class="col-md-2">
+                    <label for="date_from" class="form-label">Data Inicial</label>
+                    <input type="date" name="date_from" id="date_from" class="form-control" 
+                           value="{{ current_filters.date_from }}">
+                </div>
+                <div class="col-md-2">
+                    <label for="date_to" class="form-label">Data Final</label>
+                    <input type="date" name="date_to" id="date_to" class="form-control" 
+                           value="{{ current_filters.date_to }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Buscar</label>
+                    <input type="text" name="search" id="search" class="form-control" 
+                           value="{{ current_filters.search }}" placeholder="IP, detalhes, user agent...">
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">&nbsp;</label>
+                    <div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <a href="{% url 'security:logs' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Lista de Logs -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body p-0">
+                    {% for log in page_obj %}
+                    <div class="log-entry {{ log.severity|lower }} log-details" 
+                         onclick="toggleLogDetails({{ log.id }})">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h6 class="mb-0 me-3">
+                                        <i class="fas fa-{{ log.event_type|default:'info-circle' }}"></i>
+                                        {{ log.get_event_type_display|default:log.event_type }}
+                                    </h6>
+                                    <span class="badge severity-badge 
+                                        {% if log.severity == 'LOW' %}bg-success
+                                        {% elif log.severity == 'MEDIUM' %}bg-warning
+                                        {% elif log.severity == 'HIGH' %}bg-orange
+                                        {% elif log.severity == 'CRITICAL' %}bg-danger
+                                        {% endif %}">
+                                        {{ log.get_severity_display }}
+                                    </span>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <p class="mb-1">{{ log.description }}</p>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock"></i> {{ log.timestamp|date:"d/m/Y H:i:s" }}
+                                            {% if log.user %}
+                                                | <i class="fas fa-user"></i> {{ log.user.username }}
+                                            {% endif %}
+                                            {% if log.ip_address %}
+                                                | <i class="fas fa-map-marker-alt"></i> {{ log.ip_address }}
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        {% if log.path %}
+                                            <small class="text-muted d-block">
+                                                <i class="fas fa-link"></i> {{ log.method|default:"GET" }} {{ log.path }}
+                                            </small>
+                                        {% endif %}
+                                        <small class="text-muted">
+                                            <i class="fas fa-expand-alt"></i> Clique para detalhes
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Detalhes expandidos -->
+                        <div id="details-{{ log.id }}" class="log-metadata" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>User Agent:</strong><br>
+                                    <small>{{ log.user_agent|default:"N/A"|truncatechars:100 }}</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Metadados:</strong><br>
+                                    {% if log.metadata %}
+                                        <pre class="mb-0">{{ log.metadata|pprint }}</pre>
+                                    {% else %}
+                                        <small class="text-muted">Nenhum metadado disponível</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Nenhum log encontrado</h5>
+                        <p class="text-muted">Tente ajustar os filtros ou verificar novamente mais tarde.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paginação -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Navegação de logs">
+        <ul class="pagination mt-4">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+            
+            <li class="page-item active">
+                <span class="page-link">
+                    {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                </span>
+            </li>
+            
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleLogDetails(logId) {
+    const details = document.getElementById('details-' + logId);
+    if (details.style.display === 'none') {
+        details.style.display = 'block';
+    } else {
+        details.style.display = 'none';
+    }
+}
+
+function refreshLogs() {
+    window.location.reload();
+}
+
+function exportLogs() {
+    // Coletar parâmetros de filtro atuais
+    const params = new URLSearchParams(window.location.search);
+    params.set('export', 'csv');
+    
+    // Criar link de download
+    const exportUrl = '{% url "security:logs" %}?' + params.toString();
+    window.open(exportUrl, '_blank');
+}
+
+// Auto-refresh a cada 30 segundos se não houver filtros ativos
+if (window.location.search === '' || window.location.search === '?') {
+    setInterval(function() {
+        // Verificar se a página ainda está visível
+        if (!document.hidden) {
+            refreshLogs();
+        }
+    }, 30000);
+}
+
+// Aplicar filtros automaticamente quando mudarem
+document.getElementById('severity').addEventListener('change', function() {
+    document.getElementById('filterForm').submit();
+});
+
+// Atalhos de teclado
+document.addEventListener('keydown', function(e) {
+    // Ctrl+R para refresh
+    if (e.ctrlKey && e.key === 'r') {
+        e.preventDefault();
+        refreshLogs();
+    }
+    
+    // Ctrl+E para export
+    if (e.ctrlKey && e.key === 'e') {
+        e.preventDefault();
+        exportLogs();
+    }
+});
+</script>
+{% endblock %}

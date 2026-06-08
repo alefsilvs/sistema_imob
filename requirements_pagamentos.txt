@@ -1,0 +1,25 @@
+# Dependências para Pagamentos Reais
+# Sistema Imobiliário
+
+# Gateways de Pagamento
+mercadopago>=2.2.0
+requests>=2.28.0
+
+# Geração de QR Codes e Imagens
+qrcode[pil]>=7.4.0
+Pillow>=9.0.0
+
+# Configurações
+python-decouple>=3.6
+
+# Django (se não estiver no requirements principal)
+Django>=4.0.0
+django-cors-headers>=3.13.0
+
+# Banco de dados (opcional)
+psycopg2-binary>=2.9.0  # PostgreSQL
+# mysqlclient>=2.1.0     # MySQL
+
+# Produção (opcional)
+gunicorn>=20.1.0
+whitenoise>=6.2.0

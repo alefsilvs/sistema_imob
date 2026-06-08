@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard de Segurança{% endblock %}
+
+{% block extra_css %}
+<style>
+.security-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.security-stat {
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.security-alert {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    color: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+.log-entry {
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.log-entry.critical {
+    border-left-color: #dc3545;
+    background: #fff5f5;
+}
+
+.log-entry.high {
+    border-left-color: #fd7e14;
+    background: #fff8f0;
+}
+
+.log-entry.medium {
+    border-left-color: #ffc107;
+    background: #fffbf0;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-active { background-color: #28a745; }
+.status-warning { background-color: #ffc107; }
+.status-danger { background-color: #dc3545; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-shield-alt"></i> Dashboard de Segurança
+                <small class="text-muted">Sistema ImobilPro</small>
+            </h1>
+        </div>
+    </div>
+
+    <!-- Alertas de Segurança -->
+    {% if security_alerts %}
+    <div class="row">
+        <div class="col-12">
+            {% for alert in security_alerts %}
+            <div class="security-alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>{{ alert.title }}</strong>: {{ alert.message }}
+                <small class="float-right">{{ alert.timestamp|date:"d/m/Y H:i" }}</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Estatísticas de Segurança -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="security-card">
+                <div class="security-stat">
+                    <h3>{{ stats.total_logins }}</h3>
+                    <p>Logins Hoje</p>
+                    <i class="fas fa-sign-in-alt fa-2x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="security-card">
+                <div class="security-stat">
+                    <h3>{{ stats.failed_attempts }}</h3>
+                    <p>Tentativas Falhadas</p>
+                    <i class="fas fa-times-circle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="security-card">
+                <div class="security-stat">
+                    <h3>{{ stats.blocked_ips }}</h3>
+                    <p>IPs Bloqueados</p>
+                    <i class="fas fa-ban fa-2x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="security-card">
+                <div class="security-stat">
+                    <h3>{{ stats.security_events }}</h3>
+                    <p>Eventos de Segurança</p>
+                    <i class="fas fa-exclamation-triangle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Status do Sistema -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-server"></i> Status do Sistema</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <span class="status-indicator status-active"></span>
+                        <strong>Usuário Master:</strong> {{ master_user.user.username }}
+                        <small class="text-muted">({{ master_user.security_level }})</small>
+                    </div>
+                    <div class="mb-3">
+                        <span class="status-indicator {% if master_user.two_factor_enabled %}status-active{% else %}status-warning{% endif %}"></span>
+                        <strong>2FA:</strong> 
+                        {% if master_user.two_factor_enabled %}
+                            Ativado
+                        {% else %}
+                            <span class="text-warning">Desativado</span>
+                            <a href="{% url 'security:setup_2fa' %}" class="btn btn-sm btn-warning ml-2">Ativar</a>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <span class="status-indicator status-active"></span>
+                        <strong>IPs Autorizados:</strong> {{ master_user.authorized_ips|length }}
+                    </div>
+                    <div class="mb-3">
+                        <span class="status-indicator status-active"></span>
+                        <strong>Última Verificação:</strong> {{ master_user.last_security_check|date:"d/m/Y H:i" }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs Recentes -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <h5><i class="fas fa-list"></i> Logs Recentes</h5>
+                    <a href="{% url 'security:logs' %}" class="btn btn-sm btn-primary">Ver Todos</a>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    {% for log in recent_logs %}
+                    <div class="log-entry {{ log.severity|lower }}">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ log.get_event_type_display }}</strong>
+                            <small>{{ log.timestamp|date:"H:i" }}</small>
+                        </div>
+                        <div class="text-muted small">
+                            {% if log.user %}
+                                {{ log.user.username }} - 
+                            {% endif %}
+                            {{ log.ip_address }}
+                        </div>
+                        <div>{{ log.description|truncatechars:100 }}</div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">Nenhum log recente encontrado.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-tools"></i> Ações Rápidas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="{% url 'security:logs' %}" class="btn btn-outline-primary btn-block">
+                                <i class="fas fa-clipboard-list"></i> Ver Logs de Segurança
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'security:reports' %}" class="btn btn-outline-success btn-block">
+                                <i class="fas fa-chart-line"></i> Relatórios de Segurança
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'security:blocked_ips' %}" class="btn btn-outline-warning btn-block">
+                                <i class="fas fa-ban"></i> Gerenciar IPs Bloqueados
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'security:setup_2fa' %}" class="btn btn-outline-info btn-block">
+                                <i class="fas fa-shield-alt"></i> Configurar 2FA
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-3">
+                            <a href="{% url 'security:settings' %}" class="btn btn-outline-secondary btn-block">
+                                <i class="fas fa-cog"></i> Configurações de Segurança
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-success btn-block" onclick="refreshSecurityStatus()">
+                                <i class="fas fa-sync-alt"></i> Atualizar Status
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function refreshSecurityStatus() {
+    fetch('{% url "security:api_status" %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                location.reload();
+            } else {
+                alert('Erro ao atualizar status: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao conectar com o servidor');
+        });
+}
+
+// Auto-refresh a cada 30 segundos
+setInterval(refreshSecurityStatus, 30000);
+</script>
+{% endblock %}

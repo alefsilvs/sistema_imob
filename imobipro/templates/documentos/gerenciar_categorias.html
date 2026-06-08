@@ -1,0 +1,542 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gerenciar Tipos - Repositório Digital{% endblock %}
+
+{% block extra_css %}
+<style>
+    .category-card {
+        background: white;
+        border-radius: 15px;
+        border: 1px solid #e9ecef;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .category-card:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .category-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+    }
+    
+    .color-picker {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+    }
+    
+    .icon-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+        gap: 10px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .icon-option {
+        width: 50px;
+        height: 50px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .icon-option:hover {
+        border-color: #007bff;
+        background: #f8f9ff;
+    }
+    
+    .icon-option.selected {
+        border-color: #007bff;
+        background: #007bff;
+        color: white;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+    
+    .form-section {
+        background: white;
+        border-radius: 15px;
+        border: 1px solid #e9ecef;
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+    
+    .section-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .category-preview {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="bi bi-tags"></i>
+                        Gerenciar Tipos
+                    </h2>
+                    <p class="text-muted mb-0">Organize seus documentos com tipos personalizados</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#novoTipoModal">
+                        <i class="bi bi-plus"></i>
+                        Novo Tipo
+                    </button>
+                    <a href="{% url 'documentos:repositorio_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Voltar ao Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="stats-card">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h3 class="mb-1">{{ tipos.count }}</h3>
+                            <p class="mb-0 opacity-75">Tipos Criados</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h3 class="mb-1">{{ tipos|length }}</h3>
+                            <p class="mb-0 opacity-75">Tipos Ativos</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h3 class="mb-1">{% for tipo in tipos %}{% if forloop.first %}{{ tipo.nome }}{% endif %}{% empty %}N/A{% endfor %}</h3>
+                            <p class="mb-0 opacity-75">Primeiro Tipo</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h3 class="mb-1">{% for tipo in tipos %}{{ tipo.total_documentos|add:0 }}{% if not forloop.last %}+{% endif %}{% endfor %}</h3>
+                            <p class="mb-0 opacity-75">Total Documentos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Tipos -->
+    <div class="row">
+        {% if tipos %}
+            {% for tipo in tipos %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="category-card" onclick="editarTipo({{ tipo.id }})">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="category-icon" style="background-color: #007bff20; color: #007bff">
+                            <i class="bi bi-file-earmark-text"></i>
+                        </div>
+                        <div class="dropdown" onclick="event.stopPropagation()">
+                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <button class="dropdown-item" onclick="editarTipo({{ tipo.id }})">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item" onclick="duplicarTipo({{ tipo.id }})">
+                                        <i class="bi bi-copy"></i> Duplicar
+                                    </button>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <button class="dropdown-item text-danger" onclick="excluirTipo({{ tipo.id }})">
+                                        <i class="bi bi-trash"></i> Excluir
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <h5 class="mb-2">{{ tipo.nome }}</h5>
+                    
+                    {% if tipo.descricao %}
+                        <p class="text-muted small mb-3">{{ tipo.descricao|truncatechars:80 }}</p>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-light text-dark">
+                            {{ tipo.total_documentos }} documento{{ tipo.total_documentos|pluralize }}
+                        </span>
+                        <span class="badge bg-primary">
+                            {{ tipo.get_categoria_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="empty-state">
+                    <i class="bi bi-tags"></i>
+                    <h4>Nenhum tipo criado</h4>
+                    <p class="mb-4">Crie seu primeiro tipo para organizar melhor seus documentos.</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#novoTipoModal">
+                        <i class="bi bi-plus"></i>
+                        Criar Primeiro Tipo
+                    </button>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal Novo/Editar Tipo -->
+<div class="modal fade" id="novoTipoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Novo Tipo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="tipoForm">
+                    <input type="hidden" id="tipoId" name="tipo_id">
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-section">
+                                <h6 class="section-title">
+                                    <i class="bi bi-info-circle"></i>
+                                    Informações Básicas
+                                </h6>
+                                
+                                <div class="mb-3">
+                                    <label for="nomeTipo" class="form-label">Nome do Tipo *</label>
+                                    <input type="text" class="form-control" id="nomeTipo" name="nome" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="descricaoTipo" class="form-label">Descrição</label>
+                                    <textarea class="form-control" id="descricaoTipo" name="descricao" rows="3"></textarea>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="categoriaTipo" class="form-label">Categoria *</label>
+                                    <select class="form-control" id="categoriaTipo" name="categoria" required>
+                                        {% for value, label in categorias_choices %}
+                                            <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="obrigatorioTipo" name="obrigatorio">
+                                        <label class="form-check-label" for="obrigatorioTipo">
+                                            Documento obrigatório
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="form-section">
+                                <h6 class="section-title">
+                                    <i class="bi bi-eye"></i>
+                                    Visualização
+                                </h6>
+                                
+                                <div class="category-preview">
+                                    <div class="category-icon mx-auto" id="previewIcon" style="background-color: #007bff20; color: #007bff">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                    </div>
+                                    <h6 id="previewNome">Nome do Tipo</h6>
+                                    <p class="text-muted small" id="previewDescricao">Descrição do tipo</p>
+                                    <span class="badge bg-primary" id="previewCategoria">OUTROS</span>
+                                    <br>
+                                    <span class="badge bg-light text-dark">0 documentos</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarTipo()">Salvar Tipo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="confirmarExclusaoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir este tipo?</p>
+                <p class="text-muted small">Os documentos associados não serão excluídos, apenas ficarão sem tipo.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmarExclusaoBtn">Excluir</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let tipoParaExcluir = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Atualizar preview em tempo real - com verificações de segurança
+    const nomeTipo = document.getElementById('nomeTipo');
+    const descricaoTipo = document.getElementById('descricaoTipo');
+    const categoriaTipo = document.getElementById('categoriaTipo');
+    
+    if (nomeTipo) nomeTipo.addEventListener('input', atualizarPreview);
+    if (descricaoTipo) descricaoTipo.addEventListener('input', atualizarPreview);
+    if (categoriaTipo) categoriaTipo.addEventListener('change', atualizarPreview);
+});
+
+function atualizarPreview() {
+    const nomeInput = document.getElementById('nomeTipo');
+    const descricaoInput = document.getElementById('descricaoTipo');
+    const categoriaInput = document.getElementById('categoriaTipo');
+    
+    const nome = nomeInput ? nomeInput.value || 'Nome do Tipo' : 'Nome do Tipo';
+    const descricao = descricaoInput ? descricaoInput.value || 'Descrição do tipo' : 'Descrição do tipo';
+    const categoria = categoriaInput && categoriaInput.selectedOptions[0] ? categoriaInput.selectedOptions[0].text : 'OUTROS';
+
+    const previewNome = document.getElementById('previewNome');
+    const previewDescricao = document.getElementById('previewDescricao');
+    const previewCategoria = document.getElementById('previewCategoria');
+    
+    if (previewNome) previewNome.textContent = nome;
+    if (previewDescricao) previewDescricao.textContent = descricao;
+    if (previewCategoria) previewCategoria.textContent = categoria;
+}
+
+function editarTipo(id) {
+    fetch(`/documentos/repositorio/tipo/${id}/`)
+        .then(response => response.json())
+        .then(data => {
+            const modalTitle = document.getElementById('modalTitle');
+            const tipoId = document.getElementById('tipoId');
+            const nomeTipo = document.getElementById('nomeTipo');
+            const descricaoTipo = document.getElementById('descricaoTipo');
+            const categoriaTipo = document.getElementById('categoriaTipo');
+            const obrigatorioTipo = document.getElementById('obrigatorioTipo');
+            const modal = document.getElementById('novoTipoModal');
+            
+            if (modalTitle) modalTitle.textContent = 'Editar Tipo';
+            if (tipoId) tipoId.value = data.id;
+            if (nomeTipo) nomeTipo.value = data.nome;
+            if (descricaoTipo) descricaoTipo.value = data.descricao || '';
+            if (categoriaTipo) categoriaTipo.value = data.categoria;
+            if (obrigatorioTipo) obrigatorioTipo.checked = data.obrigatorio;
+            
+            atualizarPreview();
+            if (modal) new bootstrap.Modal(modal).show();
+        })
+        .catch(error => {
+            alert('Erro ao carregar tipo');
+            console.error(error);
+        });
+}
+
+function duplicarTipo(id) {
+    fetch(`/documentos/repositorio/tipo/${id}/`)
+        .then(response => response.json())
+        .then(data => {
+            const modalTitle = document.getElementById('modalTitle');
+            const tipoId = document.getElementById('tipoId');
+            const nomeTipo = document.getElementById('nomeTipo');
+            const descricaoTipo = document.getElementById('descricaoTipo');
+            const categoriaTipo = document.getElementById('categoriaTipo');
+            const obrigatorioTipo = document.getElementById('obrigatorioTipo');
+            const modal = document.getElementById('novoTipoModal');
+            
+            if (modalTitle) modalTitle.textContent = 'Duplicar Tipo';
+            if (tipoId) tipoId.value = '';
+            if (nomeTipo) nomeTipo.value = data.nome + ' (Cópia)';
+            if (descricaoTipo) descricaoTipo.value = data.descricao || '';
+            if (categoriaTipo) categoriaTipo.value = data.categoria;
+            if (obrigatorioTipo) obrigatorioTipo.checked = data.obrigatorio;
+            
+            atualizarPreview();
+            if (modal) new bootstrap.Modal(modal).show();
+        })
+        .catch(error => {
+            alert('Erro ao carregar tipo');
+            console.error(error);
+        });
+}
+
+function excluirTipo(id) {
+    tipoParaExcluir = id;
+    const modal = document.getElementById('confirmarExclusaoModal');
+    if (modal) new bootstrap.Modal(modal).show();
+}
+
+function salvarTipo() {
+    const form = document.getElementById('tipoForm');
+    if (!form) {
+        alert('Formulário não encontrado');
+        return;
+    }
+    
+    const formData = new FormData(form);
+    
+    const data = {
+        nome: formData.get('nome'),
+        descricao: formData.get('descricao'),
+        categoria: formData.get('categoria'),
+        obrigatorio: formData.get('obrigatorio') === 'on'
+    };
+    
+    const tipoId = formData.get('tipo_id');
+    const url = tipoId ? 
+        `/documentos/repositorio/tipo/${tipoId}/editar/` : 
+        '{% url "documentos:gerenciar_categorias" %}';
+    
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrfToken) {
+        alert('Token CSRF não encontrado');
+        return;
+    }
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken.value
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Erro ao salvar tipo: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Erro ao salvar tipo');
+        console.error(error);
+    });
+}
+
+// Confirmar exclusão
+const confirmarExclusaoBtn = document.getElementById('confirmarExclusaoBtn');
+if (confirmarExclusaoBtn) {
+    confirmarExclusaoBtn.addEventListener('click', function() {
+        if (tipoParaExcluir) {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (!csrfToken) {
+                alert('Token CSRF não encontrado');
+                return;
+            }
+            
+            fetch(`/documentos/repositorio/tipo/${tipoParaExcluir}/excluir/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrfToken.value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erro ao excluir tipo: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Erro ao excluir tipo');
+                console.error(error);
+            });
+        }
+    });
+}
+
+// Limpar modal ao fechar
+const novoTipoModal = document.getElementById('novoTipoModal');
+if (novoTipoModal) {
+    novoTipoModal.addEventListener('hidden.bs.modal', function() {
+        const modalTitle = document.getElementById('modalTitle');
+        const tipoForm = document.getElementById('tipoForm');
+        const tipoId = document.getElementById('tipoId');
+        
+        if (modalTitle) modalTitle.textContent = 'Novo Tipo';
+        if (tipoForm) tipoForm.reset();
+        if (tipoId) tipoId.value = '';
+        atualizarPreview();
+    });
+}
+</script>
+{% endblock %}

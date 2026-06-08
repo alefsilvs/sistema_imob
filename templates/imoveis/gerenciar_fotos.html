@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fotos - {{ imovel.codigo }} - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Fotos - {{ imovel.codigo }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'imoveis:listar' %}">Imóveis</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'imoveis:detalhes_imovel' imovel.pk %}">{{ imovel.codigo }}</a></li>
+                    <li class="breadcrumb-item active">Fotos</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="{% url 'imoveis:detalhes_imovel' imovel.pk %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <!-- Upload de Fotos -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Adicionar Fotos</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_foto" class="form-label">Selecionar Foto</label>
+                                    <input type="file" class="form-control" id="id_foto" name="foto" accept="image/*" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_descricao" class="form-label">Descrição</label>
+                                    <input type="text" class="form-control" id="id_descricao" name="descricao" placeholder="Descrição da foto (opcional)">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="id_principal" name="principal">
+                                    <label class="form-check-label" for="id_principal">
+                                        Definir como foto principal
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-upload"></i> Adicionar Foto
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Lista de Fotos -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Fotos do Imóvel ({{ imovel.fotos.count }})</h6>
+                </div>
+                <div class="card-body">
+                    {% if imovel.fotos.exists %}
+                        <div class="row">
+                            {% for foto in imovel.fotos.all %}
+                            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="position-relative">
+                                        <img src="{{ foto.foto.url }}" class="card-img-top" alt="{{ foto.descricao }}" style="height: 200px; object-fit: cover;">
+                                        {% if foto.principal %}
+                                            <span class="position-absolute top-0 start-0 badge bg-success m-2">
+                                                <i class="bi bi-star-fill"></i> Principal
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="card-body p-2">
+                                        {% if foto.descricao %}
+                                            <p class="card-text small mb-2">{{ foto.descricao }}</p>
+                                        {% endif %}
+                                        <small class="text-muted">{{ foto.created_at|date:"d/m/Y H:i" }}</small>
+                                    </div>
+                                    <div class="card-footer p-2">
+                                        <div class="btn-group w-100" role="group">
+                                            {% if not foto.principal %}
+                                                <form method="post" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action" value="set_principal">
+                                                    <input type="hidden" name="foto_id" value="{{ foto.id }}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-warning" title="Definir como principal">
+                                                        <i class="bi bi-star"></i>
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                            <form method="post" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="foto_id" value="{{ foto.id }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                        onclick="return confirm('Tem certeza que deseja excluir esta foto?')" 
+                                                        title="Excluir foto">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-images text-muted" style="font-size: 4rem;"></i>
+                            <h5 class="mt-3 text-muted">Nenhuma foto adicionada</h5>
+                            <p class="text-muted">Use o formulário acima para adicionar fotos do imóvel.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

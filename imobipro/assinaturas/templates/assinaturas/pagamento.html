@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pagamento - ImobilPro{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4><i class="fas fa-credit-card"></i> Finalizar Pagamento</h4>
+                </div>
+                
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Dados do Pagamento</h5>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ pagamento.assinatura.plano.nome }}</h6>
+                                    <p class="card-text">{{ pagamento.assinatura.plano.descricao }}</p>
+                                    
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Valor:</span>
+                                        <span class="font-weight-bold">R$ {{ pagamento.valor|floatformat:2 }}</span>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Forma de Pagamento:</span>
+                                        <span>{{ pagamento.forma_pagamento }}</span>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Status:</span>
+                                        <span class="badge badge-warning">{{ pagamento.status }}</span>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between">
+                                        <span>Vencimento:</span>
+                                        <span>{{ pagamento.data_vencimento|date:"d/m/Y H:i" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            {% if pagamento.forma_pagamento == 'PIX' and pix_data %}
+                            <h5>Pagamento via PIX</h5>
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+                                        <img src="data:image/png;base64,{{ pix_data.qr_code_base64 }}" 
+                                             alt="QR Code PIX" class="img-fluid" style="max-width: 200px;">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="pix-code">Código PIX Copia e Cola:</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="pix-code" 
+                                                   value="{{ pix_data.qr_code }}" readonly>
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-secondary" type="button" 
+                                                        onclick="copyPixCode()">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        <strong>Como pagar:</strong><br>
+                                        1. Abra o app do seu banco<br>
+                                        2. Escaneie o QR Code ou cole o código<br>
+                                        3. Confirme o pagamento<br>
+                                        4. Aguarde a confirmação automática
+                                    </div>
+                                </div>
+                            </div>
+                            {% elif pagamento.forma_pagamento == 'CARTAO' %}
+                            <h5>Pagamento via Cartão</h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        Redirecionando para a página de pagamento seguro...
+                                    </div>
+                                </div>
+                            </div>
+                            {% elif pagamento.forma_pagamento == 'BOLETO' %}
+                            <h5>Pagamento via Boleto</h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        Seu boleto será gerado em instantes...
+                                    </div>
+                                    
+                                    <div class="text-center">
+                                        <button class="btn btn-primary" onclick="gerarBoleto()">
+                                            <i class="fas fa-download"></i> Gerar Boleto
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-clock"></i>
+                                <strong>Importante:</strong> Após a confirmação do pagamento, sua assinatura será ativada automaticamente.
+                                Você receberá um e-mail de confirmação.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <a href="{% url 'assinaturas:confirmar_pagamento' pagamento.id %}" 
+                           class="btn btn-success btn-lg mr-2">
+                            <i class="fas fa-check"></i> Simular Pagamento (Teste)
+                        </a>
+                        
+                        <a href="{% url 'assinaturas:minha_assinatura' %}" 
+                           class="btn btn-info btn-lg mr-2">
+                            <i class="fas fa-eye"></i> Verificar Status
+                        </a>
+                        
+                        <a href="{% url 'assinaturas:planos' %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-arrow-left"></i> Voltar aos Planos
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-footer text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-shield-alt"></i> Transação segura e criptografada
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyPixCode() {
+    var pixCode = document.getElementById('pix-code');
+    pixCode.select();
+    pixCode.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    
+    // Mostrar feedback
+    var button = event.target.closest('button');
+    var originalHtml = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i>';
+    button.classList.add('btn-success');
+    button.classList.remove('btn-outline-secondary');
+    
+    setTimeout(function() {
+        button.innerHTML = originalHtml;
+        button.classList.remove('btn-success');
+        button.classList.add('btn-outline-secondary');
+    }, 2000);
+}
+
+function gerarBoleto() {
+    // Implementar geração de boleto
+    alert('Funcionalidade de boleto será implementada em breve.');
+}
+
+// Auto-refresh para verificar status do pagamento
+setInterval(function() {
+    fetch(window.location.href + '?check_status=1')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'APROVADO') {
+                window.location.href = '{% url "core:dashboard" %}';
+            }
+        })
+        .catch(error => console.log('Erro ao verificar status:', error));
+}, 10000); // Verifica a cada 10 segundos
+</script>
+{% endblock %}

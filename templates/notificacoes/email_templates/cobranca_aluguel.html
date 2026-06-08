@@ -1,0 +1,96 @@
+{% extends "notificacoes/email_templates/base_email.html" %}
+
+{% block content %}
+<div class="greeting">
+    Olá, {{ inquilino_nome|default:"Cliente" }}!
+</div>
+
+<div class="alert alert-warning">
+    <strong>💰 Lembrete de Pagamento</strong> - Aluguel em aberto
+</div>
+
+<div class="message-content">
+    Identificamos que há uma pendência financeira em seu contrato. 
+    O pagamento do aluguel referente ao mês de <strong>{{ mes_referencia }}</strong> 
+    ainda não foi identificado em nosso sistema.
+</div>
+
+<div class="info-card">
+    <h3>💳 Detalhes da Cobrança</h3>
+    <div class="info-row">
+        <span class="info-label">Imóvel:</span>
+        <span class="info-value">{{ imovel_endereco|default:"N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Mês de Referência:</span>
+        <span class="info-value">{{ mes_referencia|default:"N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Valor do Aluguel:</span>
+        <span class="info-value">R$ {{ valor_aluguel|default:"0,00" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Data de Vencimento:</span>
+        <span class="info-value">{{ data_vencimento|date:"d/m/Y"|default:"N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Dias em Atraso:</span>
+        <span class="info-value">{{ dias_atraso }} dias</span>
+    </div>
+    {% if valor_multa %}
+    <div class="info-row">
+        <span class="info-label">Multa por Atraso:</span>
+        <span class="info-value">R$ {{ valor_multa }}</span>
+    </div>
+    {% endif %}
+    {% if valor_juros %}
+    <div class="info-row">
+        <span class="info-label">Juros:</span>
+        <span class="info-value">R$ {{ valor_juros }}</span>
+    </div>
+    {% endif %}
+    <div class="info-row" style="border-top: 2px solid #667eea; font-weight: bold; color: #2c3e50;">
+        <span class="info-label">Valor Total:</span>
+        <span class="info-value">R$ {{ valor_total|default:valor_aluguel }}</span>
+    </div>
+</div>
+
+<div class="message-content">
+    <strong>Formas de Pagamento:</strong>
+    <ul style="margin-left: 20px; margin-top: 15px;">
+        <li><strong>PIX:</strong> Pagamento instantâneo via QR Code</li>
+        <li><strong>Boleto Bancário:</strong> Disponível para download</li>
+        <li><strong>Transferência:</strong> Dados bancários em anexo</li>
+        <li><strong>Cartão de Crédito:</strong> Parcelamento disponível</li>
+    </ul>
+</div>
+
+<div class="btn-container">
+    <a href="#" class="btn btn-success">
+        💳 Pagar Agora
+    </a>
+    <a href="#" class="btn btn-warning">
+        📄 Gerar Boleto
+    </a>
+    <a href="#" class="btn btn-secondary">
+        📞 Negociar
+    </a>
+</div>
+
+{% if dias_atraso > 30 %}
+<div class="alert alert-danger">
+    <strong>⚠️ Atenção:</strong> Seu pagamento está em atraso há mais de 30 dias. 
+    Entre em contato conosco urgentemente para evitar procedimentos legais.
+</div>
+{% elif dias_atraso > 0 %}
+<div class="alert alert-warning">
+    <strong>⏰ Pagamento em Atraso:</strong> Para evitar juros adicionais, 
+    regularize sua situação o quanto antes.
+</div>
+{% endif %}
+
+<div class="alert alert-info">
+    <strong>💡 Dica:</strong> Configure o débito automático e nunca mais se preocupe 
+    com datas de vencimento!
+</div>
+{% endblock %}

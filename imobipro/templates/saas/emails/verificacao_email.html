@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificação de Email - {{ site_name }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .title {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .btn-verify {
+            display: inline-block;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-verify:hover {
+            background: linear-gradient(135deg, #0056b3, #004085);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+        }
+        .security-info {
+            background: #e8f4fd;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+        }
+        .link-manual {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🏢 {{ site_name }}</div>
+            <h1 class="title">Verificação de Email</h1>
+        </div>
+        
+        <div class="content">
+            <p>Olá <strong>{{ usuario.first_name|default:usuario.username }}</strong>,</p>
+            
+            <p>Obrigado por se cadastrar no <strong>{{ site_name }}</strong>! Para completar seu cadastro e ter acesso ao sistema, você precisa verificar seu endereço de email.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{ url_verificacao }}" class="btn-verify">
+                    ✅ Verificar Meu Email
+                </a>
+            </div>
+            
+            <div class="security-info">
+                <h4>🔒 Informações de Segurança:</h4>
+                <ul>
+                    <li>Este link é válido por 24 horas</li>
+                    <li>Só pode ser usado uma vez</li>
+                    <li>Se você não solicitou este cadastro, ignore este email</li>
+                </ul>
+            </div>
+            
+            <p><strong>Próximos passos após a verificação:</strong></p>
+            <ol>
+                <li>✅ Verificar seu email (este passo)</li>
+                <li>💳 Escolher e confirmar seu plano</li>
+                <li>🚀 Fazer login e acessar o dashboard</li>
+            </ol>
+            
+            <p>Se o botão acima não funcionar, copie e cole o link abaixo no seu navegador:</p>
+            <div class="link-manual">
+                {{ url_verificacao }}
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Este email foi enviado automaticamente pelo sistema {{ site_name }}.</p>
+            <p>Se você não se cadastrou em nossa plataforma, pode ignorar este email com segurança.</p>
+            <p><strong>Não responda este email</strong> - ele é enviado automaticamente.</p>
+        </div>
+    </div>
+</body>
+</html>

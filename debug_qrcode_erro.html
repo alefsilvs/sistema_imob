@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug QR Code PIX</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .error { color: red; }
+        .success { color: green; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>Debug QR Code PIX - Erro net::ERR_INVALID_URL</h1>
+    
+    <div class="test-section">
+        <h2>Teste 1: Data URL Original</h2>
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUgAAAFIAQAAAAAab1qeAAACkUlEQVR4nO1bS27FIAy0Ue9/5ak8Y5O06oJsStziRCIhlp4Z+Q/PYYs0VhntcK7QWOL675yGUlDoziGuuOdXdFnR2Mr5ISTNXIM5+AQ3Byehr21WNPZzuruGwM55CWXcvo79cjbjRCAZCukQtL/663+QEwh7z5d48N/89T/jPy0hdPAK50kdTd+JN8g5GsZ3/HiJTnxfo4+pf7RwBiHpKacuQK3LisZuTnfeRC5CucJ7etB8PvnSIrlCENGU5xSKpaCFLdqsaGzldOlgIVoxnRGJo+VbmxWNrZyeCCZ8hXC9UU+d811WNLZzgnlnYhq5PF8QJSd5wHG/nE3iu/nNj2b6xLAUhi5sD55P4jtSGdkJyXReICtjwrF3e8LpjEjVBxGc4QPYt/PQ0XfI2YQTadgBoex8JqExadlh2i5nF05nGj9reDpLhaCA2atG2i5nl/od6nTe6vWcmT17C64uKxq7OX0mmhzD6qWuuf1hwna7nF04UcVmWbtaylkbedVK2+VsUx+JCFy1PzPpRMMVjZf0l1DdOW3FKVmqNNRfIGcX/XQ142XVt64SnUCVS6e/tEZeW0aXEw26oev51GVFYyun8dRCVZVXNOdEJkvGty4rGi/ohyANvwJSbMWXetrZj7OH/TqrJggBzTwpMI5sFP4WOZv4T1cDWUl97hXXJkhWnXb857N+iGnHQzkobT37niyXTv1uy4Rrh70qeQWpnLVMSk88WvefQXkSTOFcZn4dCcMr5OwS302hXCk9vh6/mQ60zYrGVk5L0565JxvzaeWZlwYde3/MCYLLbY+ISJU/+ekn20N7x7et+HnKZmoudss5Wp6vsysCzX1NU+V57H2J/PxfZoHGChPpcK7Qur1/Aju4cxVYJJINAAAAAElFTkSuQmCC" alt="QR Code Original" style="border: 1px solid #ccc;">
+        <p>Tamanho: 974 caracteres</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>Teste 2: Base64 Limpo</h2>
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUgAAAFIAQAAAAAab1qeAAACkUlEQVR4nO1bS27FIAy0Ue9/5ak8Y5O06oJsStziRCIhlp4Z+Q/PYYs0VhntcK7QWOL675yGUlDoziGuuOdXdFnR2Mr5ISTNXIM5+AQ3Byehr21WNPZzuruGwM55CWXcvo79cjbjRCAZCukQtL/663+QEwh7z5d48N/89T/jPy0hdPAK50kdTd+JN8g5GsZ3/HiJTnxfo4+pf7RwBiHpKacuQK3LisZuTnfeRC5CucJ7etB8PvnSIrlCENGU5xSKpaCFLdqsaGzldOlgIVoxnRGJo+VbmxWNrZyeCCZ8hXC9UU+d811WNLZzgnlnYhq5PF8QJSd5wHG/nE3iu/nNj2b6xLAUhi5sD55P4jtSGdkJyXReICtjwrF3e8LpjEjVBxGc4QPYt/PQ0XfI2YQTadgBoex8JqExadlh2i5nF05nGj9reDpLhaCA2atG2i5nl/od6nTe6vWcmT17C64uKxq7OX0mmhzD6qWuuf1hwna7nF04UcVmWbtaylkbedVK2+VsUx+JCFy1PzPpRMMVjZf0l1DdOW3FKVmqNNRfIGcX/XQ142XVt64SnUCVS6e/tEZeW0aXEw26oev51GVFYyun8dRCVZVXNOdEJkvGty4rGi/ohyANvwJSbMWXetrZj7OH/TqrJggBzTwpMI5sFP4WOZv4T1cDWUl97hXXJkhWnXb857N+iGnHQzkobT37niyXTv1uy4Rrh70qeQWpnLVMSk88WvefQXkSTOFcZn4dCcMr5OwS302hXCk9vh6/mQ60zYrGVk5L0565JxvzaeWZlwYde3/MCYLLbY+ISJU/+ekn20N7x7et+HnKZmoudss5Wp6vsysCzX1NU+V57H2J/PxfZoHGChPpcK7Qur1/Aju4cxVYJJINAAAAAElFTkSuQmCC" alt="QR Code Limpo" style="border: 1px solid #ccc;">
+        <p>Tamanho: 952 caracteres</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>Teste 3: Template Renderizado</h2>
+        <div style="border: 1px solid #eee; padding: 10px; max-height: 300px; overflow-y: auto;">
+            <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .info-box { background: white; padding: 20px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .highlight { background: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 15px 0; }
+        .payment-section { background: #f1f8e9; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .qr-code { text-align: center; margin: 20px 0; }
+        .footer { text-align: center; margin-top: 30px; padding: 20px; color: #666; }
+        .btn { display: inline-block; padding: 12px 24px; background: #4caf50; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Cobrança - Banca de Feira</h1>
+            <p></p>
+        </div>
+        
+        <div class="content">
+            <p>Prezado(a) <strong></strong>,</p>
+            
+            <p>Esperamos que esteja bem!</p>
+            
+            <p>Temos uma cobrança pendente referente à sua banca de feira. Confira os detalhes abaixo:</p>
+            
+            <div class="info-box">
+                <h3>📋 DADOS DA BANCA</h3>
+                <ul>
+                    <li><strong>Código:</strong> </li>
+                    <li><strong>Localização:</strong> </li>
+                    <li><strong>Tipo:</strong> </li>
+                </ul>
+            </div>
+            
+            <div class="info-box">
+                <h3>📅 DADOS DA COBRANÇA</h3>
+                <ul>
+                    <li><strong>Contrato:</strong> </li>
+                    <li><strong>Data de Vencimento:</strong> </li>
+                    <li><strong>Valor Total:</strong> <span style="font-size: 1.2em; color: #d32f2f;"></span></li>
+                </ul>
+            </div>
+            
+            <div class="payment-section">
+                <h3>💰 FORMAS DE PAGAMENTO</h3>
+                
+                
+                <div class="highlight">
+                    <h4>🔸 PIX - Pagamento Instantâneo</h4>
+                    <p><strong>Código PIX (Copie e Cole):</strong></p>
+                    <div style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-family: monospace; word-break: break-all; font-size: 12px;">
+                        0014BR.GOV.BCB.PIX26330014BR.GOV.BCB.PIX01116198303658652040000530398654071050.005802BR5919alef da silva alves6009SAO PAULO62100506BANCA1630477F9
+                    </div>
+                    
+                    <div class="qr-code">
+                        <p><strong>📱 QR Code PIX:</strong></p>
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUgAAAFIAQAAAAAab1qeAAACkUlEQVR4nO1bS27FIAy0Ue9/5ak8Y5O06oJsStziRCIhlp4Z+Q/PYYs0VhntcK7QWOL675yGUlDoziGuuOdXdFnR2Mr5ISTNXIM5+AQ3Byehr21WNPZzuruGwM55CWXcvo79cjbjRCAZCukQtL/663+QEwh7z5d48N/89T/jPy0hdPAK50kdTd+JN8g5GsZ3/HiJTnxfo4+pf7RwBiHpKacuQK3LisZuTnfeRC5CucJ7etB8PvnSIrlCENGU5xSKpaCFLdqsaGzldOlgIVoxnRGJo+VbmxWNrZyeCCZ8hXC9UU+d811WNLZzgnlnYhq5PF8QJSd5wHG/nE3iu/nNj2b6xLAUhi5sD55P4jtSGdkJyXReICtjwrF3e8LpjEjVBxGc4QPYt/PQ0XfI2YQTadgBoex8JqExadlh2i5nF05nGj9reDpLhaCA2atG2i5nl/od6nTe6vWcmT17C64uKxq7OX0mmhzD6qWuuf1hwna7nF04UcVmWbtaylkbedVK2+VsUx+JCFy1PzPpRMMVjZf0l1DdOW3FKVmqNNRfIGcX/XQ142XVt64SnUCVS6e/tEZeW0aXEw26oev51GVFYyun8dRCVZVXNOdEJkvGty4rGi/ohyANvwJSbMWXetrZj7OH/TqrJggBzTwpMI5sFP4WOZv4T1cDWUl97hXXJkhWnXb857N+iGnHQzkobT37niyXTv1uy4Rrh70qeQWpnLVMSk88WvefQXkSTOFcZn4dCcMr5OwS302hXCk9vh6/mQ60zYrGVk5L0565JxvzaeWZlwYde3/MCYLLbY+ISJU/+ekn20N7x7et+HnKZmoudss5Wp6vsysCzX1NU+V57H2J/PxfZoHGChPpcK7Qur1/Aju4cxVYJJINAAAAAElFTkSuQmCC" alt="QR Code PIX" style="max-width: 200px; border: 2px solid #ddd; padding: 10px; background: white;">
+                        <p style="font-size: 12px; color: #666;">Escaneie com o app do seu banco</p>
+                    </div>
+                </div>
+                
+                
+                <p><strong>🔸 Outras opções:</strong></p>
+                <ul>
+                    <li><a href="" class="btn">💳 Link de Pagamento Online</a></li>
+                    <li>🏦 Transferência bancária</li>
+                    <li>📄 Boleto bancário</li>
+                </ul>
+            </div>
+            
+            
+            <div class="info-box">
+                <h4>📱 COMO PAGAR VIA PIX:</h4>
+                <ol>
+                    <li>Abra o aplicativo do seu banco</li>
+                    <li>Escaneie o QR Code acima OU copie e cole o código PIX</li>
+                    <li>Confirme os dados e efetue o pagamento</li>
+                </ol>
+            </div>
+            
+            
+            <div class="info-box">
+                <h3>📞 DÚVIDAS OU NEGOCIAÇÃO</h3>
+                <p>Se precisar de esclarecimentos ou negociar condições de pagamento:</p>
+                <ul>
+                    <li><strong>📱 Telefone:</strong> </li>
+                    <li><strong>📧 Email:</strong> </li>
+                </ul>
+            </div>
+            
+            <div class="warning">
+                <p><strong>⚠️ IMPORTANTE:</strong> Mantenha sua banca em dia para evitar problemas e garantir a continuidade do seu negócio!</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Atenciosamente,<br>
+            <strong></strong><br>
+            Gestão de Bancas de Feira</p>
+            
+            <p style="font-size: 12px; color: #999;">
+                Este é um email automático. Para dúvidas, entre em contato pelos canais informados acima.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Informações de Debug</h2>
+        <ul>
+            <li>Código PIX: 145 chars</li>
+            <li>Base64: 952 chars</li>
+            <li>Base64 Limpo: 952 chars</li>
+            <li>Data URL: 974 chars</li>
+            <li>HTML Renderizado: 6123 chars</li>
+        </ul>
+    </div>
+    
+    <script>
+        console.log('=== DEBUG QR CODE PIX ===');
+        console.log('Data URL length:', 974);
+        console.log('Base64 length:', 952);
+        
+        // Testar carregamento da imagem
+        const img = new Image();
+        img.onload = function() {
+            console.log('✅ Imagem carregada com sucesso!');
+            console.log('Dimensões:', this.width, 'x', this.height);
+        };
+        img.onerror = function(e) {
+            console.error('❌ Erro ao carregar imagem:', e);
+            console.error('Data URL:', "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUgAAAFIAQAAAAAab1qeAAACkUlEQVR4nO1bS27FIAy0Ue9/5ak8Y5O06oJsStziRCIhlp4Z+Q/PYYs0VhntcK7QWOL675yGUlDoziGuuOdXdFnR2Mr5ISTNXIM5+AQ3Byehr21WNPZzuruGwM55CWXcvo79cjbjRCAZCukQtL/663+QEwh7z5d48N/89T/jPy0hdPAK50kdTd+JN8g5GsZ3/HiJTnxfo4+pf7RwBiHpKacuQK3LisZuTnfeRC5CucJ7etB8PvnSIrlCENGU5xSKpaCFLdqsaGzldOlgIVoxnRGJo+VbmxWNrZyeCCZ8hXC9UU+d811WNLZzgnlnYhq5PF8QJSd5wHG/nE3iu/nNj2b6xLAUhi5sD55P4jtSGdkJyXReICtjwrF3e8LpjEjVBxGc4QPYt/PQ0XfI2YQTadgBoex8JqExadlh2i5nF05nGj9reDpLhaCA2atG2i5nl/od6nTe6vWcmT17C64uKxq7OX0mmhzD6qWuuf1hwna7nF04UcVmWbtaylkbedVK2+VsUx+JCFy1PzPpRMMVjZf0l1DdOW3FKVmqNNRfIGcX/XQ142XVt64SnUCVS6e/tEZeW0aXEw26oev51GVFYyun8dRCVZVXNOdEJkvGty4rGi/ohyANvwJSbMWXetrZj7OH/TqrJggBzTwpMI5sFP4WOZv4T1cDWUl97hXXJkhWnXb857N+iGnHQzkobT37niyXTv1uy4Rrh70qeQWpnLVMSk88WvefQXkSTOFcZn4dCcMr5OwS302hXCk9vh6/mQ60zYrGVk5L0565JxvzaeWZlwYde3/MCYLLbY+ISJU/+ekn20N7x7et+HnKZmoudss5Wp6vsysCzX1NU+V57H2J/PxfZoHGChPpcK7Qur1/Aju4cxVYJJINAAAAAElFTkSuQmCC".substring(0, 100) + "...");
+        };
+        img.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUgAAAFIAQAAAAAab1qeAAACkUlEQVR4nO1bS27FIAy0Ue9/5ak8Y5O06oJsStziRCIhlp4Z+Q/PYYs0VhntcK7QWOL675yGUlDoziGuuOdXdFnR2Mr5ISTNXIM5+AQ3Byehr21WNPZzuruGwM55CWXcvo79cjbjRCAZCukQtL/663+QEwh7z5d48N/89T/jPy0hdPAK50kdTd+JN8g5GsZ3/HiJTnxfo4+pf7RwBiHpKacuQK3LisZuTnfeRC5CucJ7etB8PvnSIrlCENGU5xSKpaCFLdqsaGzldOlgIVoxnRGJo+VbmxWNrZyeCCZ8hXC9UU+d811WNLZzgnlnYhq5PF8QJSd5wHG/nE3iu/nNj2b6xLAUhi5sD55P4jtSGdkJyXReICtjwrF3e8LpjEjVBxGc4QPYt/PQ0XfI2YQTadgBoex8JqExadlh2i5nF05nGj9reDpLhaCA2atG2i5nl/od6nTe6vWcmT17C64uKxq7OX0mmhzD6qWuuf1hwna7nF04UcVmWbtaylkbedVK2+VsUx+JCFy1PzPpRMMVjZf0l1DdOW3FKVmqNNRfIGcX/XQ142XVt64SnUCVS6e/tEZeW0aXEw26oev51GVFYyun8dRCVZVXNOdEJkvGty4rGi/ohyANvwJSbMWXetrZj7OH/TqrJggBzTwpMI5sFP4WOZv4T1cDWUl97hXXJkhWnXb857N+iGnHQzkobT37niyXTv1uy4Rrh70qeQWpnLVMSk88WvefQXkSTOFcZn4dCcMr5OwS302hXCk9vh6/mQ60zYrGVk5L0565JxvzaeWZlwYde3/MCYLLbY+ISJU/+ekn20N7x7et+HnKZmoudss5Wp6vsysCzX1NU+V57H2J/PxfZoHGChPpcK7Qur1/Aju4cxVYJJINAAAAAElFTkSuQmCC";
+    </script>
+</body>
+</html>

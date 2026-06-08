@@ -1,0 +1,1286 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .modern-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    }
+    
+    .modern-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+    
+    .gradient-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px 15px 0 0 !important;
+        padding: 1.2rem;
+    }
+    
+    .filter-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 15px 15px 0 0 !important;
+        padding: 1.2rem;
+    }
+    
+    .recipients-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        border-radius: 15px 15px 0 0 !important;
+        padding: 1.2rem;
+    }
+    
+    .form-control, .form-select {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        transform: translateY(-1px);
+    }
+    
+    .btn-modern {
+        border-radius: 25px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .btn-primary-modern {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-primary-modern:hover {
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary-modern {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        color: #333;
+    }
+    
+    .btn-secondary-modern:hover {
+        background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .btn-outline-modern {
+        border: 2px solid #667eea;
+        color: #667eea;
+        background: transparent;
+        border-radius: 25px;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-modern:hover {
+        background: #667eea;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .badge-modern {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        color: #333;
+        border-radius: 20px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .recipient-card {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+        cursor: pointer;
+    }
+    
+    .recipient-card:hover {
+        border-color: #667eea;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+    }
+    
+    .recipient-card.selected {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .search-container {
+        position: relative;
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #667eea;
+        z-index: 10;
+    }
+    
+    .search-input {
+        padding-left: 45px !important;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        border: none;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .stats-label {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 4px solid #667eea;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .stats-mini {
+        text-align: center;
+    }
+    
+    .stats-mini .stats-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stats-mini .stats-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .destinatarios-container {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .destinatario-item {
+        border-bottom: 1px solid #e9ecef;
+        padding: 1rem;
+        transition: background-color 0.2s;
+    }
+    
+    .destinatario-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .destinatario-item.selecionado {
+        background-color: #e3f2fd;
+        border-left: 4px solid #2196f3;
+    }
+    
+    .destinatario-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .destinatario-checkbox {
+        transform: scale(1.2);
+    }
+    
+    .destinatario-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    
+    .destinatario-detalhes {
+        flex: 1;
+    }
+    
+    .destinatario-nome {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+    
+    .destinatario-contatos {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .contato-item {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .contato-item i {
+        width: 16px;
+    }
+    
+    .btn-success-modern {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-success-modern:hover {
+        background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+    
+    .btn-outline-primary.active,
+    .btn-outline-success.active,
+    .btn-outline-warning.active,
+    .btn-outline-info.active {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+        color: white;
+    }
+    
+    .preview-container {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: none;
+    }
+    
+    .filter-section {
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .page-title {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: bold;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <h1 class="page-title">
+        <i class="fas fa-paper-plane"></i> Envio Avançado de Notificações
+    </h1>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Painel de Filtros -->
+            <div class="card modern-card">
+                <div class="card-header filter-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-filter me-2"></i> Filtros Inteligentes
+                        <button class="btn btn-outline-light btn-sm float-end" onclick="mostrarEstatisticas()">
+                            <i class="fas fa-chart-bar me-1"></i> Estatísticas
+                        </button>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="filtros-form">
+                        <!-- Busca Principal -->
+                        <div class="mb-4 search-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" name="busca" class="form-control search-input" placeholder="🔍 Buscar por nome, email, telefone..." onkeyup="debounceSearch()">
+                        </div>
+                        
+                        <div class="filter-section">
+                            <h6 class="text-primary mb-3"><i class="fas fa-users me-2"></i>Tipo de Inquilino</h6>
+                            <select name="tipo" class="form-select" onchange="aplicarFiltros()">
+                                <option value="todos">📋 Todos os Inquilinos</option>
+                                <option value="com_contrato">✅ Com Contrato Ativo</option>
+                                <option value="sem_contrato">❌ Sem Contrato</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <h6 class="text-success mb-3"><i class="fas fa-toggle-on me-2"></i>Status</h6>
+                            <select name="status" class="form-select" onchange="aplicarFiltros()">
+                                <option value="todos">🌐 Todos</option>
+                                <option value="ativo">🟢 Ativos</option>
+                                <option value="inativo">🔴 Inativos</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <h6 class="text-info mb-3"><i class="fas fa-map-marker-alt me-2"></i>Localização</h6>
+                            <select name="cidade" class="form-select" onchange="aplicarFiltros()">
+                                <option value="">🏙️ Todas as Cidades</option>
+                                <!-- Preenchido via JavaScript -->
+                            </select>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <h6 class="text-warning mb-3"><i class="fas fa-money-bill-wave me-2"></i>Faixa de Renda</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="number" name="renda_min" class="form-control" placeholder="💰 Mínimo" onchange="aplicarFiltros()">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" name="renda_max" class="form-control" placeholder="💎 Máximo" onchange="aplicarFiltros()">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <h6 class="text-danger mb-3"><i class="fas fa-calendar-alt me-2"></i>Vencimento</h6>
+                            <select name="vencimento" class="form-select" onchange="aplicarFiltros()">
+                                <option value="">📅 Qualquer Dia</option>
+                                {% for i in "12345678901234567890123456789012" %}
+                                    <option value="{{ forloop.counter }}">📆 Dia {{ forloop.counter }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="filter-section">
+                            <h6 class="text-secondary mb-3"><i class="fas fa-home me-2"></i>Valor do Aluguel</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="number" name="valor_min" class="form-control" placeholder="🏠 Mínimo" onchange="aplicarFiltros()">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" name="valor_max" class="form-control" placeholder="🏡 Máximo" onchange="aplicarFiltros()">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="button" class="btn btn-secondary-modern btn-modern" onclick="limparFiltros()">
+                                <i class="fas fa-broom me-2"></i> Limpar Filtros
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Resumo da Seleção -->
+            <div class="card modern-card mt-3">
+                <div class="card-header gradient-header">
+                    <h6 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Resumo da Seleção</h6>
+                </div>
+                <div class="card-body">
+                    <div id="resumo-selecao">
+                        <div class="stats-card">
+                            <div class="stats-number">0</div>
+                            <div class="stats-label">Destinatários Selecionados</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Formulário de Envio -->
+            <div class="card modern-card">
+                <div class="card-header gradient-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-rocket me-2"></i> Configurar Envio
+                        <span class="badge badge-modern float-end" id="contador-selecionados">0 selecionados</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="form-envio">
+                        {% csrf_token %}
+                        
+                        <!-- Template -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-file-alt me-2 text-primary"></i>Template de Notificação *
+                            </label>
+                            <select name="template" class="form-select" required onchange="previewTemplate()">
+                                <option value="">📄 Selecione um template</option>
+                                {% for template in templates %}
+                                    <option value="{{ template.id }}">📋 {{ template.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Canal -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-broadcast-tower me-2 text-success"></i>Canal de Envio
+                            </label>
+                            <select name="canal" class="form-select">
+                                <option value="EMAIL">📧 E-mail</option>
+                                <option value="SMS">📱 SMS</option>
+                                <option value="WHATSAPP">💬 WhatsApp</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Preview do Template -->
+                        <div class="mb-4" id="preview-container" style="display: none;">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-eye me-2 text-info"></i>Preview da Notificação
+                            </label>
+                            <div class="preview-container" id="preview-content">
+                                <!-- Conteúdo carregado via AJAX -->
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'notificacoes:listar' %}" class="btn btn-secondary-modern btn-modern me-md-2">
+                                <i class="fas fa-arrow-left me-2"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-primary-modern btn-modern" id="btn-enviar" disabled>
+                                <i class="fas fa-paper-plane me-2"></i> Enviar Notificações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Campo de Busca Avançada -->
+            <div class="card modern-card mt-3">
+                <div class="card-header gradient-header">
+                    <h6 class="mb-0"><i class="fas fa-search me-2"></i>Busca Avançada de Destinatários</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text bg-primary text-white">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" 
+                                       id="busca-destinatarios" 
+                                       class="form-control form-control-lg" 
+                                       placeholder="🔍 Digite nome, CPF, e-mail ou telefone do destinatário..."
+                                       onkeyup="buscarDestinatarios(this.value)">
+                                <button class="btn btn-outline-secondary" type="button" onclick="limparBusca()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted mt-1 d-block">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Busque por nome completo, CPF (com ou sem pontos), e-mail ou telefone
+                            </small>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-success-modern btn-lg" onclick="selecionarTodosVisiveis()">
+                                    <i class="fas fa-check-double me-2"></i>Selecionar Visíveis
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filtros Rápidos -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="filtroRapido('com-email')">
+                                    <i class="fas fa-envelope me-1"></i>Com E-mail
+                                </button>
+                                <button type="button" class="btn btn-outline-success btn-sm" onclick="filtroRapido('com-telefone')">
+                                    <i class="fas fa-phone me-1"></i>Com Telefone
+                                </button>
+                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="filtroRapido('sem-contato')">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Sem Contato
+                                </button>
+                                <button type="button" class="btn btn-outline-info btn-sm" onclick="filtroRapido('aniversariantes')">
+                                    <i class="fas fa-birthday-cake me-1"></i>Aniversariantes do Mês
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Destinatários Melhorada -->
+            <div class="card modern-card mt-3">
+                <div class="card-header gradient-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Lista de Destinatários
+                        <span class="badge badge-modern ms-2" id="total-destinatarios">0</span>
+                    </h6>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="selecionarTodos()">
+                            <i class="fas fa-check-square me-1"></i> Todos
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="deselecionarTodos()">
+                            <i class="fas fa-square me-1"></i> Nenhum
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-light" onclick="exportarSelecionados()">
+                            <i class="fas fa-download me-1"></i>Exportar
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Barra de Status -->
+                    <div class="bg-light p-3 border-bottom">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <div class="stats-mini">
+                                    <div class="stats-number text-primary" id="total-visiveis">0</div>
+                                    <div class="stats-label">Visíveis</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stats-mini">
+                                    <div class="stats-number text-success" id="total-selecionados">0</div>
+                                    <div class="stats-label">Selecionados</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stats-mini">
+                                    <div class="stats-number text-info" id="total-com-email">0</div>
+                                    <div class="stats-label">Com E-mail</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stats-mini">
+                                    <div class="stats-number text-warning" id="total-com-telefone">0</div>
+                                    <div class="stats-label">Com Telefone</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading Indicator -->
+                    <div id="loading" class="text-center p-4" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <div class="mt-2">🔍 Aplicando filtros inteligentes...</div>
+                    </div>
+
+                    <!-- Lista de Destinatários -->
+                    <div id="lista-destinatarios" class="destinatarios-container">
+                        <div class="text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Use os filtros para encontrar destinatários</p>
+                            <small class="text-muted">💡 Dica: Use a busca rápida para encontrar rapidamente</small>
+                        </div>
+                    </div>
+
+                    <!-- Paginação -->
+                    <div class="p-3 border-top bg-light" id="paginacao-container" style="display: none;">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center gap-2">
+                                    <label class="form-label mb-0">Itens por página:</label>
+                                    <select class="form-select form-select-sm" style="width: auto;" onchange="alterarItensPorPagina(this.value)">
+                                        <option value="20">20</option>
+                                        <option value="50" selected>50</option>
+                                        <option value="100">100</option>
+                                        <option value="200">200</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <nav aria-label="Paginação de destinatários">
+                                    <ul class="pagination pagination-sm justify-content-end mb-0" id="paginacao-destinatarios">
+                                        <!-- Preenchido via JavaScript -->
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Estatísticas -->
+<div class="modal fade" id="modalEstatisticas" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Estatísticas dos Destinatários</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="conteudo-estatisticas">
+                <!-- Conteúdo carregado via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Variáveis globais para busca e paginação
+let timeoutId;
+let inquilinosSelecionados = [];
+let destinatariosCarregados = [];
+let paginaAtual = 1;
+let itensPorPagina = 50;
+let termoBusca = '';
+let filtroRapidoAtivo = '';
+
+// Carregar cidades ao inicializar
+document.addEventListener('DOMContentLoaded', function() {
+    carregarCidades();
+    aplicarFiltros();
+});
+
+// Função de busca de destinatários com debounce
+function buscarDestinatarios(termo) {
+    clearTimeout(timeoutId);
+    termoBusca = termo.toLowerCase();
+    
+    timeoutId = setTimeout(() => {
+        filtrarDestinatarios();
+    }, 300);
+}
+
+// Limpar busca
+function limparBusca() {
+    document.getElementById('busca-destinatarios').value = '';
+    termoBusca = '';
+    filtroRapidoAtivo = '';
+    filtrarDestinatarios();
+}
+
+// Filtros rápidos
+function filtroRapido(tipo) {
+    // Remove classe ativa de todos os botões
+    document.querySelectorAll('.btn-outline-primary, .btn-outline-success, .btn-outline-warning, .btn-outline-info').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    if (filtroRapidoAtivo === tipo) {
+        filtroRapidoAtivo = '';
+    } else {
+        filtroRapidoAtivo = tipo;
+        // Adiciona classe ativa ao botão clicado
+        event.target.classList.add('active');
+    }
+    
+    filtrarDestinatarios();
+}
+
+// Selecionar todos os visíveis
+function selecionarTodosVisiveis() {
+    const checkboxes = document.querySelectorAll('#lista-destinatarios input[type="checkbox"]:not([style*="display: none"])');
+    checkboxes.forEach(checkbox => {
+        if (!checkbox.checked) {
+            checkbox.checked = true;
+            const inquilinoId = checkbox.value;
+            if (!inquilinosSelecionados.includes(inquilinoId)) {
+                inquilinosSelecionados.push(inquilinoId);
+            }
+        }
+    });
+    atualizarContadores();
+}
+
+// Filtrar destinatários baseado na busca e filtros rápidos
+function filtrarDestinatarios() {
+    const destinatarios = document.querySelectorAll('.destinatario-item');
+    let visiveis = 0;
+    let comEmail = 0;
+    let comTelefone = 0;
+    
+    destinatarios.forEach(item => {
+        const nome = item.querySelector('.destinatario-nome')?.textContent.toLowerCase() || '';
+        const cpf = item.querySelector('.destinatario-cpf')?.textContent.toLowerCase() || '';
+        const email = item.querySelector('.destinatario-email')?.textContent.toLowerCase() || '';
+        const telefone = item.querySelector('.destinatario-telefone')?.textContent.toLowerCase() || '';
+        
+        let mostrar = true;
+        
+        // Filtro por termo de busca
+        if (termoBusca) {
+            mostrar = nome.includes(termoBusca) || 
+                     cpf.includes(termoBusca) || 
+                     email.includes(termoBusca) || 
+                     telefone.includes(termoBusca);
+        }
+        
+        // Filtros rápidos
+        if (mostrar && filtroRapidoAtivo) {
+            switch (filtroRapidoAtivo) {
+                case 'com-email':
+                    mostrar = email && email !== 'não informado';
+                    break;
+                case 'com-telefone':
+                    mostrar = telefone && telefone !== 'não informado';
+                    break;
+                case 'sem-contato':
+                    mostrar = (!email || email === 'não informado') && (!telefone || telefone === 'não informado');
+                    break;
+                case 'aniversariantes':
+                    // Implementar lógica de aniversariantes se necessário
+                    break;
+            }
+        }
+        
+        if (mostrar) {
+            item.style.display = 'block';
+            visiveis++;
+            if (email && email !== 'não informado') comEmail++;
+            if (telefone && telefone !== 'não informado') comTelefone++;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    // Atualizar contadores
+    document.getElementById('total-visiveis').textContent = visiveis;
+    document.getElementById('total-com-email').textContent = comEmail;
+    document.getElementById('total-com-telefone').textContent = comTelefone;
+    document.getElementById('total-destinatarios').textContent = destinatarios.length;
+    
+    // Mostrar/ocultar paginação
+    const paginacaoContainer = document.getElementById('paginacao-container');
+    if (visiveis > 0) {
+        paginacaoContainer.style.display = 'block';
+    } else {
+        paginacaoContainer.style.display = 'none';
+    }
+}
+
+// Alterar itens por página
+function alterarItensPorPagina(novosItens) {
+    itensPorPagina = parseInt(novosItens);
+    paginaAtual = 1;
+    aplicarFiltros();
+}
+
+// Exportar selecionados
+function exportarSelecionados() {
+    if (inquilinosSelecionados.length === 0) {
+        alert('Selecione pelo menos um destinatário para exportar.');
+        return;
+    }
+    
+    // Criar CSV dos selecionados
+    let csv = 'Nome,CPF,Email,Telefone,Cidade\n';
+    
+    inquilinosSelecionados.forEach(id => {
+        const item = document.querySelector(`input[value="${id}"]`).closest('.destinatario-item');
+        const nome = item.querySelector('.destinatario-nome')?.textContent || '';
+        const cpf = item.querySelector('.destinatario-cpf')?.textContent || '';
+        const email = item.querySelector('.destinatario-email')?.textContent || '';
+        const telefone = item.querySelector('.destinatario-telefone')?.textContent || '';
+        const cidade = item.querySelector('.destinatario-cidade')?.textContent || '';
+        
+        csv += `"${nome}","${cpf}","${email}","${telefone}","${cidade}"\n`;
+    });
+    
+    // Download do arquivo
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `destinatarios_selecionados_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+// Atualizar contadores
+function atualizarContadores() {
+    document.getElementById('total-selecionados').textContent = inquilinosSelecionados.length;
+    document.getElementById('contador-selecionados').textContent = `${inquilinosSelecionados.length} selecionados`;
+    
+    // Habilitar/desabilitar botão de envio
+    const btnEnviar = document.getElementById('btn-enviar');
+    const template = document.querySelector('select[name="template"]').value;
+    
+    if (inquilinosSelecionados.length > 0 && template) {
+        btnEnviar.disabled = false;
+    } else {
+        btnEnviar.disabled = true;
+    }
+}
+
+function carregarCidades() {
+    fetch('/notificacoes/api/cidades/')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.querySelector('select[name="cidade"]');
+            if (data && data.cidades && Array.isArray(data.cidades)) {
+                data.cidades.forEach(cidade => {
+                    const option = document.createElement('option');
+                    option.value = cidade;
+                    option.textContent = cidade;
+                    select.appendChild(option);
+                });
+            } else {
+                console.warn('Dados de cidades não encontrados ou formato inválido:', data);
+            }
+        })
+        .catch(error => console.error('Erro ao carregar cidades:', error));
+}
+
+function debounceSearch() {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(aplicarFiltros, 500);
+}
+
+function aplicarFiltros() {
+    const form = document.getElementById('filtros-form');
+    const formData = new FormData(form);
+    const params = new URLSearchParams(formData);
+    
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('lista-destinatarios').style.display = 'none';
+    
+    fetch(`/notificacoes/api/filtrar-destinatarios/?${params}`)
+        .then(response => response.json())
+        .then(data => {
+            exibirDestinatarios(data.inquilinos);
+            atualizarResumo(data);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('lista-destinatarios').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Erro ao filtrar destinatários:', error);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('lista-destinatarios').style.display = 'block';
+        });
+}
+
+function exibirDestinatarios(inquilinos) {
+    const container = document.getElementById('lista-destinatarios');
+    
+    if (inquilinos.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center py-4">Nenhum destinatário encontrado com os filtros aplicados</p>';
+        return;
+    }
+    
+    let html = '<div class="row">';
+    
+    inquilinos.forEach(inquilino => {
+        const isSelected = inquilinosSelecionados.includes(inquilino.id);
+        const statusBadge = inquilino.ativo ? '<span class="badge bg-success">Ativo</span>' : '<span class="badge bg-secondary">Inativo</span>';
+        const contratoBadge = inquilino.tem_contrato ? '<span class="badge bg-info">Com Contrato</span>' : '<span class="badge bg-warning">Sem Contrato</span>';
+        
+        html += `
+            <div class="col-md-6 mb-3">
+                <div class="card ${isSelected ? 'border-primary' : ''}">
+                    <div class="card-body">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="${inquilino.id}" 
+                                   id="inquilino_${inquilino.id}" ${isSelected ? 'checked' : ''} 
+                                   onchange="toggleInquilino(${inquilino.id})">
+                            <label class="form-check-label" for="inquilino_${inquilino.id}">
+                                <strong>${inquilino.nome}</strong>
+                            </label>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                <i class="fas fa-envelope"></i> ${inquilino.email || 'Sem email'}<br>
+                                <i class="fas fa-phone"></i> ${inquilino.telefone || 'Sem telefone'}<br>
+                                <i class="fas fa-map-marker-alt"></i> ${inquilino.cidade || 'Sem cidade'}
+                            </small>
+                        </div>
+                        <div class="mt-2">
+                            ${statusBadge} ${contratoBadge}
+                        </div>
+                        ${inquilino.tem_contrato ? `
+                            <div class="mt-2">
+                                <small class="text-info">
+                                    <i class="fas fa-home"></i> Contrato: ${inquilino.contrato_numero}<br>
+                                    <i class="fas fa-dollar-sign"></i> R$ ${inquilino.valor_aluguel?.toFixed(2) || '0,00'}<br>
+                                    <i class="fas fa-calendar"></i> Venc: Dia ${inquilino.dia_vencimento}
+                                </small>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function toggleInquilino(id) {
+    const index = inquilinosSelecionados.indexOf(id);
+    if (index > -1) {
+        inquilinosSelecionados.splice(index, 1);
+    } else {
+        inquilinosSelecionados.push(id);
+    }
+    atualizarContador();
+}
+
+function selecionarTodos() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][id^="inquilino_"]');
+    checkboxes.forEach(checkbox => {
+        if (!checkbox.checked) {
+            checkbox.checked = true;
+            const id = parseInt(checkbox.value);
+            if (!inquilinosSelecionados.includes(id)) {
+                inquilinosSelecionados.push(id);
+            }
+        }
+    });
+    atualizarContador();
+}
+
+function deselecionarTodos() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][id^="inquilino_"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    inquilinosSelecionados = [];
+    atualizarContador();
+}
+
+function atualizarContador() {
+    const contador = document.getElementById('contador-selecionados');
+    const btnEnviar = document.getElementById('btn-enviar');
+    
+    contador.textContent = `${inquilinosSelecionados.length} selecionados`;
+    btnEnviar.disabled = inquilinosSelecionados.length === 0;
+}
+
+function atualizarResumo(data) {
+    const resumo = document.getElementById('resumo-selecao');
+    const filtros = data.filtros_aplicados;
+    
+    let html = `<p><strong>Total encontrados:</strong> ${data.total}</p>`;
+    
+    const filtrosAtivos = [];
+    if (filtros.tipo !== 'todos') filtrosAtivos.push(`Tipo: ${filtros.tipo}`);
+    if (filtros.status !== 'todos') filtrosAtivos.push(`Status: ${filtros.status}`);
+    if (filtros.cidade) filtrosAtivos.push(`Cidade: ${filtros.cidade}`);
+    if (filtros.renda_min) filtrosAtivos.push(`Renda mín: R$ ${filtros.renda_min}`);
+    if (filtros.renda_max) filtrosAtivos.push(`Renda máx: R$ ${filtros.renda_max}`);
+    if (filtros.vencimento) filtrosAtivos.push(`Vencimento: Dia ${filtros.vencimento}`);
+    if (filtros.valor_min) filtrosAtivos.push(`Aluguel mín: R$ ${filtros.valor_min}`);
+    if (filtros.valor_max) filtrosAtivos.push(`Aluguel máx: R$ ${filtros.valor_max}`);
+    if (filtros.busca) filtrosAtivos.push(`Busca: "${filtros.busca}"`);
+    
+    if (filtrosAtivos.length > 0) {
+        html += '<hr><small class="text-muted">Filtros ativos:</small><ul class="small">';
+        filtrosAtivos.forEach(filtro => {
+            html += `<li>${filtro}</li>`;
+        });
+        html += '</ul>';
+    }
+    
+    resumo.innerHTML = html;
+}
+
+function limparFiltros() {
+    document.getElementById('filtros-form').reset();
+    aplicarFiltros();
+}
+
+function previewTemplate() {
+    const templateId = document.querySelector('select[name="template"]').value;
+    if (!templateId) {
+        document.getElementById('preview-container').style.display = 'none';
+        return;
+    }
+    
+    fetch(`/notificacoes/preview-template/${templateId}/`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('preview-content').innerHTML = `
+                <h6>${data.assunto}</h6>
+                <div class="mt-2">${data.corpo}</div>
+            `;
+            document.getElementById('preview-container').style.display = 'block';
+        })
+        .catch(error => console.error('Erro ao carregar preview:', error));
+}
+
+function mostrarEstatisticas() {
+    fetch('/notificacoes/api/estatisticas-destinatarios/')
+        .then(response => response.json())
+        .then(data => {
+            let html = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Resumo Geral</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Total de Inquilinos:</strong> ${data.total_inquilinos}</li>
+                            <li><strong>Inquilinos Ativos:</strong> ${data.inquilinos_ativos}</li>
+                            <li><strong>Com Contrato Ativo:</strong> ${data.inquilinos_com_contrato}</li>
+                            <li><strong>Sem E-mail:</strong> ${data.inquilinos_sem_email}</li>
+                            <li><strong>Sem Telefone:</strong> ${data.inquilinos_sem_telefone}</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Distribuição por Renda</h6>
+                        <ul class="list-unstyled">
+                            <li>Até R$ 2.000: ${data.renda_stats.ate_2000}</li>
+                            <li>R$ 2.000 - R$ 5.000: ${data.renda_stats['2000_5000']}</li>
+                            <li>R$ 5.000 - R$ 10.000: ${data.renda_stats['5000_10000']}</li>
+                            <li>Acima de R$ 10.000: ${data.renda_stats.acima_10000}</li>
+                            <li>Sem renda informada: ${data.renda_stats.sem_renda}</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Top 10 Cidades</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Cidade</th>
+                                        <th>Inquilinos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+            `;
+            
+            data.cidades_stats.forEach(cidade => {
+                html += `
+                    <tr>
+                        <td>${cidade.cidade || 'Não informado'}</td>
+                        <td>${cidade.total}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('conteudo-estatisticas').innerHTML = html;
+            new bootstrap.Modal(document.getElementById('modalEstatisticas')).show();
+        })
+        .catch(error => console.error('Erro ao carregar estatísticas:', error));
+}
+
+// Submissão do formulário
+document.getElementById('form-envio').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (inquilinosSelecionados.length === 0) {
+        alert('Selecione pelo menos um destinatário.');
+        return;
+    }
+    
+    const formData = new FormData(this);
+    
+    // Adicionar inquilinos selecionados
+    inquilinosSelecionados.forEach(id => {
+        formData.append('inquilinos', id);
+    });
+    
+    // Enviar formulário
+    fetch(this.action || window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            alert('Notificações enviadas com sucesso!');
+            window.location.href = '/notificacoes/whatsapp/';
+        } else {
+            alert('Erro ao enviar notificações.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao enviar notificações.');
+    });
+});
+</script>
+{% endblock %}
+
+        <!-- Campo de Busca Avançada -->
+        <div class="card modern-card mb-3">
+            <div class="card-header gradient-header">
+                <h6 class="mb-0"><i class="fas fa-search me-2"></i>Busca Avançada de Destinatários</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text bg-primary text-white">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" 
+                                   id="busca-destinatarios" 
+                                   class="form-control form-control-lg" 
+                                   placeholder="🔍 Digite nome, CPF, e-mail ou telefone do destinatário..."
+                                   onkeyup="buscarDestinatarios(this.value)">
+                            <button class="btn btn-outline-secondary" type="button" onclick="limparBusca()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted mt-1 d-block">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Busque por nome completo, CPF (com ou sem pontos), e-mail ou telefone
+                        </small>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-grid">
+                            <button type="button" class="btn btn-success-modern btn-lg" onclick="selecionarTodosVisiveis()">
+                                <i class="fas fa-check-double me-2"></i>Selecionar Visíveis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filtros Rápidos -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="filtroRapido('com-email')">
+                                <i class="fas fa-envelope me-1"></i>Com E-mail
+                            </button>
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="filtroRapido('com-telefone')">
+                                <i class="fas fa-phone me-1"></i>Com Telefone
+                            </button>
+                            <button type="button" class="btn btn-outline-warning btn-sm" onclick="filtroRapido('sem-contato')">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Sem Contato
+                            </button>
+                            <button type="button" class="btn btn-outline-info btn-sm" onclick="filtroRapido('aniversariantes')">
+                                <i class="fas fa-birthday-cake me-1"></i>Aniversariantes do Mês
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Destinatários Melhorada -->
+        <div class="card modern-card">
+            <div class="card-header gradient-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">
+                    <i class="fas fa-users me-2"></i>Lista de Destinatários
+                    <span class="badge badge-modern ms-2" id="total-destinatarios">0</span>
+                </h6>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="alternarVisualizacao()">
+                        <i class="fas fa-th-list me-1"></i>Alternar Visualização
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="exportarSelecionados()">
+                        <i class="fas fa-download me-1"></i>Exportar
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <!-- Barra de Status -->
+                <div class="bg-light p-3 border-bottom">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="stats-mini">
+                                <div class="stats-number text-primary" id="total-visiveis">0</div>
+                                <div class="stats-label">Visíveis</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-mini">
+                                <div class="stats-number text-success" id="total-selecionados">0</div>
+                                <div class="stats-label">Selecionados</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-mini">
+                                <div class="stats-number text-info" id="total-com-email">0</div>
+                                <div class="stats-label">Com E-mail</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-mini">
+                                <div class="stats-number text-warning" id="total-com-telefone">0</div>
+                                <div class="stats-label">Com Telefone</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="loading-destinatarios" class="text-center p-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <div class="mt-2">Carregando destinatários...</div>
+                </div>
+
+                <!-- Lista de Destinatários -->
+                <div id="lista-destinatarios" class="destinatarios-container">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+
+                <!-- Paginação -->
+                <div class="p-3 border-top bg-light">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="form-label mb-0">Itens por página:</label>
+                                <select class="form-select form-select-sm" style="width: auto;" onchange="alterarItensPorPagina(this.value)">
+                                    <option value="20">20</option>
+                                    <option value="50" selected>50</option>
+                                    <option value="100">100</option>
+                                    <option value="200">200</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <nav aria-label="Paginação de destinatários">
+                                <ul class="pagination pagination-sm justify-content-end mb-0" id="paginacao-destinatarios">
+                                    <!-- Preenchido via JavaScript -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>

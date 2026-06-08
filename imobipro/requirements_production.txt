@@ -1,0 +1,370 @@
+# Dependências de Produção - Sistema Imobiliário
+# Django e extensões
+Django==4.2.7
+django-cors-headers==4.3.1
+django-extensions==3.2.3
+django-crispy-forms==2.1
+crispy-bootstrap5==0.7
+
+# Banco de dados
+psycopg2-binary==2.9.9
+
+# Servidor WSGI
+gunicorn==21.2.0
+
+# Manipulação de dados
+pandas==2.1.3
+numpy==1.25.2
+openpyxl==3.1.2
+
+# HTTP e APIs
+requests==2.31.0
+httpx==0.25.2
+
+# Processamento de arquivos
+Pillow==10.1.0
+reportlab==4.0.7
+PyPDF2==3.0.1
+
+# Data e hora
+pytz==2023.3
+python-dateutil==2.8.2
+
+# Validação e formulários
+django-phonenumber-field==7.2.0
+phonumbers==8.13.25
+
+# Segurança
+cryptography==41.0.7
+django-ratelimit==4.1.0
+
+# Monitoramento e logs
+sentry-sdk==1.38.0
+django-debug-toolbar==4.2.0
+
+# Utilitários
+python-decouple==3.8
+django-environ==0.11.2
+celery==5.3.4
+redis==5.0.1
+
+# Email
+django-ses==3.5.0
+
+# Backup e storage
+django-storages==1.14.2
+boto3==1.34.0
+
+# Desenvolvimento (remover em produção se necessário)
+ipython==8.17.2
+django-shell-plus==1.1.7
+
+# Formatação e linting
+black==23.11.0
+flake8==6.1.0
+isort==5.12.0
+
+# Testes
+pytest==7.4.3
+pytest-django==4.7.0
+factory-boy==3.3.0
+
+# Documentação
+sphinx==7.2.6
+sphinx-rtd-theme==1.3.0
+
+# Integração WhatsApp
+qrcode==7.4.2
+websockets==12.0
+
+# Processamento de imagens
+opencv-python-headless==4.8.1.78
+
+# Geolocalização
+geopy==2.4.0
+
+# Exportação de dados
+django-import-export==3.3.1
+tablib==3.5.0
+
+# Cache
+django-redis==5.4.0
+
+# Compressão
+django-compressor==4.4
+
+# Internacionalização
+django-rosetta==0.9.9
+
+# Notificações push
+pyfcm==1.5.4
+
+# Processamento assíncrono
+django-q==1.3.9
+
+# Métricas e analytics
+django-analytical==3.1.0
+
+# SEO
+django-meta==2.2.0
+
+# Sitemap
+django-sitemap==2.3
+
+# Social auth (se necessário)
+django-allauth==0.57.0
+
+# API REST (se necessário)
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.0
+
+# Swagger/OpenAPI
+drf-spectacular==0.26.5
+
+# Filtros
+django-filter==23.4
+
+# Paginação
+django-pure-pagination==0.3.0
+
+# Widgets
+django-widget-tweaks==1.5.0
+
+# Timezone
+django-timezone-field==6.0.1
+
+# Slugs
+django-autoslug==1.9.9
+
+# Modelos
+django-model-utils==4.3.1
+
+# Campos extras
+django-jsonfield==3.1.0
+
+# Validação de CPF/CNPJ
+validate-docbr==1.10.0
+
+# Formatação de moeda
+babel==2.13.1
+
+# Processamento de texto
+unidecode==1.3.7
+
+# Configuração de ambiente
+python-dotenv==1.0.0
+
+# Utilitários de sistema
+psutil==5.9.6
+
+# Logging estruturado
+structlog==23.2.0
+
+# Monitoramento de performance
+django-silk==5.0.4
+
+# Health checks
+django-health-check==3.17.0
+
+# Backup automático
+django-dbbackup==4.0.2
+
+# Compressão de assets
+django-pipeline==2.1.0
+
+# Otimização de imagens
+django-imagekit==5.0.0
+
+# Controle de versão de modelos
+django-reversion==5.0.8
+
+# Auditoria
+django-simple-history==3.4.0
+
+# Permissões avançadas
+django-guardian==2.4.0
+
+# Configurações dinâmicas
+django-constance==3.1.0
+
+# Notificações em tempo real
+channels==4.0.0
+channels-redis==4.1.0
+
+# WebSockets
+daphne==4.0.0
+
+# Processamento de filas
+rq==1.15.1
+django-rq==2.8.1
+
+# Métricas de sistema
+prometheus-client==0.19.0
+
+# Integração com serviços externos
+twilio==8.10.3
+sendgrid==6.10.0
+
+# Processamento de documentos
+python-docx==1.1.0
+
+# Análise de dados
+scipy==1.11.4
+matplotlib==3.8.2
+seaborn==0.13.0
+
+# Machine Learning (se necessário)
+scikit-learn==1.3.2
+
+# Processamento de JSON
+orjson==3.9.10
+
+# Validação de schemas
+jsonschema==4.20.0
+
+# Processamento de XML
+lxml==4.9.3
+
+# Compressão
+zstandard==0.22.0
+
+# Utilitários de rede
+netaddr==0.9.0
+
+# Processamento de URLs
+furl==2.1.3
+
+# Validação de emails
+email-validator==2.1.0
+
+# Processamento de markdown
+markdown==3.5.1
+
+# Syntax highlighting
+pygments==2.17.2
+
+# Processamento de CSV
+csv-diff==1.0
+
+# Utilitários de string
+inflection==0.5.1
+
+# Processamento de cores
+colour==0.1.5
+
+# Geração de códigos
+secrets==1.0.0
+
+# Processamento de arquivos temporários
+tempfile==1.0.0
+
+# Utilitários de sistema operacional
+os-sys==2.1.4
+
+# Processamento de argumentos
+argparse==1.4.0
+
+# Logging avançado
+loguru==0.7.2
+
+# Configuração de aplicação
+click==8.1.7
+
+# Processamento de templates
+jinja2==3.1.2
+
+# Serialização
+pickle-mixin==1.0.2
+
+# Utilitários de data
+arrow==1.3.0
+
+# Processamento de timezone
+zoneinfo==0.2.1
+
+# Validação de tipos
+typeguard==4.1.5
+
+# Decoradores
+functools32==3.2.3
+
+# Processamento assíncrono
+asyncio==3.4.3
+
+# Utilitários de coleções
+collections-extended==2.0.2
+
+# Processamento de iteradores
+itertools==1.0.0
+
+# Utilitários matemáticos
+math==1.0.0
+
+# Processamento de expressões regulares
+re==2.2.1
+
+# Utilitários de sistema de arquivos
+shutil==1.0.0
+
+# Processamento de caminhos
+pathlib==1.0.1
+
+# Utilitários de threading
+threading==1.0.0
+
+# Processamento de multiprocessing
+multiprocessing==1.0.0
+
+# Utilitários de subprocess
+subprocess==1.0.0
+
+# Processamento de sinais
+signal==1.0.0
+
+# Utilitários de socket
+socket==1.0.0
+
+# Processamento de SSL
+ssl==1.16
+
+# Utilitários de hash
+hashlib==1.0.0
+
+# Processamento de base64
+base64==1.0.0
+
+# Utilitários de UUID
+uuid==1.30
+
+# Processamento de random
+random==1.0.0
+
+# Utilitários de time
+time==1.0.0
+
+# Processamento de calendar
+calendar==1.0.0
+
+# Utilitários de locale
+locale==1.0.0
+
+# Processamento de gettext
+gettext==1.0.0
+
+# Utilitários de warnings
+warnings==1.0.0
+
+# Processamento de traceback
+traceback==1.0.0
+
+# Utilitários de inspect
+inspect==1.0.0
+
+# Processamento de gc
+gc==1.0.0
+
+# Utilitários de sys
+sys==1.0.0
+
+# Processamento de builtins
+builtins==1.0.0

@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - ImobilPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-calendar-plus me-2"></i>
+                        {{ title }}
+                    </h4>
+                    <a href="{% url 'documentos:listar_vistorias' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-list me-1"></i>
+                        Ver Vistorias
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.imovel.id_for_label }}" class="form-label">
+                                {{ form.imovel.label }}
+                                <span class="text-danger">*</span>
+                            </label>
+                            {{ form.imovel }}
+                            {% if form.imovel.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.imovel.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.contrato.id_for_label }}" class="form-label">
+                                {{ form.contrato.label }}
+                            </label>
+                            {{ form.contrato }}
+                            {% if form.contrato.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.contrato.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                Opcional - Selecione apenas se a vistoria estiver relacionada a um contrato específico
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.tipo.id_for_label }}" class="form-label">
+                                {{ form.tipo.label }}
+                                <span class="text-danger">*</span>
+                            </label>
+                            {{ form.tipo }}
+                            {% if form.tipo.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.tipo.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="{{ form.data_agendamento.id_for_label }}" class="form-label">
+                                {{ form.data_agendamento.label }}
+                                <span class="text-danger">*</span>
+                            </label>
+                            {{ form.data_agendamento }}
+                            {% if form.data_agendamento.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.data_agendamento.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label for="{{ form.responsavel.id_for_label }}" class="form-label">
+                                {{ form.responsavel.label }}
+                                <span class="text-danger">*</span>
+                            </label>
+                            {{ form.responsavel }}
+                            {% if form.responsavel.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.responsavel.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label for="{{ form.observacoes.id_for_label }}" class="form-label">
+                                {{ form.observacoes.label }}
+                            </label>
+                            {{ form.observacoes }}
+                            {% if form.observacoes.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.observacoes.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="col-12">
+                                <div class="alert alert-danger">
+                                    {% for error in form.non_field_errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="col-12">
+                            <hr>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>
+                                    Agendar Vistoria
+                                </button>
+                                <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-1"></i>
+                                    Cancelar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Script para filtrar contratos baseado no imóvel selecionado
+document.addEventListener('DOMContentLoaded', function() {
+    const imovelSelect = document.getElementById('{{ form.imovel.id_for_label }}');
+    const contratoSelect = document.getElementById('{{ form.contrato.id_for_label }}');
+    
+    if (imovelSelect && contratoSelect) {
+        const originalContratos = Array.from(contratoSelect.options);
+        
+        imovelSelect.addEventListener('change', function() {
+            const imovelId = this.value;
+            
+            // Limpar opções do contrato
+            contratoSelect.innerHTML = '<option value="">---------</option>';
+            
+            if (imovelId) {
+                // Filtrar contratos do imóvel selecionado
+                // Nota: Esta funcionalidade seria melhor implementada com AJAX
+                // Por enquanto, mantemos todos os contratos disponíveis
+                originalContratos.forEach(option => {
+                    if (option.value !== '') {
+                        contratoSelect.appendChild(option.cloneNode(true));
+                    }
+                });
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

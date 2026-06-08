@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Configurar Dashboard - Sistema Imobiliário{% endblock %}
+
+{% block extra_css %}
+<style>
+    .config-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        padding: 30px;
+        margin-bottom: 20px;
+    }
+    
+    .config-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .form-check-input:checked {
+        background-color: #667eea;
+        border-color: #667eea;
+    }
+    
+    .btn-save {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        color: white;
+        font-weight: bold;
+    }
+    
+    .btn-cancel {
+        background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        color: white;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <header class="config-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2">
+                    <i class="fas fa-cog me-3"></i>
+                    Configurar Dashboard
+                </h1>
+                <p class="mb-0">Personalize a exibição dos seus indicadores</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'indicadores:dashboard' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Voltar ao Dashboard
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Formulário de Configuração -->
+    <div class="config-card">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-4">
+                        <i class="fas fa-eye me-2 text-primary"></i>
+                        Indicadores Visíveis
+                    </h5>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="mostrar_inadimplencia" 
+                               id="mostrar_inadimplencia" 
+                               {% if dashboard.configuracao.mostrar_inadimplencia %}checked{% endif %}>
+                        <label class="form-check-label" for="mostrar_inadimplencia">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            Mostrar Indicadores de Inadimplência
+                        </label>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="mostrar_imobiliario" 
+                               id="mostrar_imobiliario"
+                               {% if dashboard.configuracao.mostrar_imobiliario %}checked{% endif %}>
+                        <label class="form-check-label" for="mostrar_imobiliario">
+                            <i class="fas fa-building text-info me-2"></i>
+                            Mostrar Indicadores Imobiliários
+                        </label>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="mostrar_financeiro" 
+                               id="mostrar_financeiro"
+                               {% if dashboard.configuracao.mostrar_financeiro %}checked{% endif %}>
+                        <label class="form-check-label" for="mostrar_financeiro">
+                            <i class="fas fa-dollar-sign text-success me-2"></i>
+                            Mostrar Indicadores Financeiros
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h5 class="mb-4">
+                        <i class="fas fa-sliders-h me-2 text-primary"></i>
+                        Configurações Gerais
+                    </h5>
+                    
+                    <div class="mb-3">
+                        <label for="periodo_historico" class="form-label">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            Período Histórico (meses)
+                        </label>
+                        <select class="form-select" name="periodo_historico" id="periodo_historico">
+                            <option value="3" {% if dashboard.configuracao.periodo_historico == 3 %}selected{% endif %}>3 meses</option>
+                            <option value="6" {% if dashboard.configuracao.periodo_historico == 6 %}selected{% endif %}>6 meses</option>
+                            <option value="12" {% if dashboard.configuracao.periodo_historico == 12 %}selected{% endif %}>12 meses</option>
+                            <option value="24" {% if dashboard.configuracao.periodo_historico == 24 %}selected{% endif %}>24 meses</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="atualizar_automatico" 
+                               id="atualizar_automatico"
+                               {% if dashboard.configuracao.atualizar_automatico %}checked{% endif %}>
+                        <label class="form-check-label" for="atualizar_automatico">
+                            <i class="fas fa-sync-alt text-primary me-2"></i>
+                            Atualização Automática (5 minutos)
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <hr class="my-4">
+            
+            <div class="text-end">
+                <a href="{% url 'indicadores:dashboard' %}" class="btn btn-cancel me-3">
+                    <i class="fas fa-times me-2"></i>
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-save">
+                    <i class="fas fa-save me-2"></i>
+                    Salvar Configurações
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

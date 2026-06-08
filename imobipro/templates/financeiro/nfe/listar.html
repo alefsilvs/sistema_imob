@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}NFe Emitidas - ImobiPro{% endblock %}
+
+{% block extra_css %}
+<style>
+.nfe-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.filter-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+}
+
+.nfe-table-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.table-modern {
+    margin-bottom: 0;
+}
+
+.table-modern thead {
+    background: linear-gradient(45deg, #4e73df, #224abe);
+    color: white;
+}
+
+.table-modern th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+}
+
+.table-modern td {
+    border: none;
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.table-modern tbody tr:hover {
+    background-color: #f8f9fc;
+    transform: scale(1.01);
+    transition: all 0.2s ease;
+}
+
+.nfe-numero {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.chave-acesso {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    background: #f8f9fc;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    border: 1px solid #e3e6f0;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.valor-nfe {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #28a745;
+}
+
+.btn-action {
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    margin: 0 0.1rem;
+    transition: all 0.2s ease;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.stats-row {
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    border: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.stat-card h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 15px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Moderno -->
+    <div class="nfe-header">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="h2 mb-2">
+                    <i class="bi bi-receipt me-3"></i>
+                    Notas Fiscais Eletrônicas
+                </h1>
+                <p class="mb-0 opacity-90">Gerencie e acompanhe todas as NFe emitidas pelo sistema</p>
+            </div>
+            <div class="col-lg-4 text-end">
+                <a href="{% url 'financeiro:emitir_nfe' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-plus-circle me-2"></i> Emitir NFe
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="stats-row row">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <h3>{{ nfes.count }}</h3>
+                <p class="mb-0">Total de NFe</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(45deg, #36d1dc 0%, #5b86e5 100%);">
+                <h3>{{ nfes_mes }}</h3>
+                <p class="mb-0">Este Mês</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);">
+                <h3>R$ {{ valor_total|floatformat:0 }}</h3>
+                <p class="mb-0">Valor Total</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);">
+                <h3>{{ nfes_pendentes }}</h3>
+                <p class="mb-0">Processando</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filter-card card mb-4">
+        <div class="card-header bg-transparent border-0">
+            <h5 class="mb-0 text-primary">
+                <i class="bi bi-funnel me-2"></i>Filtros de Pesquisa
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Data Início</label>
+                    <input type="date" name="data_inicio" class="form-control" value="{{ request.GET.data_inicio }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Data Fim</label>
+                    <input type="date" name="data_fim" class="form-control" value="{{ request.GET.data_fim }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">Todos os Status</option>
+                        <option value="AUTORIZADA" {% if request.GET.status == 'AUTORIZADA' %}selected{% endif %}>Autorizada</option>
+                        <option value="CANCELADA" {% if request.GET.status == 'CANCELADA' %}selected{% endif %}>Cancelada</option>
+                        <option value="PROCESSANDO" {% if request.GET.status == 'PROCESSANDO' %}selected{% endif %}>Processando</option>
+                        <option value="REJEITADA" {% if request.GET.status == 'REJEITADA' %}selected{% endif %}>Rejeitada</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-search me-1"></i> Filtrar
+                    </button>
+                    <a href="{% url 'financeiro:listar_nfe' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Limpar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de NFe -->
+    <div class="nfe-table-card card">
+        <div class="card-header bg-gradient-primary text-white">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">
+                        <i class="bi bi-receipt me-2"></i>
+                        Notas Fiscais Emitidas
+                    </h5>
+                </div>
+                <div class="col-auto">
+                    <span class="badge bg-light text-primary fs-6">{{ nfes.count }} NFe(s)</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if nfes %}
+                <div class="table-responsive">
+                    <table class="table table-modern">
+                        <thead>
+                            <tr>
+                                <th><i class="bi bi-hash me-1"></i>Número</th>
+                                <th><i class="bi bi-collection me-1"></i>Série</th>
+                                <th><i class="bi bi-key me-1"></i>Chave de Acesso</th>
+                                <th><i class="bi bi-person me-1"></i>Cliente</th>
+                                <th><i class="bi bi-calendar me-1"></i>Emissão</th>
+                                <th><i class="bi bi-currency-dollar me-1"></i>Valor</th>
+                                <th><i class="bi bi-check-circle me-1"></i>Status</th>
+                                <th><i class="bi bi-gear me-1"></i>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for nfe in nfes %}
+                            <tr>
+                                <td>
+                                    <span class="nfe-numero">{{ nfe.numero }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ nfe.serie }}</span>
+                                </td>
+                                <td>
+                                    {% if nfe.chave_acesso %}
+                                        <div class="chave-acesso">
+                                            {{ nfe.chave_acesso|truncatechars:20 }}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong class="text-dark">{{ nfe.cliente_nome }}</strong><br>
+                                        <small class="text-muted">
+                                            <i class="bi bi-card-text me-1"></i>
+                                            {{ nfe.cliente_documento|default:"Não informado" }}
+                                        </small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>{{ nfe.data_emissao|date:"d/m/Y" }}</strong><br>
+                                        <small class="text-muted">{{ nfe.data_emissao|date:"H:i" }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="valor-nfe">R$ {{ nfe.valor_total|floatformat:2 }}</span>
+                                </td>
+                                <td>
+                                    {% if nfe.status == 'AUTORIZADA' %}
+                                        <span class="status-badge bg-success text-white">
+                                            <i class="bi bi-check-circle me-1"></i>Autorizada
+                                        </span>
+                                    {% elif nfe.status == 'CANCELADA' %}
+                                        <span class="status-badge bg-danger text-white">
+                                            <i class="bi bi-x-circle me-1"></i>Cancelada
+                                        </span>
+                                    {% elif nfe.status == 'PROCESSANDO' %}
+                                        <span class="status-badge bg-warning text-dark">
+                                            <i class="bi bi-clock me-1"></i>Processando
+                                        </span>
+                                    {% elif nfe.status == 'REJEITADA' %}
+                                        <span class="status-badge bg-danger text-white">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>Rejeitada
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge bg-secondary text-white">
+                                            <i class="bi bi-question-circle me-1"></i>{{ nfe.status }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'financeiro:detalhes_nfe' nfe.id %}" 
+                                           class="btn btn-sm btn-outline-primary btn-action" 
+                                           title="Ver Detalhes">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        {% if nfe.arquivo_pdf %}
+                                        <a href="{% url 'financeiro:download_nfe_pdf' nfe.id %}" 
+                                           class="btn btn-sm btn-outline-success btn-action" 
+                                           title="Download PDF" 
+                                           target="_blank">
+                                            <i class="bi bi-file-pdf"></i>
+                                        </a>
+                                        {% endif %}
+                                        {% if nfe.arquivo_xml %}
+                                        <a href="{% url 'financeiro:download_nfe_xml' nfe.id %}" 
+                                           class="btn btn-sm btn-outline-info btn-action" 
+                                           title="Download XML" 
+                                           target="_blank">
+                                            <i class="bi bi-file-code"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação -->
+                {% if is_paginated %}
+                <nav aria-label="Navegação de páginas">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if request.GET.data_inicio %}&data_inicio={{ request.GET.data_inicio }}{% endif %}{% if request.GET.data_fim %}&data_fim={{ request.GET.data_fim }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                    Primeira
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.data_inicio %}&data_inicio={{ request.GET.data_inicio }}{% endif %}{% if request.GET.data_fim %}&data_fim={{ request.GET.data_fim }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                    Anterior
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.data_inicio %}&data_inicio={{ request.GET.data_inicio }}{% endif %}{% if request.GET.data_fim %}&data_fim={{ request.GET.data_fim }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                    Próxima
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.data_inicio %}&data_inicio={{ request.GET.data_inicio }}{% endif %}{% if request.GET.data_fim %}&data_fim={{ request.GET.data_fim }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                    Última
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-receipt text-muted" style="font-size: 4rem;"></i>
+                    <h5 class="text-muted mt-3">Nenhuma NFe encontrada</h5>
+                    <p class="text-muted">Não há notas fiscais emitidas com os filtros selecionados.</p>
+                    <a href="{% url 'financeiro:emitir_nfe' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Emitir Primeira NFe
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Filtros automáticos
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit no change dos selects
+    const statusSelect = document.querySelector('select[name="status"]');
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+            this.form.submit();
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,329 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pagamento Aprovado - Sistema Imobiliário{% endblock %}
+
+{% block extra_css %}
+<style>
+    .success-container {
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+    }
+    
+    .success-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+        text-align: center;
+    }
+    
+    .success-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 40px 30px;
+    }
+    
+    .success-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .success-icon i {
+        font-size: 2.5rem;
+    }
+    
+    .success-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    
+    .success-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .success-body {
+        padding: 40px 30px;
+    }
+    
+    .payment-details {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+    
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .detail-row:last-child {
+        border-bottom: none;
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #28a745;
+    }
+    
+    .detail-label {
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .detail-value {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .transaction-info {
+        background: #e8f5e8;
+        border: 1px solid #c3e6c3;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .transaction-id {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        color: #495057;
+        background: white;
+        padding: 8px 12px;
+        border-radius: 5px;
+        margin-top: 10px;
+        word-break: break-all;
+    }
+    
+    .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 30px;
+    }
+    
+    .btn-action {
+        padding: 15px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        border: none;
+    }
+    
+    .btn-secondary {
+        background: #f8f9fa;
+        color: #495057;
+        border: 2px solid #e9ecef;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .btn-primary:hover {
+        color: white;
+    }
+    
+    .payment-method-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #007bff;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .payment-method-badge.pix {
+        background: #32bcad;
+    }
+    
+    .payment-method-badge.cartao {
+        background: #6c757d;
+    }
+    
+    .security-note {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 20px;
+        font-size: 0.9rem;
+        color: #856404;
+    }
+    
+    @media (max-width: 768px) {
+        .success-container {
+            margin: 20px auto;
+            padding: 10px;
+        }
+        
+        .success-header {
+            padding: 30px 20px;
+        }
+        
+        .success-body {
+            padding: 30px 20px;
+        }
+        
+        .action-buttons {
+            grid-template-columns: 1fr;
+        }
+        
+        .success-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-container">
+    <div class="success-card">
+        <!-- Cabeçalho de Sucesso -->
+        <div class="success-header">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h1 class="success-title">Pagamento Aprovado!</h1>
+            <p class="success-subtitle">Sua transação foi processada com sucesso</p>
+        </div>
+        
+        <!-- Corpo com Detalhes -->
+        <div class="success-body">
+            <!-- Detalhes do Pagamento -->
+            <div class="payment-details">
+                <h4 class="mb-3"><i class="fas fa-receipt"></i> Detalhes do Pagamento</h4>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Imóvel:</span>
+                    <span class="detail-value">{{ imovel.endereco_completo|truncatechars:30 }}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Inquilino:</span>
+                    <span class="detail-value">{{ inquilino.nome }}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Referência:</span>
+                    <span class="detail-value">{{ pagamento.parcela.mes_referencia|date:"m/Y" }}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Método:</span>
+                    <span class="detail-value">
+                        {% if pagamento.metodo_pagamento == 'PIX' %}
+                            <span class="payment-method-badge pix">
+                                <i class="fab fa-pix"></i> PIX
+                            </span>
+                        {% elif pagamento.metodo_pagamento == 'CARTAO_CREDITO' %}
+                            <span class="payment-method-badge cartao">
+                                <i class="fas fa-credit-card"></i> 
+                                {{ pagamento.gateway_response.bandeira|default:"Cartão" }}
+                                {% if pagamento.gateway_response.parcelas > 1 %}
+                                    ({{ pagamento.gateway_response.parcelas }}x)
+                                {% endif %}
+                            </span>
+                        {% else %}
+                            <span class="payment-method-badge">
+                                {{ pagamento.get_metodo_pagamento_display }}
+                            </span>
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Data do Pagamento:</span>
+                    <span class="detail-value">{{ pagamento.data_pagamento|date:"d/m/Y H:i" }}</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">Valor Total:</span>
+                    <span class="detail-value">R$ {{ pagamento.valor_pago|floatformat:2 }}</span>
+                </div>
+            </div>
+            
+            <!-- Informações da Transação -->
+            {% if pagamento.transaction_id %}
+            <div class="transaction-info">
+                <h6><i class="fas fa-hashtag"></i> ID da Transação</h6>
+                <p class="mb-2">Guarde este número para suas referências:</p>
+                <div class="transaction-id">{{ pagamento.transaction_id }}</div>
+            </div>
+            {% endif %}
+            
+            <!-- Botões de Ação -->
+            <div class="action-buttons">
+                <a href="{% url 'core:dashboard' %}" class="btn-action btn-primary">
+                    <i class="fas fa-home"></i>
+                    Voltar ao Dashboard
+                </a>
+                <a href="javascript:window.print()" class="btn-action btn-secondary">
+                    <i class="fas fa-print"></i>
+                    Imprimir Comprovante
+                </a>
+            </div>
+            
+            <!-- Nota de Segurança -->
+            <div class="security-note">
+                <i class="fas fa-info-circle"></i>
+                <strong>Importante:</strong> Guarde este comprovante. Um e-mail de confirmação será enviado para {{ inquilino.email|default:"seu e-mail" }}.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-redirect após 30 segundos (opcional)
+setTimeout(function() {
+    if (confirm('Deseja voltar ao dashboard automaticamente?')) {
+        window.location.href = "{% url 'core:dashboard' %}";
+    }
+}, 30000);
+
+// Função para copiar ID da transação
+function copiarTransactionId() {
+    const transactionId = document.querySelector('.transaction-id').textContent;
+    navigator.clipboard.writeText(transactionId).then(function() {
+        alert('ID da transação copiado!');
+    });
+}
+
+// Adicionar evento de clique no ID da transação
+document.querySelector('.transaction-id')?.addEventListener('click', copiarTransactionId);
+</script>
+{% endblock %}

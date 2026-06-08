@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sangrias - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between mb-4">
+        <div class="mb-3 mb-sm-0">
+            <h1 class="h3 mb-0 text-gray-800">Sangrias</h1>
+            <p class="mb-0 text-muted">Gerencie as saídas e despesas do sistema</p>
+        </div>
+        <a href="{% url 'financeiro:cadastrar_sangria' %}" class="btn btn-primary mobile-full-width">
+            <i class="bi bi-plus-circle"></i> <span class="d-none d-sm-inline">Nova </span>Sangria
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-12 col-md-4 col-lg-3">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" name="search" class="form-control" value="{{ request.GET.search }}" placeholder="Descrição ou observações...">
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <label class="form-label">Categoria</label>
+                    <select name="categoria" class="form-select">
+                        <option value="">Todas</option>
+                        {% for value, label in categoria_choices %}
+                            <option value="{{ value }}" {% if request.GET.categoria == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">Todos</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                    <label class="form-label">Forma de Pagamento</label>
+                    <select name="forma_pagamento" class="form-select">
+                        <option value="">Todas</option>
+                        {% for value, label in forma_pagamento_choices %}
+                            <option value="{{ value }}" {% if request.GET.forma_pagamento == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-md-6 col-lg-2 d-flex align-items-end">
+                    <div class="d-flex w-100 gap-2">
+                        <button type="submit" class="btn btn-outline-primary flex-fill">
+                            <i class="bi bi-search"></i> <span class="d-none d-sm-inline">Filtrar</span>
+                        </button>
+                        <a href="{% url 'financeiro:listar_sangrias' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resumo -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-left-primary">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total de Sangrias</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_sangrias }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-cash-stack fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-success">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Valor Total</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">R$ {{ valor_total|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-currency-dollar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-warning">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pendentes</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pendentes }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-info">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Pagas</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pagas }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Sangrias -->
+    <div class="card">
+        <div class="card-body">
+            {% if page_obj %}
+                <!-- Tabela Desktop -->
+                <div class="table-responsive d-none d-lg-block">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data Vencimento</th>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Forma Pagamento</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sangria in page_obj %}
+                                <tr>
+                                    <td>{{ sangria.data_vencimento|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <strong>{{ sangria.descricao }}</strong>
+                                        {% if sangria.imovel %}
+                                            <br><small class="text-muted">{{ sangria.imovel }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ sangria.get_categoria_display }}</span>
+                                    </td>
+                                    <td>
+                                        <strong>R$ {{ sangria.valor|floatformat:2 }}</strong>
+                                    </td>
+                                    <td>
+                                        {% if sangria.status == 'pendente' %}
+                                            <span class="badge bg-warning">{{ sangria.get_status_display }}</span>
+                                        {% elif sangria.status == 'pago' %}
+                                            <span class="badge bg-success">{{ sangria.get_status_display }}</span>
+                                        {% elif sangria.status == 'cancelado' %}
+                                            <span class="badge bg-danger">{{ sangria.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ sangria.get_forma_pagamento_display }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'financeiro:detalhes_sangria' sangria.id %}" class="btn btn-sm btn-outline-info" title="Detalhes">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            {% if sangria.status == 'pendente' %}
+                                                <a href="{% url 'financeiro:editar_sangria' sangria.id %}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <a href="{% url 'financeiro:marcar_sangria_paga' sangria.id %}" class="btn btn-sm btn-outline-success" title="Marcar como Paga">
+                                                    <i class="bi bi-check"></i>
+                                                </a>
+                                                <a href="{% url 'financeiro:cancelar_sangria' sangria.id %}" class="btn btn-sm btn-outline-danger" title="Cancelar">
+                                                    <i class="bi bi-x"></i>
+                                                </a>
+                                            {% endif %}
+                                            <a href="{% url 'financeiro:excluir_sangria' sangria.id %}" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Cards Mobile -->
+                <div class="d-lg-none">
+                    {% for sangria in page_obj %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="card-title mb-0">{{ sangria.descricao }}</h6>
+                                    {% if sangria.status == 'pendente' %}
+                                        <span class="badge bg-warning">{{ sangria.get_status_display }}</span>
+                                    {% elif sangria.status == 'pago' %}
+                                        <span class="badge bg-success">{{ sangria.get_status_display }}</span>
+                                    {% elif sangria.status == 'cancelado' %}
+                                        <span class="badge bg-danger">{{ sangria.get_status_display }}</span>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if sangria.imovel %}
+                                    <p class="text-muted small mb-2">{{ sangria.imovel }}</p>
+                                {% endif %}
+                                
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Vencimento</small>
+                                        <strong>{{ sangria.data_vencimento|date:"d/m/Y" }}</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Valor</small>
+                                        <strong class="text-primary">R$ {{ sangria.valor|floatformat:2 }}</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Categoria</small>
+                                        <span class="badge bg-secondary">{{ sangria.get_categoria_display }}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Pagamento</small>
+                                        {{ sangria.get_forma_pagamento_display }}
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <a href="{% url 'financeiro:detalhes_sangria' sangria.id %}" class="btn btn-sm btn-outline-info">
+                                        <i class="bi bi-eye"></i> Detalhes
+                                    </a>
+                                    {% if sangria.status == 'pendente' %}
+                                        <a href="{% url 'financeiro:editar_sangria' sangria.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i> Editar
+                                        </a>
+                                        <a href="{% url 'financeiro:marcar_sangria_paga' sangria.id %}" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-check"></i> Pagar
+                                        </a>
+                                        <a href="{% url 'financeiro:cancelar_sangria' sangria.id %}" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-x"></i> Cancelar
+                                        </a>
+                                    {% endif %}
+                                    <a href="{% url 'financeiro:excluir_sangria' sangria.id %}" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i> Excluir
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Paginação -->
+                {% if is_paginated %}
+                    <nav aria-label="Navegação de páginas">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.forma_pagamento %}&forma_pagamento={{ request.GET.forma_pagamento }}{% endif %}">Primeira</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.forma_pagamento %}&forma_pagamento={{ request.GET.forma_pagamento }}{% endif %}">Anterior</a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                            </li>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.forma_pagamento %}&forma_pagamento={{ request.GET.forma_pagamento }}{% endif %}">Próxima</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.forma_pagamento %}&forma_pagamento={{ request.GET.forma_pagamento }}{% endif %}">Última</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-cash-stack fa-3x text-gray-300 mb-3"></i>
+                    <h5 class="text-gray-600">Nenhuma sangria encontrada</h5>
+                    <p class="text-muted">Comece cadastrando uma nova sangria.</p>
+                    <a href="{% url 'financeiro:cadastrar_sangria' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Nova Sangria
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

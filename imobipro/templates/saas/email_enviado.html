@@ -1,0 +1,272 @@
+{% extends 'auth_base.html' %}
+{% load static %}
+
+{% block title %}Email de Verificação Enviado{% endblock %}
+
+{% block extra_css %}
+<style>
+    .verification-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    
+    .verification-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        padding: 40px;
+        max-width: 500px;
+        width: 100%;
+        text-align: center;
+        animation: slideUp 0.6s ease-out;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .email-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .email-icon i {
+        font-size: 35px;
+        color: white;
+    }
+    
+    .verification-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 15px;
+    }
+    
+    .verification-subtitle {
+        font-size: 16px;
+        color: #718096;
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+    
+    .email-highlight {
+        color: #667eea;
+        font-weight: 600;
+    }
+    
+    .instructions {
+        background: #f7fafc;
+        border-radius: 12px;
+        padding: 25px;
+        margin: 30px 0;
+        text-align: left;
+    }
+    
+    .instructions h4 {
+        color: #2d3748;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .instructions h4 i {
+        margin-right: 10px;
+        color: #667eea;
+    }
+    
+    .instructions ol {
+        margin: 0;
+        padding-left: 20px;
+    }
+    
+    .instructions li {
+        color: #4a5568;
+        margin-bottom: 8px;
+        line-height: 1.5;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 30px;
+    }
+    
+    .btn-resend {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .btn-resend:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-login {
+        background: transparent;
+        color: #667eea;
+        border: 2px solid #667eea;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-login:hover {
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .help-text {
+        margin-top: 25px;
+        padding-top: 25px;
+        border-top: 1px solid #e2e8f0;
+        color: #718096;
+        font-size: 14px;
+    }
+    
+    .help-text a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .help-text a:hover {
+        text-decoration: underline;
+    }
+    
+    @media (max-width: 768px) {
+        .verification-card {
+            padding: 30px 20px;
+            margin: 10px;
+        }
+        
+        .verification-title {
+            font-size: 24px;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="verification-container">
+    <div class="verification-card">
+        <div class="email-icon">
+            <i class="fas fa-envelope"></i>
+        </div>
+        
+        <h1 class="verification-title">Verifique seu Email</h1>
+        
+        <p class="verification-subtitle">
+            Enviamos um email de verificação para<br>
+            <span class="email-highlight">{{ email|default:"seu email" }}</span>
+        </p>
+        
+        <div class="instructions">
+            <h4><i class="fas fa-list-check"></i>Próximos Passos:</h4>
+            <ol>
+                <li>Verifique sua caixa de entrada (e spam/lixo eletrônico)</li>
+                <li>Clique no link de verificação no email</li>
+                <li>Faça login em sua conta</li>
+                <li>Escolha seu plano e complete o pagamento</li>
+                <li>Comece a usar o sistema!</li>
+            </ol>
+        </div>
+        
+        <div class="action-buttons">
+            <form method="post" action="{% url 'saas:reenviar_email' %}" style="margin: 0;">
+                {% csrf_token %}
+                <input type="hidden" name="email" value="{{ email }}">
+                <button type="submit" class="btn-resend">
+                    <i class="fas fa-paper-plane"></i>
+                    Reenviar Email de Verificação
+                </button>
+            </form>
+            
+            <a href="{% url 'login' %}" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i>
+                Já Verifiquei - Fazer Login
+            </a>
+        </div>
+        
+        <div class="help-text">
+            <p>
+                <strong>Não recebeu o email?</strong><br>
+                Verifique sua pasta de spam ou 
+                <a href="mailto:suporte@seusite.com">entre em contato conosco</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-refresh da página a cada 30 segundos para verificar se o email foi verificado
+setInterval(function() {
+    // Verificar se o usuário ainda está na página
+    if (document.visibilityState === 'visible') {
+        // Fazer uma verificação silenciosa (opcional)
+        console.log('Verificando status do email...');
+    }
+}, 30000);
+
+// Mostrar mensagem de sucesso quando o formulário for enviado
+document.querySelector('form').addEventListener('submit', function(e) {
+    const button = this.querySelector('button');
+    const originalText = button.innerHTML;
+    
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    button.disabled = true;
+    
+    // Reabilitar após 3 segundos
+    setTimeout(function() {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    }, 3000);
+});
+</script>
+{% endblock %}

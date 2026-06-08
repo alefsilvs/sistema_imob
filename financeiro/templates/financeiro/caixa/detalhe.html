@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Detalhe do Caixa</title>
+  <style>
+    table{width:100%; border-collapse:collapse;}
+    th,td{border:1px solid #ddd; padding:8px;}
+    th{background:#f3f3f3;}
+  </style>
+</head>
+<body>
+  <h1>Caixa {{ sessao.banca_feira.codigo }} - {{ sessao.data }}</h1>
+  <p>Status: {{ sessao.get_status_display }} | Aberto por: {{ sessao.aberto_por }}</p>
+  <p>Saldo inicial: R$ {{ sessao.saldo_inicial }} | Receitas: R$ {{ sessao.total_receitas }} | Despesas: R$ {{ sessao.total_despesas }} | Saldo final: R$ {{ sessao.saldo_final }}</p>
+
+  {% if sessao.status == 'ABERTA' %}
+    <p><a href="{% url 'financeiro:caixa_movimento' sessao.id %}">Lançar movimento</a> | <a href="{% url 'financeiro:caixa_fechar' sessao.id %}">Fechar caixa</a></p>
+  {% endif %}
+
+  <h2>Movimentos</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Data/Hora</th>
+        <th>Tipo</th>
+        <th>Categoria</th>
+        <th>Descrição</th>
+        <th>Valor</th>
+        <th>Forma</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in movimentos %}
+      <tr>
+        <td>{{ m.data_hora }}</td>
+        <td>{{ m.get_tipo_display }}</td>
+        <td>{{ m.categoria }}</td>
+        <td>{{ m.descricao }}</td>
+        <td>R$ {{ m.valor }}</td>
+        <td>{{ m.get_forma_pagamento_display }}</td>
+        <td>
+          {% if sessao.status == 'ABERTA' %}
+          <a href="{% url 'financeiro:caixa_movimento_excluir' m.id %}">Excluir</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7">Sem movimentos.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p><a href="{% url 'financeiro:caixa_lista' %}">Voltar para lista</a></p>
+</body>
+</html>

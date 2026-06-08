@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Abrir Caixa</title>
+</head>
+<body>
+  <h1>Abrir Caixa</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Abrir</button>
+  </form>
+  <p><a href="{% url 'financeiro:caixa_lista' %}">Voltar</a></p>
+</body>
+</html>

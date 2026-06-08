@@ -1,0 +1,920 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Enviar Notificações{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Layout Profissional e Moderno */
+    .main-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px 0;
+    }
+    
+    .professional-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        border: none;
+        overflow: hidden;
+        margin-bottom: 30px;
+        transition: all 0.3s ease;
+    }
+    
+    .professional-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+    }
+    
+    .card-header-professional {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .card-header-professional::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+    
+    .card-header-professional h4 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .card-body-professional {
+        padding: 30px;
+        background: #fafbfc;
+    }
+    
+    /* Barra de Busca Profissional */
+    .search-container {
+        position: relative;
+        margin-bottom: 25px;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 15px 50px 15px 20px;
+        border: 2px solid #e1e5e9;
+        border-radius: 10px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .search-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+    
+    .search-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 18px;
+    }
+    
+    /* Filtros Profissionais */
+    .filters-row {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .filter-select {
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .filter-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    /* Botões de Ação Rápida */
+    .quick-actions {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .btn-quick-action {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-quick-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    
+    .btn-quick-action.btn-outline {
+        background: transparent;
+        border: 2px solid #667eea;
+        color: #667eea;
+        box-shadow: none;
+    }
+    
+    .btn-quick-action.btn-outline:hover {
+        background: #667eea;
+        color: white;
+    }
+    
+    /* Cards de Inquilinos Profissionais */
+    .inquilinos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .inquilino-card {
+        background: white;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        padding: 20px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .inquilino-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .inquilino-card:hover {
+        border-color: #667eea;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    .inquilino-card:hover::before {
+        transform: scaleY(1);
+    }
+    
+    .inquilino-card.selected {
+        border-color: #667eea;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+    }
+    
+    .inquilino-card.selected::before {
+        transform: scaleY(1);
+    }
+    
+    .inquilino-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .inquilino-checkbox {
+        width: 20px;
+        height: 20px;
+        margin-right: 15px;
+        accent-color: #667eea;
+        cursor: pointer;
+    }
+    
+    .inquilino-nome {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #2c3e50;
+        margin: 0;
+    }
+    
+    .inquilino-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .info-item i {
+        width: 20px;
+        margin-right: 8px;
+        color: #667eea;
+    }
+    
+    .cidade-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        display: inline-block;
+        margin-top: 10px;
+    }
+    
+    /* Estatísticas Profissionais */
+    .stats-container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 15px;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        border-radius: 10px;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+        display: block;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    /* Mensagem de Nenhum Resultado */
+    .no-results {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .no-results i {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 20px;
+    }
+    
+    .no-results h5 {
+        color: #495057;
+        margin-bottom: 10px;
+    }
+    
+    /* Opções de Canal */
+    .canal-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .canal-option {
+        background: white;
+        border: 2px solid #e1e5e9;
+        border-radius: 10px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    
+    .canal-option:hover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+    }
+    
+    .canal-option.selected {
+        border-color: #667eea;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    }
+    
+    /* Animações */
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .inquilinos-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .filters-row .row > div {
+            margin-bottom: 15px;
+        }
+        
+        .canal-options {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* Melhorias no formulário principal */
+    .form-select, .form-control {
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-select:focus, .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .loading-spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <!-- Cabeçalho Principal -->
+                <div class="professional-card">
+                    <div class="card-header-professional">
+                        <h4><i class="fas fa-paper-plane me-3"></i>Enviar Notificações</h4>
+                    </div>
+                    <div class="card-body-professional">
+                        <form method="post" id="form-enviar">
+                            {% csrf_token %}
+
+                            <div class="row">
+                                <!-- Seleção de Canal -->
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label fw-bold">Canal de Envio</label>
+                                    <div class="canal-options">
+                                        <div class="canal-option selected" data-canal="EMAIL">
+                                            <i class="fas fa-envelope text-primary me-2"></i>
+                                            <strong>E-mail</strong>
+                                            <small class="d-block text-muted">Envio padrão por e-mail</small>
+                                        </div>
+                                        <div class="canal-option" data-canal="WHATSAPP">
+                                            <i class="fab fa-whatsapp text-success me-2"></i>
+                                            <strong>WhatsApp</strong>
+                                            <small class="d-block text-muted">Envio pelo WhatsApp (Evolution API)</small>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="canal" id="canal" value="EMAIL">
+                                </div>
+                                
+                                <!-- Seleção de Template -->
+                                <div class="col-md-6 mb-4">
+                                    <label for="template" class="form-label fw-bold">Template de Notificação</label>
+                                    <select name="template" id="template" class="form-select" required>
+                                        <option value="">Selecione um template...</option>
+                                        {% for template in templates %}
+                                            <option value="{{ template.id }}" 
+                                                    data-assunto="{{ template.assunto }}" 
+                                                    data-corpo="{{ template.corpo }}">
+                                                {{ template.nome }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+
+                    </div>
+                </div>
+                
+                <!-- Seção de Busca e Filtros -->
+                <div class="professional-card">
+                    <div class="card-header-professional">
+                        <h4><i class="fas fa-search me-3"></i>Buscar e Filtrar Destinatários</h4>
+                    </div>
+                    <div class="card-body-professional">
+                        <!-- Barra de Busca -->
+                        <div class="search-container">
+                            <input type="text" id="search-inquilinos" class="search-input" 
+                                   placeholder="Digite o nome do inquilino para buscar...">
+                            <i class="fas fa-search search-icon"></i>
+                        </div>
+                        
+                        <!-- Filtros -->
+                        <div class="filters-row">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Filtrar por Cidade</label>
+                                    <select id="filter-cidade" class="filter-select">
+                                        <option value="">Todas as cidades</option>
+                                        {% for cidade in cidades_disponiveis %}
+                                            <option value="{{ cidade }}">{{ cidade }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Status de Contato</label>
+                                    <select id="filter-contato" class="filter-select">
+                                        <option value="">Todos</option>
+                                        <option value="com-email">Com E-mail</option>
+                                        <option value="sem-email">Sem E-mail</option>
+                                        <option value="com-telefone">Com Telefone</option>
+                                        <option value="sem-telefone">Sem Telefone</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">Ações Rápidas</label>
+                                    <div>
+                                        <button type="button" class="btn-quick-action" id="btn-select-filtered">
+                                            <i class="fas fa-check-square me-1"></i>Selecionar Filtrados
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Ações Rápidas -->
+                        <div class="quick-actions">
+                            <button type="button" class="btn-quick-action" id="btn-select-all">
+                                <i class="fas fa-check-double me-1"></i>Selecionar Todos
+                            </button>
+                            <button type="button" class="btn-quick-action btn-outline" id="btn-clear-all">
+                                <i class="fas fa-times me-1"></i>Limpar Seleção
+                            </button>
+                            <button type="button" class="btn-quick-action btn-outline" id="btn-invert-selection">
+                                <i class="fas fa-exchange-alt me-1"></i>Inverter Seleção
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Estatísticas -->
+                <div class="stats-container">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-number" id="total-inquilinos">{{ inquilinos.count }}</span>
+                            <div class="stat-label">Total de Inquilinos</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="inquilinos-visiveis">{{ inquilinos.count }}</span>
+                            <div class="stat-label">Inquilinos Visíveis</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="inquilinos-selecionados">0</span>
+                            <div class="stat-label">Inquilinos Selecionados</div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number" id="inquilinos-validos">0</span>
+                            <div class="stat-label">Com Contato Válido</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Lista de Inquilinos -->
+                <div class="professional-card">
+                    <div class="card-header-professional">
+                        <h4><i class="fas fa-users me-3"></i>Selecionar Destinatários</h4>
+                    </div>
+                    <div class="card-body-professional">
+                        <div class="inquilinos-grid" id="inquilinos-container">
+                            {% for inquilino in inquilinos %}
+                                <div class="inquilino-card fade-in" 
+                                     data-nome="{{ inquilino.nome|lower }}"
+                                     data-cidade="{{ inquilino.cidade|default:'' }}"
+                                     data-email="{{ inquilino.email|yesno:'sim,nao' }}"
+                                     data-telefone="{{ inquilino.telefone|yesno:'sim,nao' }}">
+                                    
+                                    <div class="inquilino-header">
+                                        <input type="checkbox" name="inquilinos" value="{{ inquilino.id }}" 
+                                               class="inquilino-checkbox" id="inquilino-{{ inquilino.id }}">
+                                        <h5 class="inquilino-nome">{{ inquilino.nome }}</h5>
+                                    </div>
+                                    
+                                    <div class="inquilino-info">
+                                        <div class="info-item">
+                                            <i class="fas fa-envelope"></i>
+                                            <span>{{ inquilino.email|default:"Não informado" }}</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <i class="fas fa-phone"></i>
+                                            <span>{{ inquilino.telefone|default:"Não informado" }}</span>
+                                        </div>
+                                        {% if inquilino.cidade %}
+                                            <div class="cidade-badge">
+                                                <i class="fas fa-map-marker-alt me-1"></i>{{ inquilino.cidade }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="no-results">
+                                    <i class="fas fa-users"></i>
+                                    <h5>Nenhum inquilino encontrado</h5>
+                                    <p>Não há inquilinos cadastrados no sistema.</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Mensagem de nenhum resultado -->
+                        <div class="no-results" id="no-results" style="display: none;">
+                            <i class="fas fa-search"></i>
+                            <h5>Nenhum resultado encontrado</h5>
+                            <p>Tente ajustar os filtros ou termo de busca.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Botão de Envio -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <span class="loading-spinner"></span>
+                        <i class="fas fa-paper-plane me-2"></i>
+                        Enviar Notificações
+                    </button>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Variáveis globais com verificação de existência
+    const searchInput = document.getElementById('search-inquilinos');
+    const filterCidade = document.getElementById('filter-cidade');
+    const filterContato = document.getElementById('filter-contato');
+    const inquilinosContainer = document.getElementById('inquilinos-container');
+    const noResults = document.getElementById('no-results');
+    const canalOptions = document.querySelectorAll('.canal-option');
+    const canalInput = document.getElementById('canal');
+    
+    // Estatísticas
+    const totalInquilinos = document.getElementById('total-inquilinos');
+    const inquilinosVisiveis = document.getElementById('inquilinos-visiveis');
+    const inquilinosSelecionados = document.getElementById('inquilinos-selecionados');
+    const inquilinosValidos = document.getElementById('inquilinos-validos');
+    
+    // Botões de ação rápida
+    const btnSelectAll = document.getElementById('btn-select-all');
+    const btnClearAll = document.getElementById('btn-clear-all');
+    const btnInvertSelection = document.getElementById('btn-invert-selection');
+    const btnSelectFiltered = document.getElementById('btn-select-filtered');
+
+
+    
+    // Verificar se os elementos essenciais existem
+    if (!searchInput || !filterCidade || !filterContato || !inquilinosContainer) {
+        console.warn('Alguns elementos essenciais não foram encontrados na página');
+        return;
+    }
+    
+    // Seleção de canal
+    if (canalOptions.length > 0 && canalInput) {
+        canalOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                canalOptions.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                canalInput.value = this.dataset.canal;
+                filtrarInquilinos();
+            });
+        });
+    }
+    
+    // Função para filtrar inquilinos
+    function filtrarInquilinos() {
+        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+        const cidadeSelecionada = filterCidade ? filterCidade.value : '';
+        const contatoSelecionado = filterContato ? filterContato.value : '';
+        const canalAtual = canalInput ? canalInput.value : '';
+        
+        const inquilinoCards = document.querySelectorAll('.inquilino-card');
+        let visibleCount = 0;
+        
+        inquilinoCards.forEach(card => {
+            const nome = card.dataset.nome;
+            const cidade = card.dataset.cidade;
+            const temEmail = card.dataset.email === 'sim';
+            const temTelefone = card.dataset.telefone === 'sim';
+            
+            let mostrar = true;
+            
+            // Filtro por busca
+            if (searchTerm && !nome.includes(searchTerm)) {
+                mostrar = false;
+            }
+            
+            // Filtro por cidade
+            if (cidadeSelecionada && cidade !== cidadeSelecionada) {
+                mostrar = false;
+            }
+            
+            // Filtro por contato
+            if (contatoSelecionado) {
+                switch (contatoSelecionado) {
+                    case 'com-email':
+                        if (!temEmail) mostrar = false;
+                        break;
+                    case 'sem-email':
+                        if (temEmail) mostrar = false;
+                        break;
+                    case 'com-telefone':
+                        if (!temTelefone) mostrar = false;
+                        break;
+                    case 'sem-telefone':
+                        if (temTelefone) mostrar = false;
+                        break;
+                }
+            }
+            
+            // Filtro por canal (mostrar apenas inquilinos com contato válido para o canal)
+            if (canalAtual === 'EMAIL' && !temEmail) {
+                card.style.opacity = '0.5';
+            } else if ((canalAtual === 'SMS' || canalAtual === 'WHATSAPP') && !temTelefone) {
+                card.style.opacity = '0.5';
+            } else {
+                card.style.opacity = '1';
+            }
+            
+            if (mostrar) {
+                card.style.display = 'block';
+                card.classList.add('fade-in');
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        // Mostrar/ocultar mensagem de nenhum resultado
+        if (visibleCount === 0) {
+            if (noResults) noResults.style.display = 'block';
+            if (inquilinosContainer) inquilinosContainer.style.display = 'none';
+        } else {
+            if (noResults) noResults.style.display = 'none';
+            if (inquilinosContainer) inquilinosContainer.style.display = 'grid';
+        }
+        
+        // Atualizar estatísticas
+        if (inquilinosVisiveis) inquilinosVisiveis.textContent = visibleCount;
+        atualizarEstatisticas();
+    }
+    
+    // Função para atualizar estatísticas
+    function atualizarEstatisticas() {
+        const checkboxes = document.querySelectorAll('.inquilino-checkbox');
+        const canalAtual = canalInput ? canalInput.value : '';
+        
+        let selecionados = 0;
+        let validos = 0;
+        
+        checkboxes.forEach(checkbox => {
+            const card = checkbox.closest('.inquilino-card');
+            const temEmail = card.dataset.email === 'sim';
+            const temTelefone = card.dataset.telefone === 'sim';
+            
+            if (checkbox.checked) {
+                selecionados++;
+            }
+            
+            if (card.style.display !== 'none') {
+                if ((canalAtual === 'EMAIL' && temEmail) || ((canalAtual === 'SMS' || canalAtual === 'WHATSAPP') && temTelefone)) {
+                    validos++;
+                }
+            }
+        });
+        
+        if (inquilinosSelecionados) inquilinosSelecionados.textContent = selecionados;
+        if (inquilinosValidos) inquilinosValidos.textContent = validos;
+    }
+    
+    // Event listeners para filtros
+    if (searchInput) searchInput.addEventListener('input', filtrarInquilinos);
+    if (filterCidade) filterCidade.addEventListener('change', filtrarInquilinos);
+    if (filterContato) filterContato.addEventListener('change', filtrarInquilinos);
+    
+    // Seleção de inquilinos
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('inquilino-checkbox')) {
+            const card = e.target.closest('.inquilino-card');
+            if (e.target.checked) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+            atualizarEstatisticas();
+        }
+    });
+    
+    // Clique no card para selecionar
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.inquilino-card') && !e.target.matches('input[type="checkbox"]')) {
+            const card = e.target.closest('.inquilino-card');
+            const checkbox = card.querySelector('.inquilino-checkbox');
+            checkbox.checked = !checkbox.checked;
+            checkbox.dispatchEvent(new Event('change'));
+        }
+    });
+    
+    // Botões de ação rápida
+    if (btnSelectAll) {
+        btnSelectAll.addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('.inquilino-checkbox');
+            checkboxes.forEach(checkbox => {
+                const card = checkbox.closest('.inquilino-card');
+                if (card.style.display !== 'none') {
+                    checkbox.checked = true;
+                    card.classList.add('selected');
+                }
+            });
+            atualizarEstatisticas();
+        });
+    }
+    
+    if (btnClearAll) {
+        btnClearAll.addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('.inquilino-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                checkbox.closest('.inquilino-card').classList.remove('selected');
+            });
+            atualizarEstatisticas();
+        });
+    }
+    
+    if (btnInvertSelection) {
+        btnInvertSelection.addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('.inquilino-checkbox');
+            checkboxes.forEach(checkbox => {
+                const card = checkbox.closest('.inquilino-card');
+                if (card.style.display !== 'none') {
+                    checkbox.checked = !checkbox.checked;
+                    if (checkbox.checked) {
+                        card.classList.add('selected');
+                    } else {
+                        card.classList.remove('selected');
+                    }
+                }
+            });
+            atualizarEstatisticas();
+        });
+    }
+    
+    if (btnSelectFiltered) {
+        btnSelectFiltered.addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('.inquilino-checkbox');
+            checkboxes.forEach(checkbox => {
+                const card = checkbox.closest('.inquilino-card');
+                if (card.style.display !== 'none') {
+                    checkbox.checked = true;
+                    card.classList.add('selected');
+                }
+            });
+            atualizarEstatisticas();
+        });
+    }
+    
+    // Validação do formulário
+    const formEnviar = document.getElementById('form-enviar');
+    if (formEnviar) {
+        formEnviar.addEventListener('submit', function(e) {
+            const templateSelecionado = document.getElementById('template');
+            const inquilinosSelecionados = document.querySelectorAll('.inquilino-checkbox:checked');
+            
+            if (templateSelecionado && !templateSelecionado.value) {
+                e.preventDefault();
+                alert('Por favor, selecione um template de notificação.');
+                return;
+            }
+            
+            if (inquilinosSelecionados.length === 0) {
+                e.preventDefault();
+                alert('Por favor, selecione pelo menos um inquilino.');
+                return;
+            }
+            
+            // Mostrar loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                const spinner = submitBtn.querySelector('.loading-spinner');
+                if (spinner) spinner.style.display = 'inline-block';
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="loading-spinner" style="display: inline-block;"></span> <i class="fas fa-paper-plane me-2"></i>Enviando...';
+            }
+        });
+    }
+    
+    // Atalhos de teclado
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'a') {
+            e.preventDefault();
+            if (btnSelectAll) btnSelectAll.click();
+        }
+        
+        if (e.ctrlKey && e.key === 'Enter') {
+            e.preventDefault();
+            const formEnviar = document.getElementById('form-enviar');
+            if (formEnviar) {
+                // Simular clique no botão submit em vez de disparar evento
+                const submitBtn = formEnviar.querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.click();
+            }
+        }
+    });
+    
+    // Inicializar
+    filtrarInquilinos();
+});
+</script>
+{% endblock %}

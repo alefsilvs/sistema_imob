@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ imovel.codigo }} - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">{{ imovel.codigo }} - {{ imovel.endereco }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'imoveis:listar' %}">Imóveis</a></li>
+                    <li class="breadcrumb-item active">{{ imovel.codigo }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="{% url 'imoveis:editar' imovel.pk %}" class="btn btn-warning me-2">
+                <i class="bi bi-pencil"></i> Editar
+            </a>
+            <a href="{% url 'imoveis:gerenciar_fotos' imovel.pk %}" class="btn btn-info me-2">
+                <i class="bi bi-images"></i> Fotos
+            </a>
+            <a href="{% url 'imoveis:listar' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Dados do Imóvel -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Dados do Imóvel</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Código</label>
+                                <p class="fw-bold">{{ imovel.codigo }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Proprietário</label>
+                                <p class="fw-bold">{{ imovel.proprietario.nome }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Tipo</label>
+                                <p class="fw-bold">{{ imovel.get_tipo_display }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Finalidade</label>
+                                <p class="fw-bold">{{ imovel.get_finalidade_display }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Status</label>
+                                <span class="badge {% if imovel.status == 'DISPONIVEL' %}bg-success{% elif imovel.status == 'OCUPADO' %}bg-primary{% elif imovel.status == 'MANUTENCAO' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                    {{ imovel.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Mobiliado</label>
+                                <p class="fw-bold">{% if imovel.mobiliado %}Sim{% else %}Não{% endif %}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Endereço -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Endereço</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Endereço</label>
+                                <p class="fw-bold">{{ imovel.endereco }}, {{ imovel.numero }}</p>
+                                {% if imovel.complemento %}
+                                    <p class="text-muted">{{ imovel.complemento }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">CEP</label>
+                                <p class="fw-bold">{{ imovel.cep }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Bairro</label>
+                                <p class="fw-bold">{{ imovel.bairro }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Cidade/Estado</label>
+                                <p class="fw-bold">{{ imovel.cidade }}/{{ imovel.estado }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Características -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Características</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Área Total</label>
+                                <p class="fw-bold">{% if imovel.area_total %}{{ imovel.area_total }} m²{% else %}Não informado{% endif %}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Área Construída</label>
+                                <p class="fw-bold">{% if imovel.area_construida %}{{ imovel.area_construida }} m²{% else %}Não informado{% endif %}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Quartos</label>
+                                <p class="fw-bold">{{ imovel.quartos }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Banheiros</label>
+                                <p class="fw-bold">{{ imovel.banheiros }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Vagas de Garagem</label>
+                                <p class="fw-bold">{{ imovel.vagas_garagem }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% if imovel.descricao %}
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">Descrição</label>
+                                    <p class="fw-bold">{{ imovel.descricao }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Valores -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Valores</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Aluguel</label>
+                        <p class="fw-bold text-success">R$ {{ imovel.valor_aluguel|floatformat:2 }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Condomínio</label>
+                        <p class="fw-bold">R$ {{ imovel.valor_condominio|floatformat:2 }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">IPTU</label>
+                        <p class="fw-bold">R$ {{ imovel.valor_iptu|floatformat:2 }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Seguro</label>
+                        <p class="fw-bold">R$ {{ imovel.valor_seguro|floatformat:2 }}</p>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Total Mensal</label>
+                        <p class="fw-bold text-primary h5">R$ {{ imovel.valor_total_mensal|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documentação -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Documentação</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Inscrição Municipal</label>
+                        <p class="fw-bold">{% if imovel.inscricao_municipal %}{{ imovel.inscricao_municipal }}{% else %}Não informado{% endif %}</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Matrícula</label>
+                        <p class="fw-bold">{% if imovel.matricula %}{{ imovel.matricula }}{% else %}Não informado{% endif %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fotos -->
+            {% if imovel.fotos.exists %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Fotos</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for foto in imovel.fotos.all|slice:":4" %}
+                        <div class="col-6 mb-2">
+                            <img src="{{ foto.foto.url }}" class="img-fluid rounded" alt="{{ foto.descricao }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if imovel.fotos.count > 4 %}
+                        <div class="text-center mt-2">
+                            <a href="{% url 'imoveis:gerenciar_fotos' imovel.pk %}" class="btn btn-sm btn-outline-primary">
+                                Ver todas ({{ imovel.fotos.count }})
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

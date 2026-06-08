@@ -1,0 +1,67 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:saas_tenant_changelist' %}">Tenants</a>
+&rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module aligned">
+    <h1>{{ title }}</h1>
+    
+    <div class="form-row">
+        <div>
+            <h2>Informações da Instância</h2>
+            <p><strong>Empresa:</strong> {{ tenant.nome_empresa }}</p>
+            <p><strong>Slug:</strong> {{ tenant.slug }}</p>
+        </div>
+    </div>
+    
+    <div class="form-row">
+        <div>
+            <h2>QR Code para Conexão WhatsApp</h2>
+            <p>Escaneie este QR Code com o WhatsApp para conectar a instância:</p>
+            
+            {% if qr_code %}
+                <div style="text-align: center; margin: 20px 0;">
+                    <img src="data:image/png;base64,{{ qr_code }}" 
+                         alt="QR Code WhatsApp" 
+                         style="max-width: 300px; border: 1px solid #ddd; padding: 10px;">
+                </div>
+                
+                <div class="help">
+                    <h3>Como conectar:</h3>
+                    <ol>
+                        <li>Abra o WhatsApp no seu celular</li>
+                        <li>Toque em "Mais opções" (três pontos) > "Aparelhos conectados"</li>
+                        <li>Toque em "Conectar um aparelho"</li>
+                        <li>Aponte a câmera do celular para este QR Code</li>
+                    </ol>
+                </div>
+            {% else %}
+                <div class="errornote">
+                    Não foi possível gerar o QR Code. Verifique se a instância está ativa.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="submit-row">
+        <a href="{% url 'admin:saas_tenant_changelist' %}" class="default">Voltar para lista de tenants</a>
+        <a href="javascript:window.location.reload();" class="button">Atualizar QR Code</a>
+    </div>
+</div>
+
+<script>
+// Auto-refresh QR Code a cada 30 segundos
+setTimeout(function() {
+    window.location.reload();
+}, 30000);
+</script>
+{% endblock %}

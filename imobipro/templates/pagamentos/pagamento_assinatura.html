@@ -1,0 +1,672 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Finalizar Pagamento - {{ tenant.nome_empresa }}{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.payment-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.payment-container {
+    max-width: 900px;
+    width: 100%;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+
+.payment-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px;
+    text-align: center;
+    position: relative;
+}
+
+.payment-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+}
+
+.payment-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.payment-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.payment-content {
+    padding: 40px;
+}
+
+.step-indicator {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    margin: 0 15px;
+    color: #6c757d;
+}
+
+.step.active {
+    color: #007bff;
+}
+
+.step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.step.active .step-number {
+    background: #007bff;
+    color: white;
+}
+
+.plan-summary {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 30px;
+    border: 1px solid #e3f2fd;
+}
+
+.plan-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.plan-name {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.plan-price {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.plan-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    color: #28a745;
+    font-size: 0.9rem;
+}
+
+.feature-item i {
+    margin-right: 8px;
+}
+
+.payment-section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    margin-right: 10px;
+    color: #007bff;
+}
+
+.billing-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.billing-card {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    background: white;
+}
+
+.billing-card:hover {
+    border-color: #007bff;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,123,255,0.15);
+}
+
+.billing-card.selected {
+    border-color: #007bff;
+    background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%);
+    box-shadow: 0 8px 25px rgba(0,123,255,0.15);
+}
+
+.billing-card .check-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #007bff;
+    color: white;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+.billing-card.selected .check-icon {
+    display: flex;
+}
+
+.billing-period {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.billing-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 5px;
+}
+
+.billing-savings {
+    background: #28a745;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.billing-description {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.payment-methods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.method-card {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+    position: relative;
+}
+
+.method-card:hover {
+    border-color: #007bff;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,123,255,0.15);
+}
+
+.method-card.selected {
+    border-color: #007bff;
+    background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%);
+    box-shadow: 0 8px 25px rgba(0,123,255,0.15);
+}
+
+.method-card .check-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #007bff;
+    color: white;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+.method-card.selected .check-icon {
+    display: flex;
+}
+
+.method-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.method-icon.pix {
+    color: #00d4aa;
+}
+
+.method-icon.card {
+    color: #007bff;
+}
+
+.method-icon.boleto {
+    color: #ff6b35;
+}
+
+.method-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: #2c3e50;
+}
+
+.method-description {
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.btn-payment {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 18px 40px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 12px;
+    width: 100%;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+}
+
+.btn-payment:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+}
+
+.btn-payment:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.security-info {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    margin-top: 30px;
+    border: 1px solid #dee2e6;
+}
+
+.security-badges {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.security-badge {
+    display: flex;
+    align-items: center;
+    color: #28a745;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.security-badge i {
+    margin-right: 5px;
+}
+
+@media (max-width: 768px) {
+    .payment-wrapper {
+        padding: 10px;
+    }
+    
+    .payment-header {
+        padding: 30px 20px;
+    }
+    
+    .payment-content {
+        padding: 30px 20px;
+    }
+    
+    .payment-header h1 {
+        font-size: 2rem;
+    }
+    
+    .billing-options,
+    .payment-methods {
+        grid-template-columns: 1fr;
+    }
+    
+    .step {
+        margin: 0 10px;
+    }
+    
+    .step-text {
+        display: none;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-wrapper">
+    <div class="payment-container">
+        {% if erro %}
+            <div class="alert alert-danger m-4">
+                <i class="fas fa-exclamation-triangle me-2"></i>{{ erro }}
+            </div>
+        {% else %}
+            <!-- Header da Página -->
+            <div class="payment-header">
+                <h1><i class="fas fa-credit-card me-3"></i>Finalizar Pagamento</h1>
+                <p>Complete sua assinatura e comece a usar todas as funcionalidades</p>
+            </div>
+
+            <div class="payment-content">
+                <!-- Indicador de Etapas -->
+                <div class="step-indicator">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <span class="step-text">Configuração</span>
+                    </div>
+                    <div class="step active">
+                        <div class="step-number">2</div>
+                        <span class="step-text">Pagamento</span>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <span class="step-text">Confirmação</span>
+                    </div>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Resumo do Plano -->
+                <div class="plan-summary">
+                    <div class="plan-details">
+                        <div>
+                            <div class="plan-name">{{ tenant.nome_empresa }}</div>
+                            <small class="text-muted">Plano Profissional</small>
+                        </div>
+                        <div class="plan-price" id="current-price">R$ 97,00/mês</div>
+                    </div>
+                    <div class="plan-features">
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i>
+                            <span>Gestão completa de imóveis</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i>
+                            <span>Contratos digitais</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i>
+                            <span>Relatórios financeiros</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i>
+                            <span>Suporte prioritário</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post" id="payment-form">
+                    {% csrf_token %}
+                    
+                    <!-- Seleção de Periodicidade -->
+                    <div class="payment-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            Escolha o período de cobrança
+                        </h3>
+                        
+                        <div class="billing-options">
+                            <div class="billing-card" data-period="mensal" data-price="97.00">
+                                <input type="radio" name="periodicidade" value="mensal" id="mensal" class="d-none" checked>
+                                <div class="check-icon"><i class="fas fa-check"></i></div>
+                                <div class="billing-period">Plano Mensal</div>
+                                <div class="billing-price">R$ 97,00</div>
+                                <div class="billing-description">Cobrança mensal • Cancele quando quiser</div>
+                            </div>
+                            
+                            <div class="billing-card" data-period="anual" data-price="970.00">
+                                <input type="radio" name="periodicidade" value="anual" id="anual" class="d-none">
+                                <div class="check-icon"><i class="fas fa-check"></i></div>
+                                <div class="billing-period">Plano Anual</div>
+                                <div class="billing-price">R$ 970,00</div>
+                                <div class="billing-savings">Economize 2 meses</div>
+                                <div class="billing-description">Cobrança anual • Melhor custo-benefício</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Métodos de Pagamento -->
+                    <div class="payment-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-credit-card"></i>
+                            Escolha a forma de pagamento
+                        </h3>
+                        
+                        <div class="payment-methods">
+                            <div class="method-card" data-method="PIX">
+                                <input type="radio" name="metodo_pagamento" value="PIX" id="pix" class="d-none">
+                                <div class="check-icon"><i class="fas fa-check"></i></div>
+                                <i class="fas fa-qrcode method-icon pix"></i>
+                                <div class="method-title">PIX</div>
+                                <div class="method-description">Aprovação instantânea<br>Sem taxas adicionais</div>
+                            </div>
+
+                            <div class="method-card" data-method="CARTAO">
+                                <input type="radio" name="metodo_pagamento" value="CARTAO" id="cartao" class="d-none">
+                                <div class="check-icon"><i class="fas fa-check"></i></div>
+                                <i class="fas fa-credit-card method-icon card"></i>
+                                <div class="method-title">Cartão de Crédito</div>
+                                <div class="method-description">Visa, Master, Elo<br>Parcelamento disponível</div>
+                            </div>
+
+                            <div class="method-card" data-method="BOLETO">
+                                <input type="radio" name="metodo_pagamento" value="BOLETO" id="boleto" class="d-none">
+                                <div class="check-icon"><i class="fas fa-check"></i></div>
+                                <i class="fas fa-barcode method-icon boleto"></i>
+                                <div class="method-title">Boleto Bancário</div>
+                                <div class="method-description">Vencimento em 3 dias<br>Aprovação em 1-2 dias úteis</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-payment" disabled id="btn-continuar">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Finalizar Pagamento Seguro
+                    </button>
+                </form>
+
+                <!-- Informações de Segurança -->
+                <div class="security-info">
+                    <h5><i class="fas fa-shield-alt me-2"></i>Seus dados estão protegidos</h5>
+                    <p class="mb-3 text-muted">
+                        Utilizamos criptografia de nível bancário para proteger suas informações.
+                        Seus dados de pagamento são processados de forma segura.
+                    </p>
+                    <div class="security-badges">
+                        <div class="security-badge">
+                            <i class="fas fa-lock"></i>
+                            <span>SSL 256-bit</span>
+                        </div>
+                        <div class="security-badge">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>PCI Compliant</span>
+                        </div>
+                        <div class="security-badge">
+                            <i class="fas fa-user-shield"></i>
+                            <span>LGPD</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const methodCards = document.querySelectorAll('.method-card');
+    const billingCards = document.querySelectorAll('.billing-card');
+    const btnContinuar = document.getElementById('btn-continuar');
+    const currentPrice = document.getElementById('current-price');
+    
+    let selectedMethod = false;
+    let selectedBilling = true; // Mensal já vem selecionado
+    
+    // Função para verificar se pode habilitar o botão
+    function checkButtonState() {
+        if (btnContinuar) {
+            btnContinuar.disabled = !(selectedMethod && selectedBilling);
+        }
+    }
+    
+    // Função para atualizar o preço exibido
+    function updatePrice(period, price) {
+        if (period === 'mensal') {
+            currentPrice.textContent = 'R$ ' + price + '/mês';
+        } else {
+            currentPrice.textContent = 'R$ ' + price + '/ano';
+        }
+    }
+    
+    // Seleção de método de pagamento
+    methodCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove seleção anterior
+            methodCards.forEach(c => c.classList.remove('selected'));
+            
+            // Adiciona seleção atual
+            this.classList.add('selected');
+            
+            // Marca o radio button
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+            
+            selectedMethod = true;
+            checkButtonState();
+        });
+    });
+    
+    // Seleção de periodicidade
+    billingCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove seleção anterior
+            billingCards.forEach(c => c.classList.remove('selected'));
+            
+            // Adiciona seleção atual
+            this.classList.add('selected');
+            
+            // Marca o radio button
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+            
+            // Atualiza o preço
+            const period = this.dataset.period;
+            const price = this.dataset.price;
+            updatePrice(period, price);
+            
+            selectedBilling = true;
+            checkButtonState();
+        });
+    });
+    
+    // Marcar primeira opção de periodicidade como selecionada
+    if (billingCards.length > 0) {
+        billingCards[0].classList.add('selected');
+    }
+    
+    // Animação de entrada
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+    
+    // Aplicar animação aos cards
+    document.querySelectorAll('.method-card, .billing-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
+    
+    // Verificar estado inicial
+    checkButtonState();
+});
+</script>
+{% endblock %}

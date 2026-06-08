@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Proprietários - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Proprietários</h1>
+            <p class="mb-0 text-muted">Gerencie todos os proprietários cadastrados</p>
+        </div>
+        <a href="{% url 'core:cadastrar_proprietario' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Cadastrar Proprietário
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" name="search" class="form-control" placeholder="Nome, CPF/CNPJ ou email..." value="{{ search }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div>
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                        <a href="{% url 'core:listar_proprietarios' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise"></i> Limpar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Proprietários -->
+    <div class="card">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">Lista de Proprietários</h6>
+        </div>
+        <div class="card-body">
+            {% if page_obj %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nome</th>
+                                <th>Tipo</th>
+                                <th>CPF/CNPJ</th>
+                                <th>Telefone</th>
+                                <th>Email</th>
+                                <th>Imóveis</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for proprietario in page_obj %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'core:detalhes_proprietario' proprietario.pk %}" class="text-decoration-none">
+                                            {{ proprietario.nome }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if proprietario.tipo == 'FISICA' %}info{% else %}warning{% endif %}">
+                                            {{ proprietario.get_tipo_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ proprietario.cpf_cnpj|default:"-" }}</td>
+                                    <td>{{ proprietario.telefone|default:"-" }}</td>
+                                    <td>{{ proprietario.email|default:"-" }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ proprietario.imovel_set.count }} imóvel{{ proprietario.imovel_set.count|pluralize:"is" }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="btn-group" role="group">
+                                            <a href="{% url 'core:detalhes_proprietario' proprietario.pk %}" class="btn btn-sm btn-outline-info" title="Visualizar">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{% url 'core:editar_proprietario' proprietario.pk %}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'core:excluir_proprietario' proprietario.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação -->
+                {% if page_obj.has_other_pages %}
+                    <nav aria-label="Navegação de páginas">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}">&laquo; Primeira</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}">Anterior</a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                            </li>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}">Próxima</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}">Última &raquo;</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-person-x display-1 text-muted"></i>
+                    <h5 class="mt-3">Nenhum proprietário encontrado</h5>
+                    <p class="text-muted">{% if search %}Tente ajustar os filtros de busca.{% else %}Comece cadastrando o primeiro proprietário.{% endif %}</p>
+                    <a href="{% url 'core:cadastrar_proprietario' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Cadastrar Proprietário
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

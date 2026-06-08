@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cancelar Sangria - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Cancelar Sangria</h1>
+            <p class="mb-0 text-muted">{{ sangria.descricao }}</p>
+        </div>
+        <a href="{% url 'financeiro:detalhes_sangria' sangria.id %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-warning">
+                        <i class="bi bi-x-circle"></i> Cancelar Sangria
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-info-circle"></i> Informações da Sangria</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Descrição:</strong> {{ sangria.descricao }}</p>
+                                <p><strong>Categoria:</strong> {{ sangria.get_categoria_display }}</p>
+                                <p><strong>Valor:</strong> R$ {{ sangria.valor|floatformat:2 }}</p>
+                                <p><strong>Status Atual:</strong> 
+                                    <span class="badge bg-{{ sangria.status|lower }}">{{ sangria.get_status_display }}</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Data de Vencimento:</strong> {{ sangria.data_vencimento|date:"d/m/Y" }}</p>
+                                <p><strong>Data de Criação:</strong> {{ sangria.data_criacao|date:"d/m/Y H:i" }}</p>
+                                {% if sangria.fornecedor %}
+                                    <p><strong>Fornecedor:</strong> {{ sangria.fornecedor }}</p>
+                                {% endif %}
+                                {% if sangria.numero_documento %}
+                                    <p><strong>Documento:</strong> {{ sangria.numero_documento }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="motivo_cancelamento" class="form-label">Motivo do Cancelamento <span class="text-danger">*</span></label>
+                            <select class="form-select" id="motivo_cancelamento" name="motivo_cancelamento" required>
+                                <option value="">Selecione o motivo...</option>
+                                <option value="ERRO_LANCAMENTO">Erro no lançamento</option>
+                                <option value="DUPLICIDADE">Lançamento duplicado</option>
+                                <option value="CANCELAMENTO_FORNECEDOR">Cancelamento pelo fornecedor</option>
+                                <option value="MUDANCA_PLANEJAMENTO">Mudança no planejamento</option>
+                                <option value="FALTA_APROVACAO">Falta de aprovação</option>
+                                <option value="PROBLEMA_ORCAMENTO">Problema no orçamento</option>
+                                <option value="OUTRO">Outro motivo</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="observacoes_cancelamento" class="form-label">Observações do Cancelamento <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="observacoes_cancelamento" name="observacoes_cancelamento" rows="4" 
+                                      placeholder="Descreva detalhadamente o motivo do cancelamento..." required></textarea>
+                            <small class="form-text text-muted">
+                                Forneça informações detalhadas sobre o cancelamento para controle interno
+                            </small>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <h6><i class="bi bi-exclamation-triangle"></i> Atenção</h6>
+                            <p class="mb-2">
+                                <strong>Ao cancelar esta sangria:</strong>
+                            </p>
+                            <ul class="mb-0">
+                                <li>O status será alterado para <strong>CANCELADA</strong></li>
+                                <li>A sangria não poderá mais ser editada ou marcada como paga</li>
+                                <li>O valor não será considerado nos relatórios financeiros</li>
+                                <li>Esta ação não pode ser desfeita</li>
+                            </ul>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="confirmarCancelamento" required>
+                            <label class="form-check-label" for="confirmarCancelamento">
+                                Confirmo que desejo cancelar esta sangria e entendo que esta ação não pode ser desfeita
+                            </label>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'financeiro:detalhes_sangria' sangria.id %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-warning" id="btnCancelar" disabled>
+                                <i class="bi bi-x-circle"></i> Cancelar Sangria
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('confirmarCancelamento');
+    const btnCancelar = document.getElementById('btnCancelar');
+    const motivoSelect = document.getElementById('motivo_cancelamento');
+    const observacoesTextarea = document.getElementById('observacoes_cancelamento');
+    
+    function verificarFormulario() {
+        const motivoPreenchido = motivoSelect.value !== '';
+        const observacoesPreenchidas = observacoesTextarea.value.trim() !== '';
+        const checkboxMarcado = checkbox.checked;
+        
+        btnCancelar.disabled = !(motivoPreenchido && observacoesPreenchidas && checkboxMarcado);
+    }
+    
+    checkbox.addEventListener('change', verificarFormulario);
+    motivoSelect.addEventListener('change', verificarFormulario);
+    observacoesTextarea.addEventListener('input', verificarFormulario);
+    
+    // Adicionar placeholder dinâmico baseado no motivo selecionado
+    motivoSelect.addEventListener('change', function() {
+        const motivo = this.value;
+        let placeholder = 'Descreva detalhadamente o motivo do cancelamento...';
+        
+        switch(motivo) {
+            case 'ERRO_LANCAMENTO':
+                placeholder = 'Descreva qual foi o erro no lançamento (ex: valor incorreto, categoria errada, etc.)...';
+                break;
+            case 'DUPLICIDADE':
+                placeholder = 'Informe onde está o lançamento original ou correto...';
+                break;
+            case 'CANCELAMENTO_FORNECEDOR':
+                placeholder = 'Explique o motivo do cancelamento pelo fornecedor...';
+                break;
+            case 'MUDANCA_PLANEJAMENTO':
+                placeholder = 'Descreva a mudança no planejamento que motivou o cancelamento...';
+                break;
+            case 'FALTA_APROVACAO':
+                placeholder = 'Informe quem deveria aprovar e por que não foi aprovado...';
+                break;
+            case 'PROBLEMA_ORCAMENTO':
+                placeholder = 'Explique o problema orçamentário que motivou o cancelamento...';
+                break;
+            case 'OUTRO':
+                placeholder = 'Descreva detalhadamente o motivo do cancelamento...';
+                break;
+        }
+        
+        observacoesTextarea.placeholder = placeholder;
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Emitir NFe Manual{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card-nfe {
+        border-left: 4px solid #28a745;
+    }
+    .valor-calculado {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+    }
+    .help-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    .required-field {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-file-invoice"></i> Emitir NFe Manual</h2>
+                <a href="{% url 'financeiro:listar_nfe' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card card-nfe">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-edit"></i> Dados da Nota Fiscal</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="nfeForm">
+                        {% csrf_token %}
+                        
+                        <!-- Dados do Cliente -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-user"></i> Dados do Cliente
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                {{ form.cliente_nome|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.cliente_email|as_crispy_field }}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                {{ form.cliente_cpf|as_crispy_field }}
+                                <div class="help-text">Informe CPF ou CNPJ</div>
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.cliente_cnpj|as_crispy_field }}
+                                <div class="help-text">Informe CPF ou CNPJ</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Endereço do Cliente -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-map-marker-alt"></i> Endereço do Cliente
+                                </h6>
+                            </div>
+                            
+                            <div class="col-md-8">
+                                {{ form.cliente_endereco|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.cliente_numero|as_crispy_field }}
+                            </div>
+                            
+                            <div class="col-md-4">
+                                {{ form.cliente_complemento|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.cliente_bairro|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.cliente_cep|as_crispy_field }}
+                            </div>
+                            
+                            <div class="col-md-8">
+                                {{ form.cliente_cidade|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.cliente_uf|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <!-- Dados dos Serviços -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-cogs"></i> Dados dos Serviços
+                                </h6>
+                            </div>
+                            
+                            <div class="col-12">
+                                {{ form.discriminacao_servicos|as_crispy_field }}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                {{ form.valor_servicos|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.aliquota_iss|as_crispy_field }}
+                            </div>
+                            
+                            <div class="col-12">
+                                {{ form.observacoes|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'financeiro:listar_nfe' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-paper-plane"></i> Emitir NFe
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Resumo da NFe -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-calculator"></i> Resumo da NFe</h6>
+                </div>
+                <div class="card-body">
+                    <div class="valor-calculado">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Valor dos Serviços:</span>
+                            <span id="valorServicos">R$ 0,00</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Alíquota ISS:</span>
+                            <span id="aliquotaISS">0,00%</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Valor ISS:</span>
+                            <span id="valorISS">R$ 0,00</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold">
+                            <span>Valor Total:</span>
+                            <span id="valorTotal">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Informações Importantes -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Informações Importantes</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            Campos marcados com <span class="required-field">*</span> são obrigatórios
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            Informe CPF para pessoa física ou CNPJ para pessoa jurídica
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            A discriminação deve descrever detalhadamente os serviços
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            O ISS será calculado automaticamente
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle text-success"></i>
+                            A NFe será enviada automaticamente para a SEFAZ
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function calcularISS() {
+    const valorServicos = parseFloat(document.getElementById('id_valor_servicos').value) || 0;
+    const aliquotaISS = parseFloat(document.getElementById('id_aliquota_iss').value) || 0;
+    
+    const valorISS = (valorServicos * aliquotaISS) / 100;
+    const valorTotal = valorServicos; // Para NFSe, o valor total é igual ao valor dos serviços
+    
+    // Atualiza os campos de exibição
+    document.getElementById('valorServicos').textContent = 'R$ ' + valorServicos.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    document.getElementById('aliquotaISS').textContent = aliquotaISS.toLocaleString('pt-BR', {minimumFractionDigits: 2}) + '%';
+    document.getElementById('valorISS').textContent = 'R$ ' + valorISS.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    document.getElementById('valorTotal').textContent = 'R$ ' + valorTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+}
+
+// Máscaras para CPF, CNPJ e CEP
+document.addEventListener('DOMContentLoaded', function() {
+    // Máscara CPF
+    const cpfInput = document.getElementById('id_cliente_cpf');
+    if (cpfInput) {
+        cpfInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            e.target.value = value;
+        });
+    }
+    
+    // Máscara CNPJ
+    const cnpjInput = document.getElementById('id_cliente_cnpj');
+    if (cnpjInput) {
+        cnpjInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{2})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1/$2');
+            value = value.replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+            e.target.value = value;
+        });
+    }
+    
+    // Máscara CEP
+    const cepInput = document.getElementById('id_cliente_cep');
+    if (cepInput) {
+        cepInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            e.target.value = value;
+        });
+    }
+    
+    // Calcula ISS inicial
+    calcularISS();
+    
+    // Validação de CPF/CNPJ mutuamente exclusivos
+    const cpfField = document.getElementById('id_cliente_cpf');
+    const cnpjField = document.getElementById('id_cliente_cnpj');
+    
+    if (cpfField && cnpjField) {
+        cpfField.addEventListener('input', function() {
+            if (this.value.trim()) {
+                cnpjField.disabled = true;
+                cnpjField.value = '';
+            } else {
+                cnpjField.disabled = false;
+            }
+        });
+        
+        cnpjField.addEventListener('input', function() {
+            if (this.value.trim()) {
+                cpfField.disabled = true;
+                cpfField.value = '';
+            } else {
+                cpfField.disabled = false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

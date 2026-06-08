@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contratos - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Contratos</h1>
+            <p class="mb-0 text-muted">Gerencie todos os contratos de locação</p>
+        </div>
+        <a href="{% url 'contratos:cadastrar' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Novo Contrato
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" name="search" class="form-control" placeholder="Número do contrato, inquilino ou imóvel..." value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">Todos</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div>
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="bi bi-search"></i> Filtrar
+                        </button>
+                        <a href="{% url 'contratos:listar' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise"></i> Limpar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Contratos -->
+    <div class="card">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">Lista de Contratos</h6>
+        </div>
+        <div class="card-body">
+            {% if contratos %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Número</th>
+                                <th>Inquilino</th>
+                                <th>Imóvel</th>
+                                <th>Valor</th>
+                                <th>Vigência</th>
+                                <th>Status</th>
+                                <th width="200">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for contrato in contratos %}
+                            <tr>
+                                <td>
+                                    <strong>{{ contrato.numero }}</strong>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm me-2">
+                                            <i class="bi bi-person-circle text-primary fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <strong>{{ contrato.inquilino.nome }}</strong><br>
+                                            <small class="text-muted">{{ contrato.inquilino.cpf }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong>{{ contrato.imovel.endereco_completo|truncatechars:40 }}</strong><br>
+                                    <small class="text-muted">{{ contrato.imovel.proprietario.nome }}</small>
+                                </td>
+                                <td>
+                                    <strong class="text-success">R$ {{ contrato.valor_aluguel|floatformat:2 }}</strong>
+                                </td>
+                                <td>
+                                    {{ contrato.data_inicio|date:"d/m/Y" }} - {{ contrato.data_fim|date:"d/m/Y" }}<br>
+                                    <small class="text-muted">
+                                        {% if contrato.dias_restantes > 0 %}
+                                            {{ contrato.dias_restantes }} dias restantes
+                                        {% else %}
+                                            Vencido há {% widthratio contrato.dias_restantes -1 -1 %} dias
+                                        {% endif %}
+                                    </small>
+                                </td>
+                                <td>
+                                    {% if contrato.status == 'ATIVO' %}
+                                        <span class="badge bg-success">{{ contrato.get_status_display }}</span>
+                                    {% elif contrato.status == 'VENCIDO' %}
+                                        <span class="badge bg-danger">{{ contrato.get_status_display }}</span>
+                                    {% elif contrato.status == 'SUSPENSO' %}
+                                        <span class="badge bg-warning">{{ contrato.get_status_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ contrato.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="btn-group" role="group">
+                                        <a href="{% url 'contratos:detalhar' contrato.pk %}" class="btn btn-sm btn-outline-info" title="Visualizar">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'contratos:editar' contrato.pk %}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'contratos:cadastrar_reajuste' contrato.pk %}" class="btn btn-sm btn-outline-success" title="Reajuste">
+                                            <i class="bi bi-arrow-up-circle"></i>
+                                        </a>
+                                        <a href="{% url 'contratos:excluir' contrato.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir"
+                                           onclick="return confirm('Tem certeza que deseja excluir o contrato {{ contrato.numero }}?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação -->
+                {% if is_paginated %}
+                <nav aria-label="Navegação de páginas">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                    <i class="bi bi-chevron-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                    <i class="bi bi-chevron-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-file-text text-muted" style="font-size: 4rem;"></i>
+                    <h5 class="mt-3 text-muted">Nenhum contrato encontrado</h5>
+                    <p class="text-muted">Não há contratos cadastrados ou que correspondam aos filtros aplicados.</p>
+                    <a href="{% url 'contratos:cadastrar' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Cadastrar Primeiro Contrato
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

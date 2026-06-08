@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ inquilino.nome }} - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">{{ inquilino.nome }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'core:listar_inquilinos' %}">Inquilinos</a></li>
+                    <li class="breadcrumb-item active">{{ inquilino.nome }}</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <a href="{% url 'core:editar_inquilino' inquilino.pk %}" class="btn btn-warning me-2">
+                <i class="bi bi-pencil"></i> Editar
+            </a>
+            <a href="{% url 'core:listar_inquilinos' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Dados Pessoais -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Dados Pessoais</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Nome Completo</label>
+                                <p class="fw-bold">{{ inquilino.nome }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">CPF</label>
+                                <p class="fw-bold">{{ inquilino.cpf }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Email</label>
+                                <p class="fw-bold">{{ inquilino.email|default:"-" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Telefone</label>
+                                <p class="fw-bold">{{ inquilino.telefone|default:"-" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Data de Nascimento</label>
+                                <p class="fw-bold">{{ inquilino.data_nascimento|date:"d/m/Y"|default:"-" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Estado Civil</label>
+                                <p class="fw-bold">{{ inquilino.get_estado_civil_display|default:"-" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Profissão</label>
+                                <p class="fw-bold">{{ inquilino.profissao|default:"-" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Endereço -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Endereço</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Endereço Completo</label>
+                        <p class="fw-bold">{{ inquilino.endereco|default:"-" }}</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Cidade</label>
+                                <p class="fw-bold">{{ inquilino.cidade|default:"-" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Estado</label>
+                                <p class="fw-bold">{{ inquilino.estado|default:"-" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">CEP</label>
+                                <p class="fw-bold">{{ inquilino.cep|default:"-" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Status -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Status</h6>
+                </div>
+                <div class="card-body text-center">
+                    {% if inquilino.ativo %}
+                        <div class="text-success">
+                            <i class="bi bi-check-circle" style="font-size: 3rem;"></i>
+                            <h5 class="mt-2 text-success">Ativo</h5>
+                            <p class="text-muted">Inquilino ativo no sistema</p>
+                        </div>
+                    {% else %}
+                        <div class="text-secondary">
+                            <i class="bi bi-x-circle" style="font-size: 3rem;"></i>
+                            <h5 class="mt-2 text-secondary">Inativo</h5>
+                            <p class="text-muted">Inquilino inativo no sistema</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Ações</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'core:editar_inquilino' inquilino.pk %}" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Editar Dados
+                        </a>
+                        <a href="{% url 'core:excluir_inquilino' inquilino.pk %}" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Excluir Inquilino
+                        </a>
+                        <hr>
+                        <a href="{% url 'core:listar_inquilinos' %}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Voltar à Lista
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

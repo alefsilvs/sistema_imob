@@ -1,0 +1,554 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Configuração 2FA - Sistema Imobiliário{% endblock %}
+
+{% block extra_css %}
+<style>
+    .setup-2fa-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        color: white;
+    }
+    
+    .setup-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 10px;
+        padding: 2rem;
+        color: #333;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .step-indicator {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+    
+    .step {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    .step.active {
+        background: #28a745;
+        color: white;
+    }
+    
+    .step.inactive {
+        background: #e9ecef;
+        color: #6c757d;
+    }
+    
+    .step-line {
+        width: 50px;
+        height: 2px;
+        background: #e9ecef;
+        margin-top: 19px;
+    }
+    
+    .step-line.active {
+        background: #28a745;
+    }
+    
+    .qr-code-container {
+        text-align: center;
+        padding: 2rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin: 1rem 0;
+    }
+    
+    .qr-code-image {
+        max-width: 200px;
+        border: 3px solid #28a745;
+        border-radius: 10px;
+        padding: 10px;
+        background: white;
+    }
+    
+    .secret-key {
+        background: #f8f9fa;
+        border: 2px dashed #28a745;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+        font-family: 'Courier New', monospace;
+        font-size: 1.1em;
+        text-align: center;
+        word-break: break-all;
+    }
+    
+    .verification-input {
+        font-size: 2rem;
+        text-align: center;
+        letter-spacing: 0.5em;
+        padding: 1rem;
+        border: 3px solid #28a745;
+        border-radius: 10px;
+        width: 100%;
+        margin: 1rem 0;
+    }
+    
+    .btn-2fa {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+    
+    .btn-2fa:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        color: white;
+    }
+    
+    .btn-danger-2fa {
+        background: linear-gradient(45deg, #dc3545, #c82333);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+    
+    .btn-danger-2fa:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        color: white;
+    }
+    
+    .instructions {
+        background: #e7f3ff;
+        border-left: 4px solid #007bff;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .app-recommendations {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .app-item {
+        display: flex;
+        align-items: center;
+        margin: 0.5rem 0;
+        padding: 0.5rem;
+        background: white;
+        border-radius: 5px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .app-icon {
+        width: 30px;
+        height: 30px;
+        margin-right: 10px;
+        border-radius: 5px;
+    }
+    
+    .status-enabled {
+        color: #28a745;
+        font-weight: bold;
+    }
+    
+    .status-disabled {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    
+    .security-warning {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+        color: #856404;
+    }
+    
+    .backup-codes-container {
+        background: #f8f9fa;
+        border: 2px solid #28a745;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+    }
+    
+    .backup-code-item {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 0.75rem;
+        text-align: center;
+        font-family: 'Courier New', monospace;
+        font-size: 1.1em;
+        font-weight: bold;
+        color: #495057;
+        transition: all 0.3s ease;
+    }
+    
+    .backup-code-item:hover {
+        background: #e9ecef;
+        border-color: #28a745;
+        transform: translateY(-1px);
+    }
+    
+    .backup-code-item code {
+        background: none;
+        color: inherit;
+        font-size: inherit;
+        padding: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="setup-2fa-container">
+    <div class="text-center mb-4">
+        <h2><i class="fas fa-shield-alt"></i> Autenticação de Dois Fatores</h2>
+        <p class="mb-0">Configure uma camada adicional de segurança para sua conta</p>
+    </div>
+    
+    <div class="setup-card">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% if two_factor_enabled %}
+            <!-- 2FA Já Habilitado -->
+            <div class="text-center">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    <h3 class="mt-3 status-enabled">2FA Ativado</h3>
+                    <p class="text-muted">Sua conta está protegida com autenticação de dois fatores</p>
+                </div>
+                
+                <div class="security-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Importante:</strong> Mantenha seu aplicativo autenticador sempre acessível. 
+                    Sem ele, você não conseguirá acessar o sistema.
+                </div>
+                
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="disable">
+                    <button type="submit" class="btn btn-danger-2fa" 
+                            onclick="return confirm('Tem certeza que deseja desativar o 2FA? Isso reduzirá a segurança da sua conta.')">
+                        <i class="fas fa-times"></i> Desativar 2FA
+                    </button>
+                </form>
+            </div>
+            
+        {% elif step == 'verify' %}
+            <!-- Etapa de Verificação -->
+            <div class="step-indicator">
+                <div class="step active">1</div>
+                <div class="step-line active"></div>
+                <div class="step active">2</div>
+                <div class="step-line inactive"></div>
+                <div class="step inactive">3</div>
+            </div>
+            
+            <h4 class="text-center mb-4">Verificar Configuração</h4>
+            
+            <div class="instructions">
+                <i class="fas fa-info-circle"></i>
+                <strong>Passo 2:</strong> Digite o código de 6 dígitos que aparece no seu aplicativo autenticador para confirmar a configuração.
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="verify">
+                <input type="hidden" name="secret" value="{{ secret }}">
+                
+                <div class="form-group">
+                    <label for="code">Código de Verificação:</label>
+                    <input type="text" 
+                           id="code" 
+                           name="code" 
+                           class="verification-input" 
+                           placeholder="000000" 
+                           maxlength="6" 
+                           pattern="[0-9]{6}" 
+                           required 
+                           autocomplete="off">
+                    <small class="form-text text-muted">
+                        Digite o código de 6 dígitos do seu aplicativo autenticador
+                    </small>
+                </div>
+                
+                <button type="submit" class="btn btn-2fa">
+                    <i class="fas fa-check"></i> Verificar e Ativar 2FA
+                </button>
+            </form>
+            
+        {% else %}
+            <!-- Etapa Inicial de Configuração -->
+            <div class="step-indicator">
+                <div class="step active">1</div>
+                <div class="step-line inactive"></div>
+                <div class="step inactive">2</div>
+                <div class="step-line inactive"></div>
+                <div class="step inactive">3</div>
+            </div>
+            
+            <h4 class="text-center mb-4">Configurar Aplicativo Autenticador</h4>
+            
+            <div class="instructions">
+                <i class="fas fa-info-circle"></i>
+                <strong>Passo 1:</strong> Instale um aplicativo autenticador no seu smartphone e escaneie o QR Code abaixo ou digite a chave secreta manualmente.
+            </div>
+            
+            <div class="app-recommendations">
+                <h6><i class="fas fa-mobile-alt"></i> Aplicativos Recomendados:</h6>
+                <div class="app-item">
+                    <i class="fab fa-google" style="color: #4285f4; font-size: 24px; margin-right: 10px;"></i>
+                    <div>
+                        <strong>Google Authenticator</strong>
+                        <small class="d-block text-muted">Gratuito - Android/iOS</small>
+                    </div>
+                </div>
+                <div class="app-item">
+                    <i class="fas fa-shield-alt" style="color: #1976d2; font-size: 24px; margin-right: 10px;"></i>
+                    <div>
+                        <strong>Microsoft Authenticator</strong>
+                        <small class="d-block text-muted">Gratuito - Android/iOS</small>
+                    </div>
+                </div>
+                <div class="app-item">
+                    <i class="fas fa-key" style="color: #ff6b35; font-size: 24px; margin-right: 10px;"></i>
+                    <div>
+                        <strong>Authy</strong>
+                        <small class="d-block text-muted">Gratuito - Android/iOS/Desktop</small>
+                    </div>
+                </div>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="enable">
+                
+                <button type="submit" class="btn btn-2fa">
+                    <i class="fas fa-qrcode"></i> Gerar QR Code
+                </button>
+            </form>
+            
+        {% endif %}
+        
+        {% if step == 'verify' and qr_code %}
+            <!-- Exibir QR Code -->
+            <div class="qr-code-container">
+                <h5><i class="fas fa-qrcode"></i> Escaneie o QR Code</h5>
+                <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code 2FA" class="qr-code-image">
+                
+                <div class="mt-3">
+                    <h6>Ou digite a chave manualmente:</h6>
+                    <div class="secret-key">
+                        {{ secret }}
+                    </div>
+                    <small class="text-muted">
+                        Guarde esta chave em local seguro como backup
+                    </small>
+                </div>
+            </div>
+            
+        {% elif step == 'backup_codes' %}
+            <!-- Exibir Códigos de Backup -->
+            <div class="step-indicator">
+                <div class="step active">1</div>
+                <div class="step-line active"></div>
+                <div class="step active">2</div>
+                <div class="step-line active"></div>
+                <div class="step active">3</div>
+            </div>
+            
+            <div class="text-center">
+                <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                <h4 class="mt-3 text-success">2FA Configurado com Sucesso!</h4>
+            </div>
+            
+            <div class="security-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>IMPORTANTE:</strong> Guarde estes códigos de backup em local seguro. 
+                Eles podem ser usados para acessar sua conta se você perder seu dispositivo autenticador.
+            </div>
+            
+            <div class="backup-codes-container">
+                <h5><i class="fas fa-key"></i> Códigos de Backup</h5>
+                <p class="text-muted">Cada código pode ser usado apenas uma vez:</p>
+                
+                <div class="row">
+                    {% for code in backup_codes %}
+                        <div class="col-md-6 mb-2">
+                            <div class="backup-code-item">
+                                <code>{{ code }}</code>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="mt-3 text-center">
+                    <button onclick="printBackupCodes()" class="btn btn-outline-primary mr-2">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <button onclick="downloadBackupCodes()" class="btn btn-outline-success">
+                        <i class="fas fa-download"></i> Baixar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{% url 'security:dashboard' %}" class="btn btn-2fa">
+                    <i class="fas fa-check"></i> Finalizar Configuração
+                </a>
+            </div>
+            
+        {% endif %}
+        
+        <div class="text-center mt-4">
+            <a href="{% url 'security:dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-focus no campo de código
+document.addEventListener('DOMContentLoaded', function() {
+    const codeInput = document.getElementById('code');
+    if (codeInput) {
+        codeInput.focus();
+        
+        // Permitir apenas números
+        codeInput.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+        
+        // Auto-submit quando 6 dígitos forem digitados
+        codeInput.addEventListener('input', function(e) {
+            if (this.value.length === 6) {
+                // Pequeno delay para melhor UX
+                setTimeout(() => {
+                    this.form.submit();
+                }, 500);
+            }
+        });
+    }
+});
+
+// Função para imprimir códigos de backup
+function printBackupCodes() {
+    const backupCodes = [];
+    document.querySelectorAll('.backup-code-item code').forEach(code => {
+        backupCodes.push(code.textContent);
+    });
+    
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Códigos de Backup 2FA - Sistema Imobiliário</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    .header { text-align: center; margin-bottom: 30px; }
+                    .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; margin: 20px 0; border-radius: 5px; }
+                    .codes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 20px 0; }
+                    .code { font-family: 'Courier New', monospace; font-size: 14px; padding: 10px; border: 1px solid #ddd; text-align: center; }
+                    .footer { margin-top: 30px; font-size: 12px; color: #666; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h2>Códigos de Backup 2FA</h2>
+                    <p>Sistema Imobiliário - Usuário: {{ user.username }}</p>
+                    <p>Data: ${new Date().toLocaleDateString('pt-BR')}</p>
+                </div>
+                
+                <div class="warning">
+                    <strong>IMPORTANTE:</strong>
+                    <ul>
+                        <li>Guarde estes códigos em local seguro</li>
+                        <li>Cada código pode ser usado apenas uma vez</li>
+                        <li>Use apenas se perder acesso ao seu aplicativo autenticador</li>
+                        <li>Não compartilhe estes códigos com ninguém</li>
+                    </ul>
+                </div>
+                
+                <div class="codes">
+                    ${backupCodes.map(code => `<div class="code">${code}</div>`).join('')}
+                </div>
+                
+                <div class="footer">
+                    <p>Este documento contém informações confidenciais de segurança.</p>
+                    <p>Mantenha-o em local seguro e destrua-o adequadamente quando não precisar mais.</p>
+                </div>
+            </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.print();
+}
+
+// Função para baixar códigos de backup
+function downloadBackupCodes() {
+    const backupCodes = [];
+    document.querySelectorAll('.backup-code-item code').forEach(code => {
+        backupCodes.push(code.textContent);
+    });
+    
+    const content = `CÓDIGOS DE BACKUP 2FA - SISTEMA IMOBILIÁRIO\n` +
+                   `Usuário: {{ user.username }}\n` +
+                   `Data: ${new Date().toLocaleDateString('pt-BR')}\n\n` +
+                   `IMPORTANTE:\n` +
+                   `- Guarde estes códigos em local seguro\n` +
+                   `- Cada código pode ser usado apenas uma vez\n` +
+                   `- Use apenas se perder acesso ao seu aplicativo autenticador\n` +
+                   `- Não compartilhe estes códigos com ninguém\n\n` +
+                   `CÓDIGOS DE BACKUP:\n` +
+                   backupCodes.map((code, index) => `${index + 1}. ${code}`).join('\n') +
+                   `\n\nEste arquivo contém informações confidenciais de segurança.\n` +
+                   `Mantenha-o em local seguro e exclua-o quando não precisar mais.`;
+    
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup-codes-2fa-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

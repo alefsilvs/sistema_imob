@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalhes da Sangria - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Detalhes da Sangria</h1>
+            <p class="mb-0 text-muted">{{ sangria.descricao }}</p>
+        </div>
+        <div>
+            {% if sangria.status == 'pendente' %}
+                <a href="{% url 'financeiro:editar_sangria' sangria.id %}" class="btn btn-primary me-2">
+                    <i class="bi bi-pencil"></i> Editar
+                </a>
+                <a href="{% url 'financeiro:marcar_sangria_paga' sangria.id %}" class="btn btn-success me-2">
+                    <i class="bi bi-check"></i> Marcar como Paga
+                </a>
+                <a href="{% url 'financeiro:cancelar_sangria' sangria.id %}" class="btn btn-warning me-2">
+                    <i class="bi bi-x"></i> Cancelar
+                </a>
+            {% endif %}
+            <a href="{% url 'financeiro:listar_sangrias' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Informações Gerais</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Descrição</label>
+                                <p class="form-control-plaintext">{{ sangria.descricao }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Categoria</label>
+                                <p class="form-control-plaintext">
+                                    <span class="badge bg-secondary">{{ sangria.get_categoria_display }}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Valor</label>
+                                <p class="form-control-plaintext">
+                                    <strong class="h5 text-primary">R$ {{ sangria.valor|floatformat:2 }}</strong>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Data de Vencimento</label>
+                                <p class="form-control-plaintext">{{ sangria.data_vencimento|date:"d/m/Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Status</label>
+                                <p class="form-control-plaintext">
+                                    {% if sangria.status == 'pendente' %}
+                                        <span class="badge bg-warning">{{ sangria.get_status_display }}</span>
+                                    {% elif sangria.status == 'pago' %}
+                                        <span class="badge bg-success">{{ sangria.get_status_display }}</span>
+                                    {% elif sangria.status == 'cancelado' %}
+                                        <span class="badge bg-danger">{{ sangria.get_status_display }}</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Forma de Pagamento</label>
+                                <p class="form-control-plaintext">{{ sangria.get_forma_pagamento_display }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if sangria.data_pagamento %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">Data de Pagamento</label>
+                                    <p class="form-control-plaintext">{{ sangria.data_pagamento|date:"d/m/Y H:i" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if sangria.observacoes %}
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Observações</label>
+                            <p class="form-control-plaintext">{{ sangria.observacoes|linebreaks }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if sangria.imovel or sangria.contrato %}
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-info">Relacionamentos</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if sangria.imovel %}
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Imóvel Relacionado</label>
+                                <p class="form-control-plaintext">
+                                    <a href="{% url 'imoveis:detalhes_imovel' sangria.imovel.id %}" class="text-decoration-none">
+                                        <i class="bi bi-house"></i> {{ sangria.imovel }}
+                                    </a>
+                                </p>
+                            </div>
+                        {% endif %}
+
+                        {% if sangria.contrato %}
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Contrato Relacionado</label>
+                                <p class="form-control-plaintext">
+                                    <a href="{% url 'contratos:detalhes_contrato' sangria.contrato.id %}" class="text-decoration-none">
+                                        <i class="bi bi-file-text"></i> {{ sangria.contrato }}
+                                    </a>
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-success">Informações de Controle</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Data de Criação</label>
+                        <p class="form-control-plaintext small">{{ sangria.data_criacao|date:"d/m/Y H:i" }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Última Atualização</label>
+                        <p class="form-control-plaintext small">{{ sangria.data_atualizacao|date:"d/m/Y H:i" }}</p>
+                    </div>
+
+                    {% if sangria.usuario_criacao %}
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Criado por</label>
+                            <p class="form-control-plaintext small">{{ sangria.usuario_criacao.get_full_name|default:sangria.usuario_criacao.username }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if sangria.usuario_atualizacao %}
+                        <div class="mb-3">
+                            <label class="form-label text-muted">Atualizado por</label>
+                            <p class="form-control-plaintext small">{{ sangria.usuario_atualizacao.get_full_name|default:sangria.usuario_atualizacao.username }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if sangria.status == 'pendente' %}
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="m-0 font-weight-bold text-warning">Ações Rápidas</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'financeiro:marcar_sangria_paga' sangria.id %}" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Marcar como Paga
+                            </a>
+                            <a href="{% url 'financeiro:editar_sangria' sangria.id %}" class="btn btn-primary">
+                                <i class="bi bi-pencil"></i> Editar Sangria
+                            </a>
+                            <a href="{% url 'financeiro:cancelar_sangria' sangria.id %}" class="btn btn-warning">
+                                <i class="bi bi-x-circle"></i> Cancelar Sangria
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-danger">Zona de Perigo</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Esta ação não pode ser desfeita.</p>
+                    <a href="{% url 'financeiro:excluir_sangria' sangria.id %}" class="btn btn-danger btn-sm">
+                        <i class="bi bi-trash"></i> Excluir Sangria
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,1223 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard WhatsApp{% endblock %}
+
+{% block extra_css %}
+<style>
+    .whatsapp-container {
+        padding: 20px;
+    }
+    .nav-tabs .nav-link {
+        color: #495057;
+        font-weight: 500;
+        border: none;
+        border-bottom: 3px solid transparent;
+    }
+    .nav-tabs .nav-link.active {
+        color: #25D366;
+        border-bottom: 3px solid #25D366;
+        background-color: transparent;
+    }
+    .nav-tabs .nav-link:hover {
+        border-color: transparent;
+        color: #128C7E;
+    }
+    .card-whatsapp {
+        border-top: 4px solid #25D366;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="whatsapp-container">
+    {% if tenant_required %}
+        <div class="alert alert-warning mb-3">
+            Para usar o WhatsApp Dashboard, acesse o sistema pelo subdomínio do seu tenant.
+        </div>
+    {% endif %}
+    {% if whatsapp_dashboard_error %}
+        <div class="alert alert-danger mb-3">
+            {{ whatsapp_dashboard_error }}
+        </div>
+    {% endif %}
+    <div class="alert d-none" id="wa-notice"></div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0"><i class="fab fa-whatsapp text-success me-2"></i> WhatsApp Dashboard</h2>
+    </div>
+
+    <div class="card card-whatsapp">
+        <div class="card-header bg-white pb-0">
+            <ul class="nav nav-tabs" id="whatsappTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="filtro-tab" data-bs-toggle="tab" data-bs-target="#filtro" type="button" role="tab">Filtro de Inquilinos</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="config-tab" data-bs-toggle="tab" data-bs-target="#config" type="button" role="tab">Configurações (Mensagem)</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="conectar-tab" data-bs-toggle="tab" data-bs-target="#conectar" type="button" role="tab">Conectar / QR Code</button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content" id="whatsappTabsContent">
+                
+                <!-- Tab: Filtro -->
+                <div class="tab-pane fade show active" id="filtro" role="tabpanel">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <label>Status:</label>
+                            <select class="form-select form-select-sm" id="wa-status-select" style="width: auto;" onchange="waApplyFilters()">
+                                <option value="ATIVO" {% if wa_status_filtro == 'ATIVO' %}selected{% endif %}>ATIVO</option>
+                                <option value="INATIVO" {% if wa_status_filtro == 'INATIVO' %}selected{% endif %}>INATIVO</option>
+                                <option value="TODOS" {% if wa_status_filtro == 'TODOS' %}selected{% endif %}>TODOS</option>
+                            </select>
+                            <input class="form-control form-control-sm" id="wa-q" style="width: 220px;" placeholder="Buscar nome/telefone" value="{{ wa_q|default:'' }}" onkeydown="if(event.key==='Enter'){event.preventDefault();waApplyFilters();}">
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="checkbox" id="wa-com-telefone" {% if wa_com_telefone %}checked{% endif %} onchange="waApplyFilters()">
+                                <label class="form-check-label small" for="wa-com-telefone">Com telefone</label>
+                            </div>
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="checkbox" id="wa-com-contrato" {% if wa_com_contrato %}checked{% endif %} onchange="waApplyFilters()">
+                                <label class="form-check-label small" for="wa-com-contrato">Com contrato ativo</label>
+                            </div>
+                            {% if user.is_superuser %}
+                            <div class="form-check form-check-inline mb-0">
+                                <input class="form-check-input" type="checkbox" id="wa-inclui-sem-tenant" {% if wa_inclui_sem_tenant %}checked{% endif %} onchange="waApplyFilters()">
+                                <label class="form-check-label small" for="wa-inclui-sem-tenant">Incluir sem tenant</label>
+                            </div>
+                            {% endif %}
+                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="waClearFilters()">Limpar</button>
+                            <div class="small text-muted ms-2">Selecionados: <span id="wa-selected-count">0</span></div>
+                        </div>
+                        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#waExcecoesModal">
+                            <i class="fas fa-plus"></i> Exceto Adicionar...
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-center" style="width: 48px;">
+                                        <input type="checkbox" class="form-check-input" id="wa-select-all" onchange="waToggleSelectAll(this.checked)">
+                                    </th>
+                                    <th>Inquilino</th>
+                                    <th class="text-center" style="width: 100px;">Excluir</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for inq in inquilinos|slice:":50" %}
+                                <tr>
+                                    <td class="text-center">
+                                        <input type="checkbox" class="form-check-input wa-inq-check" data-id="{{ inq.id }}" data-nome="{{ inq.nome|default:''|escape }}" onchange="waToggleInquilino(this)">
+                                    </td>
+                                    <td>{{ inq.nome }}</td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="waExcluirInquilino({{ inq.id }})">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">
+                                        Nenhum inquilino encontrado.
+                                        {% if wa_total_excluded|default:0|add:0 > 0 %}
+                                            {{ wa_total_excluded }} em exceções. Clique em "Exceto Adicionar..." para remover.
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-end text-muted small">
+                        Total: {{ wa_total_visiveis|default:0 }} | Exceções: {{ wa_total_excluded|default:0 }}
+                    </div>
+
+                    <div class="modal fade" id="waExcecoesModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Exceções (Não enviar para)</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Adicionar inquilino</label>
+                                        <div class="d-flex gap-2">
+                                            <select id="wa-excecao-select" class="form-select form-select-sm">
+                                                {% for inq in inquilinos_base %}
+                                                    {% if inq.id not in wa_excluded_ids %}
+                                                        <option value="{{ inq.id }}">{{ inq.nome }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                            <button type="button" class="btn btn-sm btn-danger" onclick="waAddExcecao()">Adicionar</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="fw-bold mb-2">Exceções atuais</div>
+                                    <div class="list-group">
+                                        {% for inq in wa_excluded_inquilinos %}
+                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                <span>{{ inq.nome }}</span>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="waRemoverExcecao({{ inq.id }})">Remover</button>
+                                            </div>
+                                        {% empty %}
+                                            <div class="text-muted small">Nenhuma exceção cadastrada.</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Configurações -->
+                <div class="tab-pane fade" id="config" role="tabpanel">
+                    <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="msg-geral-tab" data-bs-toggle="pill" data-bs-target="#msg-geral" type="button" role="tab">Mensagem Geral</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="boas-vindas-tab" data-bs-toggle="pill" data-bs-target="#boas-vindas" type="button" role="tab">Boas-vindas</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="cob-aluguel-tab" data-bs-toggle="pill" data-bs-target="#cob-aluguel" type="button" role="tab">Cobrança Aluguel</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="cob-iptu-tab" data-bs-toggle="pill" data-bs-target="#cob-iptu" type="button" role="tab">Cobrança IPTU</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="contrato-vencendo-tab" data-bs-toggle="pill" data-bs-target="#contrato-vencendo" type="button" role="tab">Contrato vencendo</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="pills-tabContent">
+                        <div class="tab-pane fade show active" id="msg-geral" role="tabpanel">
+                            <form id="wa-form-geral" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="tipo" value="GERAL">
+                                <div class="mb-3 row">
+                                    <label class="col-sm-2 col-form-label text-end text-muted">Mensagem</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="mensagem" rows="6" placeholder="Digite sua mensagem aqui...">{{ wa_config_geral.mensagem|default:'' }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <div class="col-sm-10 offset-sm-2">
+                                        <button type="button" class="btn btn-primary px-4" onclick="salvarConfigMensagem('wa-form-geral', 'wa-msg-geral-status')">Salvar</button>
+                                        <span class="ms-2 small text-muted" id="wa-msg-geral-status"></span>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-2 col-form-label text-end text-muted">Anexo</label>
+                                    <div class="col-sm-10">
+                                        <input class="form-control" type="file" name="anexo">
+                                        <small class="text-muted">* Campo opcional.</small>
+                                        {% if wa_config_geral.anexo %}
+                                            <div class="small mt-1">
+                                                <a href="{{ wa_config_geral.anexo.url }}" target="_blank">Anexo atual</a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade" id="boas-vindas" role="tabpanel">
+                            <form id="wa-form-boas-vindas" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="tipo" value="BOAS_VINDAS">
+                                <div class="mb-3 row">
+                                    <label class="col-sm-2 col-form-label text-end text-muted">Mensagem</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="mensagem" rows="6" placeholder="Digite a mensagem de boas-vindas...">{{ wa_config_boas_vindas.mensagem|default:'' }}</textarea>
+                                        <div class="small text-muted mt-1">Variáveis: {NOME}</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <div class="col-sm-10 offset-sm-2">
+                                        <button type="button" class="btn btn-primary px-4" onclick="salvarConfigMensagem('wa-form-boas-vindas', 'wa-msg-boas-vindas-status')">Salvar</button>
+                                        <span class="ms-2 small text-muted" id="wa-msg-boas-vindas-status"></span>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-2 col-form-label text-end text-muted">Anexo</label>
+                                    <div class="col-sm-10">
+                                        <input class="form-control" type="file" name="anexo">
+                                        <small class="text-muted">* Campo opcional.</small>
+                                        {% if wa_config_boas_vindas.anexo %}
+                                            <div class="small mt-1">
+                                                <a href="{{ wa_config_boas_vindas.anexo.url }}" target="_blank">Anexo atual</a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade" id="cob-aluguel" role="tabpanel">
+                            <form id="wa-form-aluguel" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="tipo" value="COBRANCA_ALUGUEL">
+                                <div class="mb-3 row">
+                                    <label class="col-sm-2 col-form-label text-end text-muted">Mensagem</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="mensagem" rows="6" placeholder="Digite a mensagem da cobrança de aluguel...">{{ wa_config_aluguel.mensagem|default:'' }}</textarea>
+                                        <div class="small text-muted mt-1">Variáveis: {NOME}, {VALOR}, {VENCIMENTO}</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <div class="col-sm-10 offset-sm-2">
+                                        <button type="button" class="btn btn-primary px-4" onclick="salvarConfigMensagem('wa-form-aluguel', 'wa-msg-aluguel-status')">Salvar</button>
+                                        <span class="ms-2 small text-muted" id="wa-msg-aluguel-status"></span>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-2 col-form-label text-end text-muted">Anexo</label>
+                                    <div class="col-sm-10">
+                                        <input class="form-control" type="file" name="anexo">
+                                        <small class="text-muted">* Campo opcional.</small>
+                                        {% if wa_config_aluguel.anexo %}
+                                            <div class="small mt-1">
+                                                <a href="{{ wa_config_aluguel.anexo.url }}" target="_blank">Anexo atual</a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade" id="cob-iptu" role="tabpanel">
+                            <form id="wa-form-iptu" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="tipo" value="COBRANCA_IPTU">
+                                <div class="mb-3 row">
+                                    <label class="col-sm-2 col-form-label text-end text-muted">Mensagem</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="mensagem" rows="6" placeholder="Digite a mensagem da cobrança de IPTU...">{{ wa_config_iptu.mensagem|default:'' }}</textarea>
+                                        <div class="small text-muted mt-1">Variáveis: {NOME}, {VALOR}, {VENCIMENTO}</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <div class="col-sm-10 offset-sm-2">
+                                        <button type="button" class="btn btn-primary px-4" onclick="salvarConfigMensagem('wa-form-iptu', 'wa-msg-iptu-status')">Salvar</button>
+                                        <span class="ms-2 small text-muted" id="wa-msg-iptu-status"></span>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-2 col-form-label text-end text-muted">Anexo</label>
+                                    <div class="col-sm-10">
+                                        <input class="form-control" type="file" name="anexo">
+                                        <small class="text-muted">* Campo opcional.</small>
+                                        {% if wa_config_iptu.anexo %}
+                                            <div class="small mt-1">
+                                                <a href="{{ wa_config_iptu.anexo.url }}" target="_blank">Anexo atual</a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade" id="contrato-vencendo" role="tabpanel">
+                            <form id="wa-form-contrato-vencendo" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="tipo" value="CONTRATO_VENCENDO">
+                                <div class="mb-3 row">
+                                    <label class="col-sm-2 col-form-label text-end text-muted">Mensagem</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="mensagem" rows="6" placeholder="Digite a mensagem de contrato vencendo...">{{ wa_config_contrato_vencendo.mensagem|default:'' }}</textarea>
+                                        <div class="small text-muted mt-1">Variáveis: {NOME}, {DATA_FIM}, {DIAS}, {IMOVEL}</div>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <div class="col-sm-10 offset-sm-2">
+                                        <button type="button" class="btn btn-primary px-4" onclick="salvarConfigMensagem('wa-form-contrato-vencendo', 'wa-msg-contrato-vencendo-status')">Salvar</button>
+                                        <span class="ms-2 small text-muted" id="wa-msg-contrato-vencendo-status"></span>
+                                    </div>
+                                </div>
+                                <div class="mb-3 row">
+                                    <label class="col-sm-2 col-form-label text-end text-muted">Anexo</label>
+                                    <div class="col-sm-10">
+                                        <input class="form-control" type="file" name="anexo">
+                                        <small class="text-muted">* Campo opcional.</small>
+                                        {% if wa_config_contrato_vencendo.anexo %}
+                                            <div class="small mt-1">
+                                                <a href="{{ wa_config_contrato_vencendo.anexo.url }}" target="_blank">Anexo atual</a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Conectar -->
+                <div class="tab-pane fade" id="conectar" role="tabpanel">
+                    <div class="text-center py-5">
+                        <h4 class="mb-4">Leia o QR code usando o aplicativo WhatsApp</h4>
+                        
+                        <div class="row justify-content-center">
+                            <div class="col-md-4 text-end pe-4 border-end">
+                                <div class="mb-3 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Status</span>
+                                    <span class="text-warning fw-bold" id="wa-status-text">Carregando...</span>
+                                </div>
+
+                                <div class="mb-3 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Boas-vindas</span>
+                                    <button class="btn btn-primary btn-sm px-4 wa-btn" id="wa-btn-send-boas-vindas" disabled onclick="waOpenSendModalFromSelection('BOAS_VINDAS')">Enviar</button>
+                                </div>
+                                {% if not wa_has_msg_boas_vindas %}
+                                    <div class="text-danger small mb-2 text-end" id="wa-warn-boas-vindas">Configure a mensagem de boas-vindas.</div>
+                                {% endif %}
+                                
+                                <div class="mb-3 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Cobrança de aluguel</span>
+                                    <button class="btn btn-primary btn-sm px-4 wa-btn" id="wa-btn-send-aluguel" disabled onclick="waOpenSendModalFromSelection('COBRANCA_ALUGUEL')">Enviar</button>
+                                </div>
+                                {% if not wa_has_msg_aluguel %}
+                                    <div class="text-danger small mb-2 text-end" id="wa-warn-aluguel">Configure a mensagem de cobrança de aluguel.</div>
+                                {% endif %}
+                                
+                                <div class="mb-3 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Cobrança de IPTU</span>
+                                    <button class="btn btn-primary btn-sm px-4 wa-btn" id="wa-btn-send-iptu" disabled onclick="waOpenSendModalFromSelection('COBRANCA_IPTU')">Enviar</button>
+                                </div>
+                                {% if not wa_has_msg_iptu %}
+                                    <div class="text-danger small mb-2 text-end" id="wa-warn-iptu">Configure a mensagem de cobrança de IPTU.</div>
+                                {% endif %}
+                                
+                                <div class="mb-3 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Mensagem Geral</span>
+                                    <button class="btn btn-primary btn-sm px-4 wa-btn" id="wa-btn-send-geral" disabled onclick="waOpenSendModalFromSelection('GERAL')">Enviar</button>
+                                </div>
+                                {% if not wa_has_msg_geral %}
+                                    <div class="text-danger small mb-2 text-end" id="wa-warn-geral">Configure a mensagem geral.</div>
+                                {% endif %}
+
+                                <div class="mb-3 d-flex justify-content-between align-items-center">
+                                    <span class="text-muted">Contrato vencendo</span>
+                                    <button class="btn btn-primary btn-sm px-4 wa-btn" id="wa-btn-send-contrato" disabled onclick="waOpenSendModalFromSelection('CONTRATO_VENCENDO')">Enviar</button>
+                                </div>
+                                {% if not wa_has_msg_contrato_vencendo %}
+                                    <div class="text-danger small mb-2 text-end" id="wa-warn-contrato">Configure a mensagem de contrato vencendo.</div>
+                                {% endif %}
+                                
+                                <div class="mt-4">
+                                    <button class="btn btn-outline-danger btn-sm w-100" id="wa-btn-logout" style="display:none;" onclick="desconectarWhatsApp()">Desconectar Aparelho</button>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-5 ps-4 text-center">
+                                <div id="wa-qr-container" class="bg-light d-flex align-items-center justify-content-center mx-auto" style="width: 250px; height: 250px; border: 2px dashed #ccc; cursor: pointer; overflow: hidden;" onclick="carregarQRCode()">
+                                    <div class="text-primary text-center" id="wa-qr-placeholder">
+                                        <i class="fas fa-redo-alt fa-3x mb-3"></i>
+                                        <h6>CLIQUE PARA<br>RECARREGAR O QR<br>CODE</h6>
+                                    </div>
+                                    <img id="wa-qr-image" src="" style="display:none; width: 100%; height: 100%; object-fit: contain;">
+                                </div>
+                                <p class="text-muted mt-3 small" id="wa-qr-message">Aguardando conexão com a API.</p>
+                                <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="wa-btn-start-docker" style="display:{% if is_railway %}none{% else %}inline-block{% endif %};" onclick="iniciarDocker()" disabled>
+                                    Iniciar Docker agora
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="waSendModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Enviar mensagem</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Tipo</label>
+                                        <select class="form-select form-select-sm" id="wa-send-tipo" onchange="waSendFillTemplate()">
+                                            <option value="BOAS_VINDAS">Boas-vindas</option>
+                                            <option value="COBRANCA_ALUGUEL">Cobrança aluguel</option>
+                                            <option value="COBRANCA_IPTU">Cobrança IPTU</option>
+                                            <option value="CONTRATO_VENCENDO">Contrato vencendo</option>
+                                            <option value="GERAL">Mensagem geral</option>
+                                        </select>
+                                        <div class="small text-muted mt-2">Destinatários: <span id="wa-send-count">0</span></div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label class="form-label">Mensagem</label>
+                                        <textarea class="form-control" id="wa-send-mensagem" rows="6" placeholder="Digite ou edite a mensagem..."></textarea>
+                                        <div class="small text-muted mt-1">Variáveis: {NOME}, {VALOR}, {VENCIMENTO}, {DATA_FIM}, {DIAS}, {IMOVEL}</div>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="fw-bold mb-2">Selecionados</div>
+                                    <div class="border rounded p-2 small" style="max-height: 160px; overflow:auto;" id="wa-send-list"></div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary" id="wa-send-confirm" onclick="waSendSelectedNow()">Enviar agora</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="card-footer bg-white text-center border-top-0 pb-4">
+            <a href="{% url 'core:dashboard' %}" class="btn btn-outline-secondary px-4">Voltar</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const WA_IS_RAILWAY = {{ is_railway|yesno:"true,false" }};
+    let WA_HAS_MSG_GERAL = {{ wa_has_msg_geral|yesno:"true,false" }};
+    let WA_HAS_MSG_BOAS_VINDAS = {{ wa_has_msg_boas_vindas|yesno:"true,false" }};
+    let WA_HAS_MSG_ALUGUEL = {{ wa_has_msg_aluguel|yesno:"true,false" }};
+    let WA_HAS_MSG_IPTU = {{ wa_has_msg_iptu|yesno:"true,false" }};
+    let WA_HAS_MSG_CONTRATO_VENCENDO = {{ wa_has_msg_contrato_vencendo|yesno:"true,false" }};
+    const WA_TEMPLATES = JSON.parse('{{ wa_templates_json|default:"{}"|escapejs }}');
+    const WA_DEBUG_SUPERUSER = {{ user.is_superuser|yesno:"true,false" }};
+    let statusInterval;
+    window.waLastStatus = null;
+    window.waSelectedInquilinos = new Map();
+    window.waSendModalLastFilled = { tipo: null, texto: null };
+    if (WA_DEBUG_SUPERUSER) {
+        window.addEventListener('error', (ev) => {
+            try {
+                const msg = ev && ev.message ? String(ev.message) : 'Erro JavaScript';
+                const src = ev && ev.filename ? String(ev.filename).split('/').pop() : '';
+                const line = ev && ev.lineno ? String(ev.lineno) : '';
+                waNotify(`Erro JS: ${msg}${src ? ` (${src}${line ? ':' + line : ''})` : ''}`, 'danger');
+            } catch (e) {}
+        });
+        window.addEventListener('unhandledrejection', (ev) => {
+            try {
+                const reason = ev && ev.reason ? (ev.reason.message || ev.reason) : '';
+                const msg = reason ? String(reason) : 'Promise rejeitada';
+                waNotify(`Erro JS: ${msg}`, 'danger');
+            } catch (e) {}
+        });
+    }
+
+    function waGetCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
+    function waGetCsrfToken() {
+        const fromCookie = waGetCookie('csrftoken');
+        if (fromCookie) return fromCookie;
+        const fromInput = document.querySelector('input[name=csrfmiddlewaretoken]')?.value;
+        if (fromInput) return fromInput;
+        const fallback = '{{ csrf_token }}';
+        if (fallback && fallback !== 'NOTPROVIDED') return fallback;
+        return null;
+    }
+
+    window.waNoticeTimer = null;
+    function waNotify(message, level) {
+        const el = document.getElementById('wa-notice');
+        if (!el) return;
+        const lvl = (level || 'info').toLowerCase();
+        const cls = ['alert'];
+        if (lvl === 'success') cls.push('alert-success');
+        else if (lvl === 'warning') cls.push('alert-warning');
+        else if (lvl === 'danger' || lvl === 'error') cls.push('alert-danger');
+        else cls.push('alert-info');
+        cls.push('mb-3');
+        el.className = cls.join(' ');
+        el.textContent = String(message || '');
+        el.classList.remove('d-none');
+        if (window.waNoticeTimer) {
+            try { clearTimeout(window.waNoticeTimer); } catch (e) {}
+        }
+        window.waNoticeTimer = setTimeout(() => {
+            el.classList.add('d-none');
+        }, 8000);
+    }
+
+    function waShowSendModal() {
+        const modalEl = document.getElementById('waSendModal');
+        if (!modalEl) return;
+        if (window.bootstrap && window.bootstrap.Modal) {
+            const modalClass = window.bootstrap.Modal;
+            if (typeof modalClass.getOrCreateInstance === 'function') {
+                modalClass.getOrCreateInstance(modalEl).show();
+                return;
+            }
+            try {
+                new modalClass(modalEl).show();
+                return;
+            } catch (e) {}
+        }
+        if (window.jQuery && window.jQuery.fn && typeof window.jQuery.fn.modal === 'function') {
+            window.jQuery(modalEl).modal('show');
+            return;
+        }
+        modalEl.classList.add('show');
+        modalEl.style.display = 'block';
+        modalEl.removeAttribute('aria-hidden');
+    }
+
+    function waRefreshSelectedFromDom() {
+        const map = new Map();
+        document.querySelectorAll('.wa-inq-check').forEach(cb => {
+            if (cb && cb.checked) {
+                const id = Number(cb.dataset.id);
+                if (Number.isFinite(id)) {
+                    map.set(id, cb.dataset.nome || '');
+                }
+            }
+        });
+        window.waSelectedInquilinos = map;
+    }
+
+    function waUpdateSelectedUI() {
+        waRefreshSelectedFromDom();
+        const count = window.waSelectedInquilinos.size;
+        const countEl = document.getElementById('wa-selected-count');
+        if (countEl) countEl.textContent = String(count);
+        const btn = document.getElementById('wa-btn-send-selected');
+        if (btn) btn.disabled = count === 0;
+
+        const all = document.getElementById('wa-select-all');
+        const visibleChecks = Array.from(document.querySelectorAll('.wa-inq-check'));
+        const visibleCount = visibleChecks.length;
+        const checkedCount = visibleChecks.filter(x => x.checked).length;
+        if (all) {
+            if (visibleCount === 0) {
+                all.checked = false;
+                all.indeterminate = false;
+            } else if (checkedCount === 0) {
+                all.checked = false;
+                all.indeterminate = false;
+            } else if (checkedCount === visibleCount) {
+                all.checked = true;
+                all.indeterminate = false;
+            } else {
+                all.checked = false;
+                all.indeterminate = true;
+            }
+        }
+    }
+
+    function waToggleSelectAll(checked) {
+        document.querySelectorAll('.wa-inq-check').forEach(cb => {
+            cb.checked = !!checked;
+        });
+        waUpdateSelectedUI();
+    }
+
+    function waToggleInquilino() {
+        waUpdateSelectedUI();
+    }
+
+    function waSetSelection(idsToKeep) {
+        const keep = new Set((idsToKeep || []).map(x => Number(x)).filter(Number.isFinite));
+        document.querySelectorAll('.wa-inq-check').forEach(cb => {
+            const id = Number(cb.dataset.id);
+            cb.checked = keep.has(id);
+        });
+        waUpdateSelectedUI();
+    }
+
+    function waBuildSelectedListHtml() {
+        if (!window.waSelectedInquilinos || window.waSelectedInquilinos.size === 0) {
+            return '<div class="text-muted">Nenhum inquilino selecionado.</div>';
+        }
+        const items = Array.from(window.waSelectedInquilinos.entries())
+            .sort((a, b) => String(a[1] || '').localeCompare(String(b[1] || ''), 'pt-BR'));
+        return items
+            .map(([id, nome]) => `<div class="d-flex justify-content-between"><span>${String(nome || '(Sem nome)')}</span><span class="text-muted">#${id}</span></div>`)
+            .join('');
+    }
+
+    function waEnsureHasMessageForTipo(tipo) {
+        if (tipo === 'GERAL' && !WA_HAS_MSG_GERAL) return false;
+        if (tipo === 'BOAS_VINDAS' && !WA_HAS_MSG_BOAS_VINDAS) return false;
+        if (tipo === 'COBRANCA_ALUGUEL' && !WA_HAS_MSG_ALUGUEL) return false;
+        if (tipo === 'COBRANCA_IPTU' && !WA_HAS_MSG_IPTU) return false;
+        if (tipo === 'CONTRATO_VENCENDO' && !WA_HAS_MSG_CONTRATO_VENCENDO) return false;
+        return true;
+    }
+
+    function waOpenSendModalFromSelection(tipoPre) {
+        waUpdateSelectedUI();
+        if (!window.waSelectedInquilinos || window.waSelectedInquilinos.size === 0) {
+            waNotify('Selecione pelo menos 1 inquilino na lista antes de enviar.', 'warning');
+            return;
+        }
+        const tipoSel = document.getElementById('wa-send-tipo');
+        if (tipoSel && tipoPre) tipoSel.value = String(tipoPre);
+        const listEl = document.getElementById('wa-send-list');
+        if (listEl) listEl.innerHTML = waBuildSelectedListHtml();
+        const countEl = document.getElementById('wa-send-count');
+        if (countEl) countEl.textContent = String(window.waSelectedInquilinos.size);
+
+        waSendFillTemplate();
+        waShowSendModal();
+    }
+
+    function waOpenSendModalSingle(inquilinoId, inquilinoNome) {
+        waSetSelection([inquilinoId]);
+        const tipoSel = document.getElementById('wa-send-tipo');
+        if (tipoSel && !tipoSel.value) tipoSel.value = 'GERAL';
+        const listEl = document.getElementById('wa-send-list');
+        if (listEl) {
+            const nome = inquilinoNome || (window.waSelectedInquilinos.get(Number(inquilinoId)) || '');
+            listEl.innerHTML = `<div class="d-flex justify-content-between"><span>${String(nome || '(Sem nome)')}</span><span class="text-muted">#${Number(inquilinoId)}</span></div>`;
+        }
+        const countEl = document.getElementById('wa-send-count');
+        if (countEl) countEl.textContent = '1';
+
+        waSendFillTemplate();
+        waShowSendModal();
+    }
+
+    function waSendFillTemplate() {
+        const tipo = (document.getElementById('wa-send-tipo')?.value || 'GERAL').toUpperCase();
+        const textarea = document.getElementById('wa-send-mensagem');
+        if (!textarea) return;
+        const current = (textarea.value || '').trim();
+        const tpl = (WA_TEMPLATES && WA_TEMPLATES[tipo]) ? String(WA_TEMPLATES[tipo]) : '';
+
+        const last = window.waSendModalLastFilled || { tipo: null, texto: null };
+        const canOverwrite = !current || (last && last.texto !== null && current === String(last.texto).trim());
+        if (canOverwrite && tpl) {
+            textarea.value = tpl;
+            window.waSendModalLastFilled = { tipo, texto: tpl };
+        } else {
+            window.waSendModalLastFilled = { tipo, texto: current };
+        }
+    }
+
+    function waSendSelectedNow() {
+        waUpdateSelectedUI();
+        if (!window.waLastStatus || !window.waLastStatus.connected) {
+            waNotify('WhatsApp não está conectado.', 'warning');
+            return;
+        }
+        const tipo = (document.getElementById('wa-send-tipo')?.value || 'GERAL').toUpperCase();
+        if (!waEnsureHasMessageForTipo(tipo)) {
+            waNotify('Configure a mensagem deste tipo na aba "Configurações (Mensagem)" antes de enviar.', 'warning');
+            return;
+        }
+        const msg = (document.getElementById('wa-send-mensagem')?.value || '').trim();
+        if (!msg) {
+            waNotify('Digite a mensagem antes de enviar.', 'warning');
+            return;
+        }
+        const ids = Array.from(window.waSelectedInquilinos.keys());
+        if (ids.length === 0) {
+            waNotify('Selecione pelo menos 1 inquilino.', 'warning');
+            return;
+        }
+        if (ids.length > 200) {
+            waNotify('Limite de 200 inquilinos por envio.', 'warning');
+            return;
+        }
+        const btn = document.getElementById('wa-send-confirm');
+        const originalText = btn ? btn.textContent : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+        }
+        waNotify('Enviando mensagem... aguarde.', 'info');
+        const csrf = waGetCsrfToken();
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => {
+            try { controller.abort(); } catch (e) {}
+        }, 45000);
+
+        fetch("{% url 'notificacoes:api_whatsapp_send_selected' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(csrf ? { 'X-CSRFToken': csrf } : {})
+            },
+            body: JSON.stringify({ tipo, inquilino_ids: ids, mensagem: msg }),
+            signal: controller.signal,
+        })
+        .then(async r => {
+            const text = await r.text();
+            const ct = (r.headers.get('content-type') || '').toLowerCase();
+            const waApi = r.headers.get('x-wa-api') || '';
+            const waOrigCt = r.headers.get('x-wa-api-orig-ct') || '';
+            let data = null;
+            try { data = JSON.parse(text); } catch (e) { data = null; }
+            if (!r.ok) {
+                let msgErr = (data && (data.error || data.message)) ? (data.error || data.message) : `Erro ao enviar (HTTP ${r.status}).`;
+                if (WA_DEBUG_SUPERUSER && data && data.debug) {
+                    msgErr = `${msgErr} (${String(data.debug).slice(0, 220)})`;
+                }
+                if (data && data.error_id) {
+                    msgErr = `${msgErr} [id=${String(data.error_id).slice(0, 20)}]`;
+                }
+                if (WA_DEBUG_SUPERUSER && r.status >= 500) {
+                    const snippet = (text || '').replace(/\s+/g, ' ').trim().slice(0, 240);
+                    if (snippet) msgErr = `${msgErr} [${ct || 'sem content-type'}] ${snippet}`;
+                }
+                if (waApi) msgErr = `${msgErr} [X-WA-API=${waApi}${waOrigCt ? `; orig=${waOrigCt}` : ''}]`;
+                throw new Error(msgErr);
+            }
+            if (!data || data.success === false) {
+                const msgErr = (data && (data.error || data.message)) ? (data.error || data.message) : 'Erro ao enviar.';
+                throw new Error(msgErr);
+            }
+            const listEl = document.getElementById('wa-send-list');
+            if (listEl) {
+                const results = Array.isArray(data.results) ? data.results : [];
+                if (results.length) {
+                    listEl.innerHTML = results.map(r => {
+                        const nome = String(r.nome || '').trim() || '(Sem nome)';
+                        const to = r.to ? String(r.to) : '';
+                        const evoId = r.evo_id ? String(r.evo_id) : '';
+                        const waExists = (typeof r.wa_exists === 'boolean') ? r.wa_exists : null;
+                        const waJid = r.wa_jid ? String(r.wa_jid) : '';
+                        if (r.ok) {
+                            const waInfo = (waExists === null) ? '' : (waExists ? ' • WhatsApp OK' : ' • Sem WhatsApp');
+                            const jidInfo = waJid ? (' • ' + waJid) : '';
+                            const right = `${to ? ('Enviado para ' + to) : 'Enviado'}${evoId ? (' • ' + evoId) : ''}${waInfo}${jidInfo}`;
+                            return `<div class="d-flex justify-content-between"><span>${nome}</span><span class="text-success">${right}</span></div>`;
+                        }                        
+                        return `<div class="d-flex justify-content-between"><span>${nome}</span><span class="text-danger">${String(r.error || 'Erro')}</span></div>`;
+                    }).join('');
+                }
+            }
+            const dbgOwner = (data && data.debug && data.debug.owner) ? String(data.debug.owner) : (window.waLastStatus && window.waLastStatus.owner ? String(window.waLastStatus.owner) : '');
+            const dbgInstance = (data && data.debug && data.debug.instance) ? String(data.debug.instance) : '';
+            const dbgSuffix = `${dbgOwner ? ` | Remetente: ${dbgOwner}` : ''}${dbgInstance ? ` | Instância: ${dbgInstance}` : ''}`;
+            waNotify(`Enviadas (API): ${data.enviadas} | Falhas: ${data.erros} | Sem telefone: ${data.puladas_sem_telefone}${dbgSuffix}`, data.erros ? 'warning' : 'success');
+            waToggleSelectAll(false);
+            atualizarStatus();
+        })
+        .catch(e => {
+            if (e && (e.name === 'AbortError' || String(e).includes('AbortError'))) {
+                waNotify('Envio demorou demais (timeout). A Evolution API pode estar lenta. Tente novamente.', 'danger');
+                return;
+            }
+            waNotify(e && e.message ? e.message : 'Erro ao enviar.', 'danger');
+        })
+        .finally(() => {
+            try { clearTimeout(timeoutId); } catch (e) {}
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = originalText || 'Enviar agora';
+            }
+        });
+    }
+
+    function waPostExcecao(action, inquilinoId) {
+        const csrf = waGetCsrfToken();
+        const body = new URLSearchParams();
+        body.set('action', action);
+        body.set('inquilino_id', String(inquilinoId));
+        return fetch("{% url 'notificacoes:api_whatsapp_excecoes' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                ...(csrf ? { 'X-CSRFToken': csrf } : {})
+            },
+            body: body.toString()
+        }).then(r => r.json());
+    }
+
+    function waExcluirInquilino(inquilinoId) {
+        waPostExcecao('add', inquilinoId).then(() => window.location.reload());
+    }
+
+    function waRemoverExcecao(inquilinoId) {
+        waPostExcecao('remove', inquilinoId).then(() => window.location.reload());
+    }
+
+    function waAddExcecao() {
+        const sel = document.getElementById('wa-excecao-select');
+        const v = sel ? sel.value : null;
+        if (!v) return;
+        waPostExcecao('add', v).then(() => window.location.reload());
+    }
+
+    function waApplyFilters() {
+        const url = new URL(window.location.href);
+        const status = document.getElementById('wa-status-select')?.value || 'ATIVO';
+        const q = (document.getElementById('wa-q')?.value || '').trim();
+        const comTelefone = document.getElementById('wa-com-telefone')?.checked ? '1' : '';
+        const comContrato = document.getElementById('wa-com-contrato')?.checked ? '1' : '';
+        const incluiSemTenant = document.getElementById('wa-inclui-sem-tenant')?.checked ? '1' : '0';
+
+        url.searchParams.set('status', status);
+        if (q) url.searchParams.set('q', q); else url.searchParams.delete('q');
+        if (comTelefone) url.searchParams.set('com_telefone', '1'); else url.searchParams.delete('com_telefone');
+        if (comContrato) url.searchParams.set('com_contrato', '1'); else url.searchParams.delete('com_contrato');
+        if (document.getElementById('wa-inclui-sem-tenant')) {
+            url.searchParams.set('inclui_sem_tenant', incluiSemTenant);
+        }
+        window.location.href = url.toString();
+    }
+
+    function waClearFilters() {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('q');
+        url.searchParams.delete('com_telefone');
+        url.searchParams.delete('com_contrato');
+        url.searchParams.delete('inclui_sem_tenant');
+        url.searchParams.set('status', 'ATIVO');
+        window.location.href = url.toString();
+    }
+
+    function waDisableSendButtons(disabled) {
+        document.querySelectorAll('.wa-btn').forEach(btn => {
+            btn.disabled = disabled;
+        });
+    }
+
+    function waEnviarCampanha(tipo) {
+        if (!window.waLastStatus || !window.waLastStatus.connected) {
+            waNotify('WhatsApp não está conectado.', 'warning');
+            return;
+        }
+        if (tipo === 'GERAL' && !WA_HAS_MSG_GERAL) {
+            waNotify('Configure a Mensagem Geral antes de enviar.', 'warning');
+            return;
+        }
+        if (tipo === 'BOAS_VINDAS' && !WA_HAS_MSG_BOAS_VINDAS) {
+            waNotify('Configure a mensagem de Boas-vindas antes de enviar.', 'warning');
+            return;
+        }
+        if (tipo === 'COBRANCA_ALUGUEL' && !WA_HAS_MSG_ALUGUEL) {
+            waNotify('Configure a mensagem de Cobrança de Aluguel antes de enviar.', 'warning');
+            return;
+        }
+        if (tipo === 'COBRANCA_IPTU' && !WA_HAS_MSG_IPTU) {
+            waNotify('Configure a mensagem de Cobrança de IPTU antes de enviar.', 'warning');
+            return;
+        }
+        if (tipo === 'CONTRATO_VENCENDO' && !WA_HAS_MSG_CONTRATO_VENCENDO) {
+            waNotify('Configure a mensagem de Contrato vencendo antes de enviar.', 'warning');
+            return;
+        }
+
+        const status = document.getElementById('wa-status-select')?.value || 'ATIVO';
+        const q = (document.getElementById('wa-q')?.value || '').trim();
+        const comTelefone = document.getElementById('wa-com-telefone')?.checked ? '1' : '';
+        const comContrato = document.getElementById('wa-com-contrato')?.checked ? '1' : '';
+        const incluiSemTenant = document.getElementById('wa-inclui-sem-tenant')?.checked ? '1' : '0';
+        const limit = 10;
+        waNotify(`Enviando "${tipo}" para até ${limit} inquilinos (filtrados, sem exceções)...`, 'info');
+
+        waDisableSendButtons(true);
+        const csrf = waGetCsrfToken();
+        fetch("{% url 'notificacoes:api_whatsapp_send_campaign' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(csrf ? { 'X-CSRFToken': csrf } : {})
+            },
+            body: JSON.stringify({ tipo, status, limit, q, com_telefone: comTelefone, com_contrato: comContrato, inclui_sem_tenant: incluiSemTenant })
+        })
+        .then(async r => {
+            const text = await r.text();
+            const ct = (r.headers.get('content-type') || '').toLowerCase();
+            const waApi = r.headers.get('x-wa-api') || '';
+            const waOrigCt = r.headers.get('x-wa-api-orig-ct') || '';
+            let data = null;
+            try { data = JSON.parse(text); } catch (e) { data = null; }
+            if (!r.ok) {
+                let msgErr = (data && (data.error || data.message)) ? (data.error || data.message) : `Erro ao enviar (HTTP ${r.status}).`;
+                if (WA_DEBUG_SUPERUSER && data && data.debug) {
+                    msgErr = `${msgErr} (${String(data.debug).slice(0, 220)})`;
+                }
+                if (data && data.error_id) {
+                    msgErr = `${msgErr} [id=${String(data.error_id).slice(0, 20)}]`;
+                }
+                if (WA_DEBUG_SUPERUSER && r.status >= 500) {
+                    const snippet = (text || '').replace(/\s+/g, ' ').trim().slice(0, 240);
+                    if (snippet) msgErr = `${msgErr} [${ct || 'sem content-type'}] ${snippet}`;
+                }
+                if (waApi) msgErr = `${msgErr} [X-WA-API=${waApi}${waOrigCt ? `; orig=${waOrigCt}` : ''}]`;
+                throw new Error(msgErr);
+            }
+            if (!data || data.success === false) {
+                const msg = (data && (data.error || data.message)) ? (data.error || data.message) : 'Erro ao enviar.';
+                throw new Error(msg);
+            }
+            const dbgOwner = (data && data.debug && data.debug.owner) ? String(data.debug.owner) : (window.waLastStatus && window.waLastStatus.owner ? String(window.waLastStatus.owner) : '');
+            const dbgInstance = (data && data.debug && data.debug.instance) ? String(data.debug.instance) : '';
+            const dbgSuffix = `${dbgOwner ? ` | Remetente: ${dbgOwner}` : ''}${dbgInstance ? ` | Instância: ${dbgInstance}` : ''}`;
+            waNotify(`Enviadas (API): ${data.enviadas} | Falhas: ${data.erros} | Sem telefone: ${data.puladas_sem_telefone}${dbgSuffix}`, data.erros ? 'warning' : 'success');
+        })
+        .catch(e => {
+            waNotify(e && e.message ? e.message : 'Erro ao enviar.', 'danger');
+        })
+        .finally(() => {
+            waDisableSendButtons(false);
+            atualizarStatus();
+        });
+    }
+
+    let statusController = null;
+    function atualizarStatus() {
+        if (statusController) {
+            try { statusController.abort(); } catch (e) {}
+        }
+        statusController = new AbortController();
+        fetch("{% url 'notificacoes:api_whatsapp_status' %}", { signal: statusController.signal })
+            .then(async r => {
+                let data = null;
+                try { data = await r.json(); } catch (e) { data = null; }
+                if (!data) {
+                    throw new Error('Resposta inválida do servidor');
+                }
+                return data;
+            })
+            .then(data => {
+                window.waLastStatus = data;
+                const statusText = document.getElementById('wa-status-text');
+                const btnLogout = document.getElementById('wa-btn-logout');
+                const qrContainer = document.getElementById('wa-qr-container');
+                const qrPlaceholder = document.getElementById('wa-qr-placeholder');
+                const qrImage = document.getElementById('wa-qr-image');
+                const qrMessage = document.getElementById('wa-qr-message');
+                const btnStartDocker = document.getElementById('wa-btn-start-docker');
+                const waBtns = document.querySelectorAll('.wa-btn');
+                if (btnStartDocker) btnStartDocker.style.display = WA_IS_RAILWAY ? 'none' : 'inline-block';
+                
+                if (data.success && data.connected) {
+                    statusText.textContent = data.owner ? `Conectado (${data.owner})` : 'Conectado';
+                    statusText.className = 'text-success fw-bold';
+                    btnLogout.style.display = 'block';
+                    if (btnStartDocker) btnStartDocker.disabled = true;
+                    
+                    qrPlaceholder.style.display = 'none';
+                    qrImage.style.display = 'none';
+                    qrContainer.style.border = '2px solid #25D366';
+                    qrContainer.innerHTML = '<div class="text-success"><i class="fas fa-check-circle fa-4x mb-3"></i><h5>Dispositivo<br>Conectado</h5></div>';
+                    qrContainer.onclick = null;
+                    qrMessage.textContent = data.owner ? `Seu WhatsApp está pronto para enviar mensagens. Remetente: ${data.owner}` : 'Seu WhatsApp está pronto para enviar mensagens.';
+                    
+                    waBtns.forEach(btn => btn.disabled = false);
+                    
+                    // Se conectou, parar de recarregar rápido e checar a cada 10s
+                    clearInterval(statusInterval);
+                    statusInterval = setInterval(atualizarStatus, 10000);
+                } else if (data.status === 'offline') {
+                    statusText.textContent = 'API Offline';
+                    statusText.className = 'text-danger fw-bold';
+                    qrMessage.textContent = data.message;
+                    waBtns.forEach(btn => btn.disabled = true);
+                    if (btnStartDocker) {
+                        if (WA_IS_RAILWAY) {
+                            btnStartDocker.style.display = 'none';
+                            btnStartDocker.disabled = true;
+                        }
+                        const canAutoStart = data.can_auto_start !== false;
+                        btnStartDocker.style.display = canAutoStart ? 'inline-block' : 'none';
+                        btnStartDocker.disabled = !canAutoStart;
+                    }
+                    if (data.auto_started) {
+                        clearInterval(statusInterval);
+                        statusInterval = setInterval(atualizarStatus, 5000);
+                    }
+                } else {
+                    statusText.textContent = data.message || 'Desconectado';
+                    statusText.className = 'text-warning fw-bold';
+                    btnLogout.style.display = 'none';
+                    if (btnStartDocker) {
+                        btnStartDocker.style.display = WA_IS_RAILWAY ? 'none' : 'inline-block';
+                        btnStartDocker.disabled = true;
+                    }
+                    waBtns.forEach(btn => btn.disabled = true);
+                }
+            })
+            .catch(e => {
+                if (e && (e.name === 'AbortError' || String(e).includes('AbortError'))) {
+                    return;
+                }
+                const last = window.waLastStatus;
+                if (last && last.connected) {
+                    document.getElementById('wa-status-text').textContent = 'Conectado';
+                    document.getElementById('wa-status-text').className = 'text-success fw-bold';
+                    return;
+                }
+                window.waLastStatus = null;
+                document.getElementById('wa-status-text').textContent = 'Erro de Conexão';
+                document.getElementById('wa-status-text').className = 'text-danger fw-bold';
+                const btnStartDocker = document.getElementById('wa-btn-start-docker');
+                if (btnStartDocker) {
+                    btnStartDocker.style.display = WA_IS_RAILWAY ? 'none' : 'inline-block';
+                    btnStartDocker.disabled = true;
+                }
+                waDisableSendButtons(true);
+            });
+    }
+
+    function iniciarDocker() {
+        const btn = document.getElementById('wa-btn-start-docker');
+        const qrMessage = document.getElementById('wa-qr-message');
+        if (WA_IS_RAILWAY) {
+            qrMessage.textContent = 'No Railway não é possível iniciar Docker. A Evolution API precisa rodar como um serviço separado.';
+            if (btn) btn.disabled = true;
+            return;
+        }
+        if (btn) btn.disabled = true;
+        qrMessage.textContent = 'Tentando iniciar Docker/Evolution... aguarde.';
+
+        fetch("{% url 'notificacoes:api_whatsapp_start_docker' %}")
+            .then(r => r.json())
+            .then(data => {
+                qrMessage.textContent = data.message || 'Comando enviado. Aguarde e recarregue.';
+                if (btn) btn.disabled = false;
+                clearInterval(statusInterval);
+                statusInterval = setInterval(atualizarStatus, 5000);
+                atualizarStatus();
+            })
+            .catch(() => {
+                qrMessage.textContent = 'Falha ao tentar iniciar automaticamente. Abra o Docker Desktop manualmente.';
+                if (btn) btn.disabled = false;
+            });
+    }
+
+    function salvarConfigMensagem(formId, statusId) {
+        const form = document.getElementById(formId);
+        const statusEl = document.getElementById(statusId);
+        if (!form) return;
+        if (statusEl) statusEl.textContent = 'Salvando...';
+
+        const formData = new FormData(form);
+        const csrf = form.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        const tipo = (form.querySelector('[name=tipo]')?.value || '').trim();
+
+        fetch("{% url 'notificacoes:api_whatsapp_config_save' %}", {
+            method: 'POST',
+            body: formData,
+            headers: csrf ? { 'X-CSRFToken': csrf } : {}
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data && data.success) {
+                if (statusEl) statusEl.textContent = 'Salvo.';
+                if (tipo === 'GERAL') {
+                    WA_HAS_MSG_GERAL = true;
+                    const el = document.getElementById('wa-warn-geral');
+                    if (el) el.style.display = 'none';
+                }
+                if (tipo === 'BOAS_VINDAS') {
+                    WA_HAS_MSG_BOAS_VINDAS = true;
+                    const el = document.getElementById('wa-warn-boas-vindas');
+                    if (el) el.style.display = 'none';
+                }
+                if (tipo === 'COBRANCA_ALUGUEL') {
+                    WA_HAS_MSG_ALUGUEL = true;
+                    const el = document.getElementById('wa-warn-aluguel');
+                    if (el) el.style.display = 'none';
+                }
+                if (tipo === 'COBRANCA_IPTU') {
+                    WA_HAS_MSG_IPTU = true;
+                    const el = document.getElementById('wa-warn-iptu');
+                    if (el) el.style.display = 'none';
+                }
+                if (tipo === 'CONTRATO_VENCENDO') {
+                    WA_HAS_MSG_CONTRATO_VENCENDO = true;
+                    const el = document.getElementById('wa-warn-contrato');
+                    if (el) el.style.display = 'none';
+                }
+            } else {
+                if (statusEl) statusEl.textContent = (data && (data.error || data.message)) ? (data.error || data.message) : 'Erro ao salvar.';
+            }
+        })
+        .catch(() => {
+            if (statusEl) statusEl.textContent = 'Erro ao salvar.';
+        });
+    }
+
+    function carregarQRCode() {
+        const qrPlaceholder = document.getElementById('wa-qr-placeholder');
+        const qrImage = document.getElementById('wa-qr-image');
+        const qrMessage = document.getElementById('wa-qr-message');
+        
+        qrPlaceholder.innerHTML = '<i class="fas fa-spinner fa-spin fa-2x text-muted"></i><br><small class="text-muted mt-2">Gerando...</small>';
+        
+        fetch("{% url 'notificacoes:api_whatsapp_qrcode' %}")
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.qrcode) {
+                    qrImage.src = data.qrcode;
+                    qrImage.style.display = 'block';
+                    qrPlaceholder.style.display = 'none';
+                    qrMessage.textContent = 'Escaneie o código acima com seu WhatsApp.';
+                    
+                    // Começar a checar o status mais rápido para ver quando conectar
+                    clearInterval(statusInterval);
+                    statusInterval = setInterval(atualizarStatus, 3000);
+                } else {
+                    qrPlaceholder.innerHTML = '<i class="fas fa-exclamation-triangle fa-2x text-danger"></i><br><small class="text-danger mt-2">' + (data.error || 'Erro ao gerar QR Code') + '</small>';
+                }
+            })
+            .catch(() => {
+                qrPlaceholder.innerHTML = '<i class="fas fa-exclamation-triangle fa-2x text-danger"></i><br><small class="text-danger mt-2">Erro de conexão com a API</small>';
+            });
+    }
+    
+    function desconectarWhatsApp() {
+        if(confirm("Tem certeza que deseja desconectar o aparelho atual?")) {
+            const csrf = waGetCsrfToken();
+            fetch("{% url 'notificacoes:api_whatsapp_logout' %}", {
+                method: 'POST',
+                headers: {
+                    ...(csrf ? { 'X-CSRFToken': csrf } : {})
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if(data.success) {
+                    location.reload();
+                } else {
+                    waNotify("Erro ao desconectar: " + (data.error || ''), 'danger');
+                }
+            });
+        }
+    }
+
+    // Iniciar checagem de status ao carregar a página
+    document.addEventListener('DOMContentLoaded', () => {
+        waUpdateSelectedUI();
+        atualizarStatus();
+        statusInterval = setInterval(atualizarStatus, 10000);
+        
+        // Se clicar na aba Conectar, forçar atualização
+        document.getElementById('conectar-tab').addEventListener('click', () => {
+            atualizarStatus();
+            setTimeout(() => {
+                if (!window.waLastStatus || !window.waLastStatus.connected) {
+                    carregarQRCode();
+                }
+            }, 600);
+        });
+    });
+
+    window.addEventListener('beforeunload', () => {
+        if (statusInterval) {
+            clearInterval(statusInterval);
+        }
+        if (statusController) {
+            try { statusController.abort(); } catch (e) {}
+        }
+    });
+</script>
+{% endblock %}

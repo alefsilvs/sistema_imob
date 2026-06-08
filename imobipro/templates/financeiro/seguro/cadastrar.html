@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block title %}Cadastrar Seguro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-shield-plus"></i> Cadastrar Seguro</h2>
+        <a href="{% url 'financeiro:listar_seguros' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Informações do Seguro</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.imovel.id_for_label }}" class="form-label">Imóvel *</label>
+                                {{ form.imovel }}
+                                {% if form.imovel.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.imovel.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.tipo.id_for_label }}" class="form-label">Tipo de Seguro *</label>
+                                {{ form.tipo }}
+                                {% if form.tipo.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.tipo.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.seguradora.id_for_label }}" class="form-label">Seguradora *</label>
+                                {{ form.seguradora }}
+                                {% if form.seguradora.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.seguradora.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.numero_apolice.id_for_label }}" class="form-label">Número da Apólice</label>
+                                {{ form.numero_apolice }}
+                                {% if form.numero_apolice.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.numero_apolice.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="{{ form.data_inicio.id_for_label }}" class="form-label">Data de Início *</label>
+                                {{ form.data_inicio }}
+                                {% if form.data_inicio.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.data_inicio.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.data_fim.id_for_label }}" class="form-label">Data de Fim *</label>
+                                {{ form.data_fim }}
+                                {% if form.data_fim.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.data_fim.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.valor_total.id_for_label }}" class="form-label">Valor Total *</label>
+                                {{ form.valor_total }}
+                                {% if form.valor_total.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.valor_total.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.forma_pagamento.id_for_label }}" class="form-label">Forma de Pagamento</label>
+                                {{ form.forma_pagamento }}
+                                {% if form.forma_pagamento.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.forma_pagamento.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.numero_parcelas.id_for_label }}" class="form-label">Número de Parcelas</label>
+                                {{ form.numero_parcelas }}
+                                {% if form.numero_parcelas.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.numero_parcelas.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.observacoes.id_for_label }}" class="form-label">Observações</label>
+                            {{ form.observacoes }}
+                            {% if form.observacoes.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.observacoes.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'financeiro:listar_seguros' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Cadastrar Seguro
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0"><i class="bi bi-info-circle"></i> Informações</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-lightbulb"></i> Dicas</h6>
+                        <ul class="mb-0 small">
+                            <li>Mantenha sempre os dados da apólice atualizados</li>
+                            <li>Verifique as datas de vigência regularmente</li>
+                            <li>Guarde uma cópia digital da apólice</li>
+                            <li>Configure lembretes para renovação</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <h6><i class="bi bi-exclamation-triangle"></i> Atenção</h6>
+                        <p class="mb-0 small">
+                            Certifique-se de que todas as informações estão corretas antes de cadastrar o seguro.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

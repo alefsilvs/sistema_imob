@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Imobiliário - Sistema Completo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/chart.js@4.0.0/dist/chart.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007bff;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --gradient-primary: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            --gradient-success: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            --gradient-warning: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            --gradient-danger: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            --gradient-info: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 16px rgba(0,0,0,0.1);
+            --shadow-xl: 0 12px 24px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            overflow-x: hidden;
+        }
+
+        /* ===== LAYOUT PRINCIPAL ===== */
+        .app-container {
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+            grid-template-rows: var(--header-height) 1fr;
+            grid-template-areas: 
+                "sidebar header"
+                "sidebar main";
+            height: 100vh;
+        }
+
+        /* ===== HEADER PRINCIPAL ===== */
+        .main-header {
+            grid-area: header;
+            background: white;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            box-shadow: var(--shadow-sm);
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-search {
+            position: relative;
+            width: 400px;
+        }
+
+        .header-search input {
+            width: 100%;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border: 1px solid #e9ecef;
+            border-radius: 25px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .header-search input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        }
+
+        .header-search i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-notification {
+            position: relative;
+            padding: 0.5rem;
+            border-radius: 50%;
+            background: #f8f9fa;
+            border: none;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .header-notification:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 18px;
+            height: 18px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .header-profile:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            grid-area: sidebar;
+            background: var(--dark);
+            color: white;
+            padding: 2rem 0;
+            overflow-y: auto;
+            box-shadow: var(--shadow-md);
+        }
+
+        .sidebar-brand {
+            padding: 0 2rem 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-brand h4 {
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .sidebar-brand small {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .sidebar-nav-link:hover,
+        .sidebar-nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .sidebar-nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary);
+        }
+
+        .sidebar-nav-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-nav-badge {
+            margin-left: auto;
+            background: var(--primary);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+        }
+
+        /* ===== CONTEÚDO PRINCIPAL ===== */
+        .main-content {
+            grid-area: main;
+            padding: 2rem;
+            overflow-y: auto;
+            background: #f5f6fa;
+        }
+
+        /* ===== HEADER DE PÁGINA ===== */
+        .page-header {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+            border-left: 4px solid var(--primary);
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #6c757d;
+            margin: 0;
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-modern {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary-modern {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-primary-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            color: white;
+        }
+
+        .btn-outline-modern {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-outline-modern:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* ===== CARDS DE ESTATÍSTICAS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .stat-card:nth-child(2)::before { background: var(--gradient-success); }
+        .stat-card:nth-child(3)::before { background: var(--gradient-warning); }
+        .stat-card:nth-child(4)::before { background: var(--gradient-danger); }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-icon.primary { background: var(--gradient-primary); }
+        .stat-icon.success { background: var(--gradient-success); }
+        .stat-icon.warning { background: var(--gradient-warning); }
+        .stat-icon.danger { background: var(--gradient-danger); }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-change {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
+        }
+
+        /* ===== GRID DE CONTEÚDO ===== */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .card-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .card-action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: #f8f9fa;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .card-action-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* ===== TABELA MODERNA ===== */
+        .modern-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .modern-table th,
+        .modern-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .modern-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modern-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .modern-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .table-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.1);
+            color: #856404;
+        }
+
+        .status-inactive {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+        }
+
+        /* ===== LISTA DE ATIVIDADES ===== */
+        .activity-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.3rem;
+        }
+
+        .activity-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .activity-time {
+            color: #adb5bd;
+            font-size: 0.8rem;
+        }
+
+        /* ===== GRÁFICO CONTAINER ===== */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: var(--header-height) auto 1fr;
+                grid-template-areas: 
+                    "header"
+                    "sidebar"
+                    "main";
+            }
+
+            .sidebar {
+                position: static;
+                height: auto;
+                padding: 1rem 0;
+            }
+
+            .sidebar-nav {
+                display: flex;
+                overflow-x: auto;
+                padding: 0 1rem;
+            }
+
+            .sidebar-nav-item {
+                flex-shrink: 0;
+                margin-right: 1rem;
+                margin-bottom: 0;
+            }
+
+            .sidebar-nav-link {
+                padding: 0.5rem 1rem;
+                border-radius: 25px;
+                white-space: nowrap;
+            }
+
+            .header-search {
+                width: 200px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        /* ===== ANIMAÇÕES ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .animate-fade-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .animate-slide-left {
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        /* ===== SCROLLBAR PERSONALIZADA ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- HEADER PRINCIPAL -->
+        <header class="main-header">
+            <div class="header-left">
+                <button class="btn btn-link text-dark d-lg-none" id="sidebarToggle">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+                <div class="header-search">
+                    <i class="bi bi-search"></i>
+                    <input type="text" placeholder="Buscar imóveis, clientes, contratos...">
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="header-notification">
+                    <i class="bi bi-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <button class="header-notification">
+                    <i class="bi bi-envelope"></i>
+                    <span class="notification-badge">7</span>
+                </button>
+                <div class="header-profile">
+                    <div class="profile-avatar">JD</div>
+                    <div class="d-none d-md-block">
+                        <div style="font-size: 0.9rem; font-weight: 500;">João Silva</div>
+                        <div style="font-size: 0.7rem; color: #6c757d;">Administrador</div>
+                    </div>
+                    <i class="bi bi-chevron-down"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <h4><i class="bi bi-building"></i> ImóvelPro</h4>
+                <small>Sistema de Gestão Imobiliária</small>
+            </div>
+            <nav>
+                <ul class="sidebar-nav">
+                    <li class="sidebar-nav-item">
+                        <a href="#" class="sidebar-nav-link active">
+                            <i class="bi bi-speedometer2 sidebar-nav-icon"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="#" class="sidebar-nav-link">
+                            <i class="bi bi-building sidebar-nav-icon"></i>
+                            <span>Imóveis</span>
+                            <span class="sidebar-nav-badge">150</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="#" class="sidebar-nav-link">
+                            <i class="bi bi-people sidebar-nav-icon"></i>
+                            <span>Clientes</span>
+                            <span class="sidebar-nav-badge">245</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="#" class="sidebar-nav-link">
+                            <i class="bi bi-file-text sidebar-nav-icon"></i>
+                            <span>Contratos</span>
+                            <span class="sidebar-nav-badge">89</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="#" class="sidebar-nav-link">
+                            <i class="bi bi-cash-stack sidebar-nav-icon"></i>
+                            <span>Financeiro</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="#" class="sidebar-nav-link">
+                            <i class="bi bi-tools sidebar-nav-icon"></i>
+                            <span>Manutenção</span>
+                            <span class="sidebar-nav-badge">12</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="#" class="sidebar-nav-link">
+                            <i class="bi bi-graph-up sidebar-nav-icon"></i>
+                            <span>Relatórios</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="#" class="sidebar-nav-link">
+                            <i class="bi bi-gear sidebar-nav-icon"></i>
+                            <span>Configurações</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="main-content">
+            <!-- HEADER DA PÁGINA -->
+            <div class="page-header animate-fade-up">
+                <h1 class="page-title">Dashboard Imobiliário</h1>
+                <p class="page-subtitle">Visão geral completa do seu negócio imobiliário</p>
+                <div class="page-actions">
+                    <a href="#" class="btn-modern btn-primary-modern">
+                        <i class="bi bi-plus-circle"></i>
+                        Novo Imóvel
+                    </a>
+                    <a href="#" class="btn-modern btn-outline-modern">
+                        <i class="bi bi-download"></i>
+                        Exportar Dados
+                    </a>
+                </div>
+            </div>
+
+            <!-- CARDS DE ESTATÍSTICAS -->
+            <div class="stats-grid animate-slide-left">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon primary">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <div class="card-actions">
+                            <button class="card-action-btn">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="stat-value">150</div>
+                    <div class="stat-label">Imóveis Ativos</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-arrow-up"></i>
+                        <span>+12% este mês</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon success">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                        <div class="card-actions">
+                            <button class="card-action-btn">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="stat-value">R$ 2.5M</div>
+                    <div class="stat-label">Receita Mensal</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-arrow-up"></i>
+                        <span>+8% este mês</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon warning">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div class="card-actions">
+                            <button class="card-action-btn">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="stat-value">245</div>
+                    <div class="stat-label">Clientes Ativos</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-arrow-up"></i>
+                        <span>+15% este mês</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon danger">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div class="card-actions">
+                            <button class="card-action-btn">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Pendências</div>
+                    <div class="stat-change negative">
+                        <i class="bi bi-arrow-down"></i>
+                        <span>-3% este mês</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRID DE CONTEÚDO -->
+            <div class="content-grid">
+                <!-- GRÁFICO DE VENDAS -->
+                <div class="content-card animate-fade-up">
+                    <div class="card-header">
+                        <h3 class="card-title">Vendas e Locações</h3>
+                        <div class="card-actions">
+                            <button class="card-action-btn">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                            <button class="card-action-btn">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- ATIVIDADES RECENTES -->
+                <div class="content-card animate-fade-up" style="animation-delay: 0.1s;">
+                    <div class="card-header">
+                        <h3 class="card-title">Atividades Recentes</h3>
+                        <div class="card-actions">
+                            <button class="card-action-btn">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: var(--gradient-success);">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Contrato Assinado</div>
+                                <div class="activity-description">Apartamento na Rua das Flores, 123</div>
+                                <div class="activity-time">2 horas atrás</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: var(--gradient-primary);">
+                                <i class="bi bi-person-plus"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Novo Cliente</div>
+                                <div class="activity-description">Maria Santos cadastrada no sistema</div>
+                                <div class="activity-time">4 horas atrás</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: var(--gradient-warning);">
+                                <i class="bi bi-tools"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Solicitação de Manutenção</div>
+                                <div class="activity-description">Reparo no encanamento - Apto 201</div>
+                                <div class="activity-time">6 horas atrás</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: var(--gradient-info);">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Novo Imóvel</div>
+                                <div class="activity-description">Casa adicionada no Bairro Centro</div>
+                                <div class="activity-time">1 dia atrás</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: var(--gradient-danger);">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">Pagamento em Atraso</div>
+                                <div class="activity-description">Aluguel vencido - João Silva</div>
+                                <div class="activity-time">2 dias atrás</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABELA DE IMÓVEIS -->
+            <div class="content-card animate-fade-up" style="animation-delay: 0.2s;">
+                <div class="card-header">
+                    <h3 class="card-title">Imóveis Recentes</h3>
+                    <div class="card-actions">
+                        <button class="card-action-btn">
+                            <i class="bi bi-funnel"></i>
+                        </button>
+                        <button class="card-action-btn">
+                            <i class="bi bi-download"></i>
+                        </button>
+                        <button class="card-action-btn">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                    </div>
+                </div>
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Imóvel</th>
+                            <th>Tipo</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Cliente</th>
+                            <th>Data</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div>
+                                    <div style="font-weight: 600;">Apartamento Jardins</div>
+                                    <div style="font-size: 0.8rem; color: #6c757d;">Rua das Flores, 123</div>
+                                </div>
+                            </td>
+                            <td>Apartamento</td>
+                            <td>R$ 450.000</td>
+                            <td><span class="table-status status-active">Disponível</span></td>
+                            <td>-</td>
+                            <td>15/01/2024</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>
+                                    <div style="font-weight: 600;">Casa Vila Madalena</div>
+                                    <div style="font-size: 0.8rem; color: #6c757d;">Av. Principal, 456</div>
+                                </div>
+                            </td>
+                            <td>Casa</td>
+                            <td>R$ 3.200/mês</td>
+                            <td><span class="table-status status-pending">Negociação</span></td>
+                            <td>Maria Santos</td>
+                            <td>14/01/2024</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>
+                                    <div style="font-weight: 600;">Loft Centro</div>
+                                    <div style="font-size: 0.8rem; color: #6c757d;">Rua do Comércio, 789</div>
+                                </div>
+                            </td>
+                            <td>Loft</td>
+                            <td>R$ 2.800/mês</td>
+                            <td><span class="table-status status-active">Locado</span></td>
+                            <td>João Silva</td>
+                            <td>13/01/2024</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>
+                                    <div style="font-weight: 600;">Cobertura Ipanema</div>
+                                    <div style="font-size: 0.8rem; color: #6c757d;">Av. Atlântica, 1000</div>
+                                </div>
+                            </td>
+                            <td>Cobertura</td>
+                            <td>R$ 1.200.000</td>
+                            <td><span class="table-status status-inactive">Manutenção</span></td>
+                            <td>-</td>
+                            <td>12/01/2024</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Configuração do gráfico
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        const salesChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                datasets: [{
+                    label: 'Vendas',
+                    data: [12, 19, 15, 25, 22, 30, 28, 35, 32, 40, 38, 45],
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Locações',
+                    data: [8, 15, 12, 18, 16, 22, 20, 25, 23, 28, 26, 32],
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0,0,0,0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0,0,0,0.1)'
+                        }
+                    }
+                },
+                elements: {
+                    point: {
+                        radius: 4,
+                        hoverRadius: 6
+                    }
+                }
+            }
+        });
+
+        // Funcionalidades interativas
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animação dos cards de estatísticas
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+
+            // Efeito hover nos links da sidebar
+            const sidebarLinks = document.querySelectorAll('.sidebar-nav-link');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active de todos
+                    sidebarLinks.forEach(l => l.classList.remove('active'));
+                    
+                    // Adiciona active ao clicado
+                    this.classList.add('active');
+                    
+                    // Simula navegação
+                    console.log('Navegando para:', this.textContent.trim());
+                });
+            });
+
+            // Funcionalidade de busca
+            const searchInput = document.querySelector('.header-search input');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                console.log('Buscando por:', searchTerm);
+                
+                // Aqui você implementaria a lógica de busca real
+                if (searchTerm.length > 2) {
+                    // Simular resultados de busca
+                    console.log('Resultados encontrados para:', searchTerm);
+                }
+            });
+
+            // Notificações
+            const notificationBtns = document.querySelectorAll('.header-notification');
+            notificationBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const badge = this.querySelector('.notification-badge');
+                    if (badge) {
+                        badge.style.animation = 'pulse 0.3s ease-in-out';
+                        setTimeout(() => {
+                            badge.style.animation = '';
+                        }, 300);
+                    }
+                });
+            });
+
+            // Atualização em tempo real dos dados
+            function updateStats() {
+                const statValues = document.querySelectorAll('.stat-value');
+                statValues.forEach(stat => {
+                    const currentValue = parseInt(stat.textContent.replace(/\D/g, ''));
+                    if (!isNaN(currentValue)) {
+                        // Simula pequenas variações nos dados
+                        const variation = Math.floor(Math.random() * 3) - 1; // -1, 0, ou 1
+                        const newValue = Math.max(0, currentValue + variation);
+                        
+                        if (stat.textContent.includes('R$')) {
+                            stat.textContent = `R$ ${(newValue / 1000).toFixed(1)}M`;
+                        } else {
+                            stat.textContent = newValue;
+                        }
+                    }
+                });
+            }
+
+            // Atualiza estatísticas a cada 30 segundos
+            setInterval(updateStats, 30000);
+
+            // Responsividade da sidebar
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+            }
+
+            // Intersection Observer para animações
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Observar elementos animados
+            const animatedElements = document.querySelectorAll('.animate-fade-up, .animate-slide-left');
+            animatedElements.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'all 0.6s ease-out';
+                observer.observe(el);
+            });
+        });
+
+        // Função para simular carregamento de dados
+        function loadData() {
+            console.log('Carregando dados...');
+            
+            // Simula delay de carregamento
+            setTimeout(() => {
+                console.log('Dados carregados com sucesso!');
+                
+                // Atualiza o gráfico com novos dados
+                salesChart.data.datasets[0].data = salesChart.data.datasets[0].data.map(
+                    value => value + Math.floor(Math.random() * 5) - 2
+                );
+                salesChart.update();
+            }, 1000);
+        }
+
+        // Carrega dados iniciais
+        loadData();
+    </script>
+</body>
+</html>

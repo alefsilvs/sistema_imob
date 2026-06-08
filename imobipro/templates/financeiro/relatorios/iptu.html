@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Relatórios IPTU - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Relatórios IPTU</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'financeiro:listar_iptus' %}">IPTU</a></li>
+                    <li class="breadcrumb-item active">Relatórios</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <button onclick="window.print()" class="btn btn-secondary me-2">
+                <i class="bi bi-printer"></i> Imprimir
+            </button>
+            <a href="{% url 'financeiro:listar_iptus' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <!-- Filtros -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Filtros do Relatório</h6>
+                </div>
+                <div class="card-body">
+                    <form method="get">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Ano</label>
+                                <select class="form-select" name="ano">
+                                    <option value="">Todos os anos</option>
+                                    {% for ano in anos_disponiveis %}
+                                        <option value="{{ ano }}" {% if request.GET.ano == ano|stringformat:'s' %}selected{% endif %}>{{ ano }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" name="status">
+                                    <option value="">Todos</option>
+                                    <option value="PENDENTE" {% if request.GET.status == 'PENDENTE' %}selected{% endif %}>Pendente</option>
+                                    <option value="PAGO" {% if request.GET.status == 'PAGO' %}selected{% endif %}>Pago</option>
+                                    <option value="VENCIDO" {% if request.GET.status == 'VENCIDO' %}selected{% endif %}>Vencido</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Imóvel</label>
+                                <select class="form-select" name="imovel">
+                                    <option value="">Todos os imóveis</option>
+                                    {% for imovel in imoveis %}
+                                        <option value="{{ imovel.id }}" {% if request.GET.imovel == imovel.id|stringformat:'s' %}selected{% endif %}>
+                                            {{ imovel.codigo }} - {{ imovel.endereco }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-search"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Resumo -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card border-left-primary">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total de IPTUs</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_iptus }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-file-text text-primary" style="font-size: 2rem;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-left-success">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Valor Total</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">R$ {{ valor_total|floatformat:2 }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-currency-dollar text-success" style="font-size: 2rem;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-left-info">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Pagos</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_pagos }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-check-circle text-info" style="font-size: 2rem;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-left-warning">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pendentes</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_pendentes }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="bi bi-clock text-warning" style="font-size: 2rem;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela de IPTUs -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Detalhamento dos IPTUs</h6>
+                </div>
+                <div class="card-body">
+                    {% if iptus %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Imóvel</th>
+                                        <th>Ano</th>
+                                        <th>Valor Anual</th>
+                                        <th>Parcelas</th>
+                                        <th>Status</th>
+                                        <th>Vencimento</th>
+                                        <th>Valor Pago</th>
+                                        <th>Data Pagamento</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for iptu in iptus %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ iptu.imovel.codigo }}</strong><br>
+                                            <small class="text-muted">{{ iptu.imovel.endereco }}</small>
+                                        </td>
+                                        <td>{{ iptu.ano }}</td>
+                                        <td><strong class="text-primary">R$ {{ iptu.valor_total|floatformat:2 }}</strong></td>
+                                        <td>{{ iptu.parcelas }}</td>
+                                        <td>
+                                            <span class="badge {% if iptu.status == 'PAGO' %}bg-success{% elif iptu.status == 'VENCIDO' %}bg-danger{% else %}bg-warning{% endif %}">
+                                                {{ iptu.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if iptu.vencimento %}
+                                                <span class="{% if iptu.status == 'VENCIDO' %}text-danger{% endif %}">
+                                                    {{ iptu.vencimento|date:"d/m/Y" }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if iptu.valor_pago %}
+                                                <strong class="text-success">R$ {{ iptu.valor_pago|floatformat:2 }}</strong>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if iptu.data_pagamento %}
+                                                {{ iptu.data_pagamento|date:"d/m/Y" }}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-active">
+                                        <th colspan="2">TOTAIS</th>
+                                        <th>R$ {{ valor_total|floatformat:2 }}</th>
+                                        <th>{{ total_parcelas }}</th>
+                                        <th colspan="2"></th>
+                                        <th>R$ {{ valor_total_pago|floatformat:2 }}</th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <!-- Paginação -->
+                        {% if is_paginated %}
+                            <nav aria-label="Navegação de páginas">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1{% if request.GET.ano %}&ano={{ request.GET.ano }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.imovel %}&imovel={{ request.GET.imovel }}{% endif %}">&laquo; Primeira</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.ano %}&ano={{ request.GET.ano }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.imovel %}&imovel={{ request.GET.imovel }}{% endif %}">Anterior</a>
+                                        </li>
+                                    {% endif %}
+
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                                    </li>
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.ano %}&ano={{ request.GET.ano }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.imovel %}&imovel={{ request.GET.imovel }}{% endif %}">Próxima</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.ano %}&ano={{ request.GET.ano }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.imovel %}&imovel={{ request.GET.imovel }}{% endif %}">Última &raquo;</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-file-earmark-text text-muted" style="font-size: 4rem;"></i>
+                            <h5 class="mt-3 text-muted">Nenhum IPTU encontrado</h5>
+                            <p class="text-muted">Não há registros de IPTU que atendam aos critérios selecionados.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .btn, .breadcrumb, .card-header {
+        display: none !important;
+    }
+    
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    .table {
+        font-size: 12px;
+    }
+}
+</style>
+{% endblock %}

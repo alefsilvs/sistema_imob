@@ -1,0 +1,168 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrahead %}
+<style>
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2em;
+    font-weight: bold;
+    color: #007cba;
+}
+
+.stat-label {
+    color: #666;
+    margin-top: 5px;
+}
+
+.status-connected { color: #28a745; }
+.status-disconnected { color: #ffc107; }
+.status-error { color: #dc3545; }
+
+.recent-messages {
+    margin-top: 30px;
+}
+
+.message-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.message-content {
+    flex: 1;
+}
+
+.message-time {
+    color: #666;
+    font-size: 0.9em;
+}
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h1>{{ title }}</h1>
+    
+    <!-- Estatísticas Gerais -->
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_tenants }}</div>
+            <div class="stat-label">Total de Clientes</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ total_instances }}</div>
+            <div class="stat-label">Instâncias Evolution</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number status-connected">{{ connected_instances }}</div>
+            <div class="stat-label">Conectadas</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number status-disconnected">{{ disconnected_instances }}</div>
+            <div class="stat-label">Desconectadas</div>
+        </div>
+    </div>
+    
+    <!-- Status das Instâncias -->
+    <div class="form-row">
+        <h2>Status das Instâncias</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Quantidade</th>
+                    <th>Porcentagem</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for status, count in instances_by_status.items %}
+                <tr>
+                    <td>
+                        <span class="status-{{ status }}">
+                            {% if status == 'connected' %}✓ Conectado
+                            {% elif status == 'disconnected' %}⚠ Desconectado
+                            {% else %}✗ Erro{% endif %}
+                        </span>
+                    </td>
+                    <td>{{ count }}</td>
+                    <td>
+                        {% if total_instances > 0 %}
+                            {{ count|floatformat:0 }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Mensagens Recentes -->
+    <div class="recent-messages">
+        <h2>Mensagens Recentes</h2>
+        {% if recent_messages %}
+            <div class="module">
+                {% for message in recent_messages %}
+                <div class="message-item">
+                    <div class="message-content">
+                        <strong>{{ message.tenant.nome_empresa }}</strong><br>
+                        <span>{{ message.message_type|title }}: {{ message.from_number }} → {{ message.to_number }}</span><br>
+                        <small>{{ message.content|truncatechars:100 }}</small>
+                    </div>
+                    <div class="message-time">
+                        {{ message.created_at|date:"d/m/Y H:i" }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Nenhuma mensagem recente encontrada.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Ações Rápidas -->
+    <div class="submit-row">
+        <a href="{% url 'admin:saas_tenant_changelist' %}" class="default">Gerenciar Tenants</a>
+        <a href="{% url 'admin:saas_evolutioninstance_changelist' %}" class="button">Ver Instâncias</a>
+        <a href="{% url 'admin:saas_evolutionmessage_changelist' %}" class="button">Ver Mensagens</a>
+        <a href="javascript:window.location.reload();" class="button">Atualizar</a>
+    </div>
+</div>
+
+<script>
+// Auto-refresh dashboard a cada 60 segundos
+setTimeout(function() {
+    window.location.reload();
+}, 60000);
+</script>
+{% endblock %}

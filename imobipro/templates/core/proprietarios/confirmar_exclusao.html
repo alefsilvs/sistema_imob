@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Excluir {{ proprietario.nome }} - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Excluir Proprietário</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'core:listar_proprietarios' %}">Proprietários</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'core:detalhes_proprietario' proprietario.pk %}">{{ proprietario.nome }}</a></li>
+                    <li class="breadcrumb-item active">Excluir</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Confirmar Exclusão
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-x text-danger" style="font-size: 4rem;"></i>
+                        <h4 class="mt-3">Tem certeza?</h4>
+                        <p class="text-muted">Esta ação não pode ser desfeita.</p>
+                    </div>
+
+                    <div class="alert alert-danger">
+                        <strong>Você está prestes a excluir:</strong><br>
+                        <strong>Nome:</strong> {{ proprietario.nome }}<br>
+                        <strong>CPF/CNPJ:</strong> {{ proprietario.cpf_cnpj }}<br>
+                        <strong>Email:</strong> {{ proprietario.email|default:"-" }}
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Atenção:</strong> Se houver dados vinculados, o proprietário será desativado.
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-end">
+                            <a href="{% url 'core:detalhes_proprietario' proprietario.pk %}" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Sim, Excluir
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

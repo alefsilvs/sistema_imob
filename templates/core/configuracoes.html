@@ -1,0 +1,613 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Configurações - ImobilPro{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Container principal com melhor estrutura */
+    .config-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+    
+    .config-navbar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+    }
+    
+    .config-navbar .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: white !important;
+    }
+    
+    .config-navbar .nav-link {
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .config-navbar .nav-link:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white !important;
+        transform: translateY(-2px);
+    }
+    
+    .config-navbar .nav-link.active {
+        background: rgba(255, 255, 255, 0.2);
+        color: white !important;
+    }
+    
+    /* Card principal com melhor estrutura */
+    .config-main-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    
+    .config-main-card .card-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border: none;
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .config-main-card .card-body {
+        padding: 2rem;
+        background: #fafbfc;
+    }
+    
+    /* Seções de configuração com melhor organização */
+    .config-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid #667eea;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .config-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .config-section h6 {
+        color: #667eea;
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #f1f3f4;
+    }
+    
+    /* Formulários com melhor espaçamento */
+    .form-row {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        transform: translateY(-1px);
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Checkboxes com melhor visual */
+    .form-check {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-check:hover {
+        background: #e9ecef;
+    }
+    
+    .form-check-input:checked {
+        background-color: #667eea;
+        border-color: #667eea;
+    }
+    
+    .form-check-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    
+    /* Botões com melhor design */
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-secondary {
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+    
+    /* Área de botões com melhor layout */
+    .config-actions {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-top: 2rem;
+    }
+    
+    /* Rodapé com melhor estrutura */
+    .config-footer {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 3rem 0 2rem;
+        margin-top: 4rem;
+        border-radius: 20px 20px 0 0;
+    }
+    
+    .footer-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+    
+    .footer-brand {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    
+    .footer-description {
+        font-size: 1rem;
+        opacity: 0.8;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    
+    .footer-links {
+        margin-bottom: 1rem;
+    }
+    
+    .footer-links a {
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: color 0.3s ease;
+        display: block;
+        padding: 0.25rem 0;
+    }
+    
+    .footer-links a:hover {
+        color: white;
+        padding-left: 0.5rem;
+    }
+    
+    .footer-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #ecf0f1;
+    }
+    
+    .social-icons {
+        margin-top: 1.5rem;
+    }
+    
+    .social-icons a {
+        display: inline-block;
+        width: 45px;
+        height: 45px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        text-align: center;
+        line-height: 45px;
+        margin: 0 8px 8px 0;
+        transition: all 0.3s ease;
+        font-size: 1.1rem;
+    }
+    
+    .social-icons a:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-3px);
+    }
+    
+    .footer-bottom {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        margin-top: 2rem;
+        padding-top: 2rem;
+    }
+    
+    /* Responsividade melhorada */
+    @media (max-width: 768px) {
+        .config-container {
+            padding: 0 0.5rem;
+        }
+        
+        .config-section {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .config-main-card .card-header,
+        .config-main-card .card-body {
+            padding: 1.5rem;
+        }
+        
+        .config-actions {
+            padding: 1.5rem;
+        }
+        
+        .config-footer {
+            padding: 2rem 0 1.5rem;
+        }
+        
+        .footer-content {
+            padding: 0 0.5rem;
+        }
+        
+        .btn-primary,
+        .btn-secondary {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        
+        .config-actions .d-flex {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="config-container">
+    <!-- Navbar Personalizada para Configurações -->
+    <nav class="navbar navbar-expand-lg config-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-gear-fill me-2"></i>
+                Configurações do Sistema
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#configNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="configNavbar">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#gerais">
+                            <i class="bi bi-sliders me-1"></i>
+                            Gerais
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#notificacoes">
+                            <i class="bi bi-bell me-1"></i>
+                            Notificações
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#financeiro">
+                            <i class="bi bi-currency-dollar me-1"></i>
+                            Financeiro
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#sistema">
+                            <i class="bi bi-pc-display me-1"></i>
+                            Sistema
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Card Principal -->
+    <div class="card config-main-card">
+        <div class="card-header">
+            <h4 class="mb-2">
+                <i class="bi bi-gear-wide-connected me-2"></i>
+                Painel de Configurações
+            </h4>
+            <p class="mb-0 opacity-90">Personalize o sistema de acordo com suas necessidades</p>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <!-- Configurações Gerais -->
+                <div class="config-section" id="gerais">
+                    <h6>
+                        <i class="bi bi-sliders me-2"></i>
+                        Configurações Gerais
+                    </h6>
+                    <div class="row form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="empresa_nome" class="form-label">Nome da Empresa</label>
+                                <input type="text" class="form-control" id="empresa_nome" name="empresa_nome" 
+                                       value="ImobilPro" placeholder="Digite o nome da empresa">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="empresa_cnpj" class="form-label">CNPJ</label>
+                                <input type="text" class="form-control" id="empresa_cnpj" name="empresa_cnpj" 
+                                       placeholder="00.000.000/0000-00">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Configurações de Notificação -->
+                <div class="config-section" id="notificacoes">
+                    <h6>
+                        <i class="bi bi-bell me-2"></i>
+                        Notificações
+                    </h6>
+                    <div class="row form-row">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="notif_vencimentos" name="notif_vencimentos" checked>
+                                <label class="form-check-label" for="notif_vencimentos">
+                                    Notificar vencimentos de contratos
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="notif_pagamentos" name="notif_pagamentos" checked>
+                                <label class="form-check-label" for="notif_pagamentos">
+                                    Notificar pagamentos em atraso
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="notif_manutencao" name="notif_manutencao" checked>
+                                <label class="form-check-label" for="notif_manutencao">
+                                    Notificar ordens de serviço
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="notif_email" name="notif_email">
+                                <label class="form-check-label" for="notif_email">
+                                    Enviar notificações por e-mail
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Configurações Financeiras -->
+                <div class="config-section" id="financeiro">
+                    <h6>
+                        <i class="bi bi-currency-dollar me-2"></i>
+                        Configurações Financeiras
+                    </h6>
+                    <div class="row form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="taxa_administracao" class="form-label">Taxa de Administração (%)</label>
+                                <input type="number" class="form-control" id="taxa_administracao" name="taxa_administracao" 
+                                       value="10" min="0" max="100" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="dia_vencimento" class="form-label">Dia de Vencimento Padrão</label>
+                                <select class="form-select" id="dia_vencimento" name="dia_vencimento">
+                                    <option value="5">Dia 5</option>
+                                    <option value="10" selected>Dia 10</option>
+                                    <option value="15">Dia 15</option>
+                                    <option value="20">Dia 20</option>
+                                    <option value="25">Dia 25</option>
+                                    <option value="30">Dia 30</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Configurações de Sistema -->
+                <div class="config-section" id="sistema">
+                    <h6>
+                        <i class="bi bi-pc-display me-2"></i>
+                        Sistema
+                    </h6>
+                    <div class="row form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="itens_por_pagina" class="form-label">Itens por Página</label>
+                                <select class="form-select" id="itens_por_pagina" name="itens_por_pagina">
+                                    <option value="10" {% if itens_por_pagina_atual == '10' %}selected{% endif %}>10</option>
+                                    <option value="25" {% if itens_por_pagina_atual == '25' %}selected{% endif %}>25</option>
+                                    <option value="50" {% if itens_por_pagina_atual == '50' %}selected{% endif %}>50</option>
+                                    <option value="100" {% if itens_por_pagina_atual == '100' %}selected{% endif %}>100</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Área de Ações -->
+    <div class="config-actions">
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="{% url 'core:dashboard' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-2"></i>
+                Voltar ao Dashboard
+            </a>
+            <button type="submit" class="btn btn-primary" form="config-form">
+                <i class="bi bi-check-lg me-2"></i>
+                Salvar Configurações
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Rodapé Personalizado -->
+<footer class="config-footer">
+    <div class="footer-content">
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="footer-brand">
+                    <i class="bi bi-buildings me-2"></i>
+                    ImobilPro
+                </div>
+                <p class="footer-description">
+                    Sistema completo de gestão imobiliária com tecnologia de ponta, 
+                    oferecendo soluções integradas para administração de imóveis.
+                </p>
+                <div class="social-icons">
+                    <a href="#" class="text-white" title="Facebook">
+                        <i class="bi bi-facebook"></i>
+                    </a>
+                    <a href="#" class="text-white" title="Twitter">
+                        <i class="bi bi-twitter"></i>
+                    </a>
+                    <a href="#" class="text-white" title="LinkedIn">
+                        <i class="bi bi-linkedin"></i>
+                    </a>
+                    <a href="#" class="text-white" title="Instagram">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-6 mb-4">
+                <h6 class="footer-section-title">Sistema</h6>
+                <div class="footer-links">
+                    <a href="{% url 'core:dashboard' %}">Dashboard</a>
+                    <a href="{% url 'imoveis:listar' %}">Imóveis</a>
+                    <a href="{% url 'contratos:listar' %}">Contratos</a>
+                    <a href="{% url 'financeiro:listar_parcelas' %}">Financeiro</a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-6 mb-4">
+                <h6 class="footer-section-title">Suporte</h6>
+                <div class="footer-links">
+                    <a href="#">Central de Ajuda</a>
+                    <a href="#">Documentação</a>
+                    <a href="#">Contato</a>
+                    <a href="#">FAQ</a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-6 mb-4">
+                <h6 class="footer-section-title">Legal</h6>
+                <div class="footer-links">
+                    <a href="#">Termos de Uso</a>
+                    <a href="#">Política de Privacidade</a>
+                    <a href="#">Cookies</a>
+                    <a href="#">Licenças</a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-6 mb-4">
+                <h6 class="footer-section-title">Informações</h6>
+                <div class="footer-links">
+                    <div><small>Versão: 2.0.0</small></div>
+                    <div><small>Build: 2024.01</small></div>
+                    <div><small>Última atualização:</small></div>
+                    <div><small>{{ "now"|date:"d/m/Y" }}</small></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 ImobilPro. Todos os direitos reservados.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">
+                        Desenvolvido com <i class="bi bi-heart-fill text-danger"></i> pela equipe ImobilPro
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+// Smooth scroll para navegação interna
+document.querySelectorAll('.config-navbar .nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        
+        if (targetElement) {
+            targetElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+            
+            // Atualizar link ativo
+            document.querySelectorAll('.config-navbar .nav-link').forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+        }
+    });
+});
+
+// Highlight da seção ativa durante scroll
+window.addEventListener('scroll', function() {
+    const sections = document.querySelectorAll('.config-section');
+    const navLinks = document.querySelectorAll('.config-navbar .nav-link');
+    
+    let current = '';
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (scrollY >= (sectionTop - 200)) {
+            current = section.getAttribute('id');
+        }
+    });
+    
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+            link.classList.add('active');
+        }
+    });
+});
+
+// Adicionar ID ao formulário para funcionar com o botão externo
+document.querySelector('form').setAttribute('id', 'config-form');
+</script>
+{% endblock %}

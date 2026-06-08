@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia de Estilos - Header e Div</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* ===== VARIÁVEIS CSS PERSONALIZADAS ===== */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --dark-color: #34495e;
+            --light-color: #ecf0f1;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        /* ===== ESTILOS GLOBAIS ===== */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            line-height: 1.6;
+        }
+
+        /* ===== HEADER PRINCIPAL ===== */
+        .main-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 0;
+            box-shadow: var(--box-shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .main-header h1 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 1.8rem;
+        }
+
+        .main-header .subtitle {
+            opacity: 0.9;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        /* ===== HEADER DE SEÇÃO ===== */
+        .section-header {
+            background: white;
+            border-left: 4px solid var(--secondary-color);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .section-header h2 {
+            color: var(--primary-color);
+            margin: 0 0 0.5rem 0;
+            font-weight: 600;
+        }
+
+        .section-header .description {
+            color: #6c757d;
+            margin: 0;
+        }
+
+        /* ===== HEADER COM ESTATÍSTICAS ===== */
+        .stats-header {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .stats-header .header-top {
+            background: linear-gradient(45deg, var(--primary-color), var(--dark-color));
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .stats-header .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0;
+        }
+
+        .stat-item {
+            padding: 1.5rem;
+            text-align: center;
+            border-right: 1px solid #e9ecef;
+            transition: var(--transition);
+        }
+
+        .stat-item:last-child {
+            border-right: none;
+        }
+
+        .stat-item:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            display: block;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* ===== DIVS DE CONTEÚDO ===== */
+        .content-div {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .content-div:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        /* ===== DIVS DE CARD ===== */
+        .card-div {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .card-div:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(45deg, var(--secondary-color), #5dade2);
+            color: white;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-footer {
+            background: #f8f9fa;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        /* ===== DIVS DE GRID ===== */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-item {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .grid-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        /* ===== DIVS DE ALERTA ===== */
+        .alert-div {
+            border-radius: var(--border-radius);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: var(--success-color);
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border-color: var(--warning-color);
+            color: #856404;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border-color: var(--accent-color);
+            color: #721c24;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border-color: var(--secondary-color);
+            color: #0c5460;
+        }
+
+        /* ===== DIVS RESPONSIVOS ===== */
+        .responsive-div {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .responsive-div {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .stats-header .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        /* ===== DIVS COM ANIMAÇÕES ===== */
+        .animated-div {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== CÓDIGO DE EXEMPLO ===== */
+        .code-example {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .code-example .comment {
+            color: #68d391;
+        }
+
+        .code-example .property {
+            color: #63b3ed;
+        }
+
+        .code-example .value {
+            color: #fbb6ce;
+        }
+
+        /* ===== UTILITÁRIOS ===== */
+        .text-gradient {
+            background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .icon-large {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--secondary-color), transparent);
+            margin: 2rem 0;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Principal -->
+    <header class="main-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="bi bi-code-slash"></i> Guia de Estilos CSS</h1>
+                    <p class="subtitle">Headers e Divs para Sistema Imobiliário</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <span class="badge bg-light text-dark">Versão 2.0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mt-4">
+        <!-- Header de Seção -->
+        <div class="section-header">
+            <h2><i class="bi bi-palette"></i> Estilos de Header</h2>
+            <p class="description">Diferentes tipos de cabeçalhos para organizar o conteúdo</p>
+        </div>
+
+        <!-- Header com Estatísticas -->
+        <div class="stats-header">
+            <div class="header-top">
+                <h3><i class="bi bi-graph-up"></i> Dashboard de Imóveis</h3>
+                <p class="mb-0">Visão geral dos dados do sistema</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-number">245</span>
+                    <div class="stat-label">Imóveis Cadastrados</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">89</span>
+                    <div class="stat-label">Contratos Ativos</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">156</span>
+                    <div class="stat-label">Inquilinos</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">R$ 125.430</span>
+                    <div class="stat-label">Receita Mensal</div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- Seção de Divs -->
+        <div class="section-header">
+            <h2><i class="bi bi-grid-3x3"></i> Estilos de Div</h2>
+            <p class="description">Diferentes padrões de containers e layouts</p>
+        </div>
+
+        <!-- Grid de Cards -->
+        <div class="grid-container">
+            <div class="card-div">
+                <div class="card-header">
+                    <i class="bi bi-house"></i> Gestão de Imóveis
+                </div>
+                <div class="card-body">
+                    <p>Sistema completo para gerenciar propriedades, com cadastro, edição e visualização detalhada.</p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-check-circle text-success"></i> Cadastro completo</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Galeria de fotos</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Documentação</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary btn-sm">Acessar</button>
+                </div>
+            </div>
+
+            <div class="card-div">
+                <div class="card-header">
+                    <i class="bi bi-file-text"></i> Contratos
+                </div>
+                <div class="card-body">
+                    <p>Gerencie contratos de locação com renovações automáticas e controle de vencimentos.</p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-check-circle text-success"></i> Renovação automática</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Alertas de vencimento</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Histórico completo</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary btn-sm">Acessar</button>
+                </div>
+            </div>
+
+            <div class="card-div">
+                <div class="card-header">
+                    <i class="bi bi-currency-dollar"></i> Financeiro
+                </div>
+                <div class="card-body">
+                    <p>Controle financeiro completo com relatórios, cobranças e integração bancária.</p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-check-circle text-success"></i> Relatórios detalhados</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Cobrança automática</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Integração PIX</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary btn-sm">Acessar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divs de Alerta -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="alert-div alert-success">
+                    <h5><i class="bi bi-check-circle"></i> Sucesso!</h5>
+                    <p class="mb-0">Operação realizada com sucesso.</p>
+                </div>
+                <div class="alert-div alert-warning">
+                    <h5><i class="bi bi-exclamation-triangle"></i> Atenção!</h5>
+                    <p class="mb-0">Verifique os dados antes de continuar.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="alert-div alert-danger">
+                    <h5><i class="bi bi-x-circle"></i> Erro!</h5>
+                    <p class="mb-0">Ocorreu um erro durante a operação.</p>
+                </div>
+                <div class="alert-div alert-info">
+                    <h5><i class="bi bi-info-circle"></i> Informação</h5>
+                    <p class="mb-0">Dados atualizados automaticamente.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divs Animadas -->
+        <div class="animated-div">
+            <h4 class="text-gradient"><i class="bi bi-magic"></i> Div com Animação</h4>
+            <p>Este container aparece com uma animação suave de fade-in e slide-up.</p>
+        </div>
+
+        <!-- Exemplo de Código CSS -->
+        <div class="content-div">
+            <h4><i class="bi bi-code"></i> Exemplo de CSS</h4>
+            <p>Aqui está um exemplo de como criar um header personalizado:</p>
+            
+            <div class="code-example">
+<span class="comment">/* Header principal com gradiente */</span>
+<span class="property">.main-header</span> {
+    <span class="property">background</span>: <span class="value">linear-gradient(135deg, #2c3e50, #3498db)</span>;
+    <span class="property">color</span>: <span class="value">white</span>;
+    <span class="property">padding</span>: <span class="value">1rem 0</span>;
+    <span class="property">box-shadow</span>: <span class="value">0 2px 10px rgba(0,0,0,0.1)</span>;
+    <span class="property">position</span>: <span class="value">sticky</span>;
+    <span class="property">top</span>: <span class="value">0</span>;
+    <span class="property">z-index</span>: <span class="value">1000</span>;
+}
+
+<span class="comment">/* Div de conteúdo com hover */</span>
+<span class="property">.content-div</span> {
+    <span class="property">background</span>: <span class="value">white</span>;
+    <span class="property">border-radius</span>: <span class="value">8px</span>;
+    <span class="property">box-shadow</span>: <span class="value">0 2px 10px rgba(0,0,0,0.1)</span>;
+    <span class="property">padding</span>: <span class="value">1.5rem</span>;
+    <span class="property">transition</span>: <span class="value">all 0.3s ease</span>;
+}
+
+<span class="property">.content-div:hover</span> {
+    <span class="property">transform</span>: <span class="value">translateY(-2px)</span>;
+    <span class="property">box-shadow</span>: <span class="value">0 4px 20px rgba(0,0,0,0.15)</span>;
+}
+            </div>
+        </div>
+
+        <!-- Div Responsiva -->
+        <div class="responsive-div">
+            <h4><i class="bi bi-phone"></i> Design Responsivo</h4>
+            <p>Todos os elementos são otimizados para diferentes tamanhos de tela:</p>
+            <ul>
+                <li><strong>Desktop:</strong> Layout em grid com múltiplas colunas</li>
+                <li><strong>Tablet:</strong> Adaptação automática do grid</li>
+                <li><strong>Mobile:</strong> Layout em coluna única com espaçamento otimizado</li>
+            </ul>
+        </div>
+
+        <!-- Footer -->
+        <div class="content-div text-center">
+            <h5 class="text-gradient">Sistema Imobiliário - ImobilPro</h5>
+            <p class="text-muted mb-0">Desenvolvido com as melhores práticas de CSS e UX</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Adiciona animação de entrada aos elementos
+        document.addEventListener('DOMContentLoaded', function() {
+            const animatedElements = document.querySelectorAll('.animated-div');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationDelay = '0.2s';
+                        entry.target.style.animationPlayState = 'running';
+                    }
+                });
+            });
+
+            animatedElements.forEach(el => {
+                observer.observe(el);
+            });
+        });
+
+        // Adiciona efeito de hover suave aos cards
+        document.querySelectorAll('.card-div').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

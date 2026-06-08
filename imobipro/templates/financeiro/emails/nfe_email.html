@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Nota Fiscal Eletrônica</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .header { background-color: #f8f9fa; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .footer { background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 12px; }
+        .info-box { background-color: #e9ecef; padding: 15px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>{{ empresa_nome }}</h2>
+        <h3>Nota Fiscal Eletrônica de Serviços</h3>
+    </div>
+    
+    <div class="content">
+        <p>Prezado(a) <strong>{{ nota_fiscal.cliente_nome }}</strong>,</p>
+        
+        <p>Segue em anexo a Nota Fiscal Eletrônica de Serviços referente aos serviços prestados.</p>
+        
+        <div class="info-box">
+            <h4>Dados da Nota Fiscal:</h4>
+            <ul>
+                <li><strong>Número:</strong> {{ nota_fiscal.numero }}</li>
+                <li><strong>Série:</strong> {{ nota_fiscal.serie }}</li>
+                <li><strong>Data de Emissão:</strong> {{ nota_fiscal.data_emissao|date:"d/m/Y H:i" }}</li>
+                <li><strong>Valor Total:</strong> R$ {{ nota_fiscal.valor_total|floatformat:2 }}</li>
+                {% if nota_fiscal.chave_acesso %}
+                <li><strong>Chave de Acesso:</strong> {{ nota_fiscal.chave_acesso }}</li>
+                {% endif %}
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h4>Discriminação dos Serviços:</h4>
+            <p>{{ nota_fiscal.discriminacao_servicos }}</p>
+        </div>
+        
+        <p>Em caso de dúvidas, entre em contato conosco.</p>
+        
+        <p>Atenciosamente,<br>
+        <strong>{{ empresa_nome }}</strong></p>
+    </div>
+    
+    <div class="footer">
+        <p>Esta é uma mensagem automática. Por favor, não responda este email.</p>
+    </div>
+</body>
+</html>

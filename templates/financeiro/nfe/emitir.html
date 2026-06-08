@@ -1,0 +1,1025 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Emitir NFe - ImobiPro{% endblock %}
+
+{% block extra_css %}
+<style>
+.nfe-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.nfe-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.nfe-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.parcela-row {
+    transition: all 0.2s ease;
+    border-radius: 8px;
+}
+
+.parcela-row:hover {
+    background-color: #f8f9fc;
+    transform: scale(1.01);
+}
+
+.parcela-check {
+    transform: scale(1.2);
+}
+
+.btn-emitir {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    border: none;
+    border-radius: 25px;
+    padding: 12px 30px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.btn-emitir:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+}
+
+.stats-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    border: none;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+
+.stats-card .card-body {
+    padding: 1.5rem;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+    z-index: 1;
+}
+
+.stats-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.stats-number {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.stats-label {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: white;
+}
+
+.stats-card small {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    color: rgba(255,255,255,0.9);
+}
+
+/* Cores específicas para cada card */
+.stats-card:nth-child(1) {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stats-card:nth-child(2) {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stats-card:nth-child(3) {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.stats-card:nth-child(4) {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+/* Estilos para o dashboard de gráficos */
+.chart-container {
+    position: relative;
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+.status-stats {
+    padding: 0.5rem 0;
+}
+
+.status-stats .badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.8rem;
+    border-radius: 20px;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+}
+
+.card-header h6 {
+    margin: 0;
+    color: #495057;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 15px;
+}
+
+.table-modern {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+
+.table-modern thead {
+    background: linear-gradient(45deg, #4e73df, #224abe);
+    color: white;
+}
+
+.table-modern th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+}
+
+.table-modern td {
+    border: none;
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.valor-destaque {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #28a745;
+}
+
+.contrato-badge {
+    background: linear-gradient(45deg, #36d1dc, #5b86e5);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Moderno -->
+    <div class="nfe-header">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="h2 mb-2">
+                    <i class="bi bi-receipt-cutoff me-3"></i>
+                    Emissão de Notas Fiscais Eletrônicas
+                </h1>
+                <p class="mb-0 opacity-90">Gerencie e emita NFe para parcelas pagas de forma profissional e automatizada</p>
+            </div>
+            <div class="col-lg-4 text-end">
+                <a href="{% url 'financeiro:listar_nfe' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-list-ul me-2"></i> Ver NFe Emitidas
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if parcelas %}
+        <!-- Dashboard de Estatísticas -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-receipt-cutoff stats-icon text-primary"></i>
+                        <h3 class="stats-number" id="parcelasElegiveis">{{ parcelas|length }}</h3>
+                        <p class="stats-label">Parcelas Elegíveis</p>
+                        <small class="text-muted">Disponíveis para emissão</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-currency-dollar stats-icon text-success"></i>
+                        <h3 class="stats-number" id="valorTotal">R$ {% widthratio parcelas|length 1 1000 %}</h3>
+                        <p class="stats-label">Valor Total Disponível</p>
+                        <small class="text-muted">Soma das parcelas elegíveis</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-calendar-check stats-icon text-info"></i>
+                        <h3 class="stats-number">{{ nfe_mes_atual|default:"0" }}</h3>
+                        <p class="stats-label">NFe Este Mês</p>
+                        <small class="text-muted">Emitidas em {{ mes_atual_nome }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-check2-square stats-icon text-warning"></i>
+                        <h3 class="stats-number" id="selectedCount">0</h3>
+                        <p class="stats-label">Selecionadas</p>
+                        <small class="text-muted">Para emissão</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Gráfico de Estatísticas Rápidas -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h6><i class="bi bi-bar-chart me-2"></i>Resumo de Emissões - Últimos 6 Meses</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" style="height: 200px;">
+                            <canvas id="emissionsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h6><i class="bi bi-pie-chart me-2"></i>Status das NFe</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="status-stats">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="bi bi-check-circle text-success me-1"></i>Autorizadas</span>
+                                <span class="badge bg-success">{{ nfe_autorizadas|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="bi bi-clock text-warning me-1"></i>Pendentes</span>
+                                <span class="badge bg-warning">{{ nfe_pendentes|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="bi bi-x-circle text-danger me-1"></i>Rejeitadas</span>
+                                <span class="badge bg-danger">{{ nfe_rejeitadas|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-slash-circle text-secondary me-1"></i>Canceladas</span>
+                                <span class="badge bg-secondary">{{ nfe_canceladas|default:"0" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" id="nfeForm">
+            {% csrf_token %}
+            <div class="nfe-card card">
+                <div class="card-header bg-gradient-primary text-white">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5 class="mb-0">
+                                <i class="bi bi-check2-square me-2"></i>
+                                Selecione as Parcelas para Emissão
+                            </h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="form-check">
+                                <input type="checkbox" id="selectAll" class="form-check-input" style="transform: scale(1.3);">
+                                <label class="form-check-label text-white ms-2" for="selectAll">
+                                    Selecionar Todas
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-modern mb-0">
+                            <thead>
+                                <tr>
+                                    <th width="50">
+                                        <i class="bi bi-check-square"></i>
+                                    </th>
+                                    <th>Contrato</th>
+                                    <th>Inquilino</th>
+                                    <th>Imóvel</th>
+                                    <th>Vencimento</th>
+                                    <th>Valor</th>
+                                    <th>Pagamento</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for parcela in parcelas %}
+                                <tr class="parcela-row">
+                                    <td>
+                                        <input type="checkbox" name="parcelas" value="{{ parcela.id }}" class="form-check-input parcela-check">
+                                    </td>
+                                    <td>
+                                        <span class="contrato-badge">{{ parcela.contrato.numero }}</span>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>{{ parcela.contrato.inquilino.nome }}</strong><br>
+                                            <small class="text-muted">{{ parcela.contrato.inquilino.cpf|default:parcela.contrato.inquilino.cnpj }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <span class="text-dark">{{ parcela.contrato.imovel.endereco|truncatechars:40 }}</span><br>
+                                            <small class="text-muted">{{ parcela.contrato.imovel.cidade }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ parcela.data_vencimento|date:"d/m/Y" }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="valor-destaque">R$ {{ parcela.valor_aluguel|floatformat:2 }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">{{ parcela.data_pagamento|date:"d/m/Y" }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-clock me-1"></i>Pendente NFe
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        </table>
+                    </div>
+                    
+                    <div class="card-footer bg-light">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <div id="selectionInfo" class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Selecione as parcelas para emitir as NFe correspondentes
+                                </div>
+                                <div id="validationMessage" class="mt-2"></div>
+                                <div id="selectionSummary" class="mt-2 d-none"></div>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" id="btnPreview" class="btn btn-info me-2" disabled onclick="showPreview()">
+                                    <i class="bi bi-eye me-2"></i>Visualizar NFe
+                                </button>
+                                <button type="submit" class="btn btn-emitir" id="btnEmitir" disabled>
+                                    <i class="bi bi-receipt-cutoff me-2"></i>
+                                    Emitir NFe Selecionadas
+                                    <span class="spinner-border spinner-border-sm ms-2 d-none" id="loadingSpinner"></span>
+                                </button>
+                                <div id="selectionCount" class="text-muted small mt-2 d-none"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    {% else %}
+        <div class="empty-state">
+            <div class="mb-4">
+                <i class="bi bi-receipt text-muted" style="font-size: 4rem;"></i>
+            </div>
+            <h3 class="text-muted mb-3">Nenhuma Parcela Elegível</h3>
+            <p class="text-muted mb-4">No momento não há parcelas pagas aguardando emissão de NFe.</p>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-lightbulb me-2"></i>Dica:</h6>
+                        <p class="mb-0">Para emitir NFe, é necessário que as parcelas estejam com status "Paga" e ainda não tenham NFe emitida.</p>
+                    </div>
+                </div>
+            </div>
+            <a href="{% url 'financeiro:listar_parcelas' %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-list me-2"></i>Ver Parcelas
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Inicializar gráfico de emissões
+function initEmissionsChart() {
+    const ctx = document.getElementById('emissionsChart');
+    if (!ctx) return;
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            datasets: [{
+                label: 'NFe Emitidas',
+                data: [12, 19, 15, 25, 22, 30],
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Controle de seleção e validações
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar gráfico
+    initEmissionsChart();
+    
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.parcela-check');
+    const btnEmitir = document.getElementById('btnEmitir');
+    const selectedCount = document.getElementById('selectedCount');
+    const selectionInfo = document.getElementById('selectionInfo');
+    const nfeForm = document.getElementById('nfeForm');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    
+    // Verificar se os elementos existem antes de continuar
+    if (!selectAll || !btnEmitir || !selectedCount || !selectionInfo || !nfeForm) {
+        console.warn('Alguns elementos necessários não foram encontrados na página');
+        return;
+    }
+    
+    // Variáveis para validação em tempo real
+    let validationTimeout;
+    let isValidating = false;
+
+    function updateSelection() {
+        const selected = document.querySelectorAll('.parcela-check:checked');
+        const count = selected.length;
+        const btnPreview = document.getElementById('btnPreview');
+        
+        selectedCount.textContent = count;
+        btnEmitir.disabled = count === 0;
+        btnPreview.disabled = count === 0;
+        
+        // Validação em tempo real
+        validateSelection(count);
+        
+        if (count === 0) {
+            selectionInfo.innerHTML = '<i class="bi bi-info-circle me-1"></i>Selecione as parcelas para emitir as NFe correspondentes';
+            btnEmitir.classList.remove('btn-emitir');
+            btnEmitir.classList.add('btn-secondary');
+            btnEmitir.innerHTML = '<i class="bi bi-receipt-cutoff me-2"></i>Selecione parcelas para emitir';
+            btnPreview.classList.remove('btn-info');
+            btnPreview.classList.add('btn-secondary');
+        } else {
+            const total = Array.from(selected).reduce((sum, cb) => {
+                const row = cb.closest('tr');
+                const valorText = row.querySelector('.valor-destaque').textContent;
+                const valor = parseFloat(valorText.replace('R$ ', '').replace(',', '.'));
+                return sum + valor;
+            }, 0);
+            
+            selectionInfo.innerHTML = `<i class="bi bi-check-circle me-1 text-success"></i>${count} parcela(s) selecionada(s) - Total: R$ ${total.toFixed(2).replace('.', ',')}`;
+            btnEmitir.classList.remove('btn-secondary');
+            btnEmitir.classList.add('btn-emitir');
+            btnEmitir.innerHTML = `<i class="bi bi-receipt-cutoff me-2"></i>Emitir NFe (${count} parcela${count > 1 ? 's' : ''})`;
+            btnPreview.classList.remove('btn-secondary');
+            btnPreview.classList.add('btn-info');
+        }
+        
+        selectAll.indeterminate = count > 0 && count < checkboxes.length;
+        selectAll.checked = count === checkboxes.length;
+        
+        // Feedback visual nas linhas selecionadas
+        updateRowVisualFeedback();
+    }
+    
+    function validateSelection(count) {
+        clearTimeout(validationTimeout);
+        
+        validationTimeout = setTimeout(() => {
+            isValidating = true;
+            
+            // Validação de quantidade mínima
+            if (count === 0) {
+                showValidationMessage('warning', 'Selecione pelo menos uma parcela para emitir a NFe.');
+            } else if (count > 50) {
+                showValidationMessage('warning', 'Muitas parcelas selecionadas. Considere processar em lotes menores.');
+            } else {
+                hideValidationMessage();
+            }
+            
+            isValidating = false;
+        }, 300);
+    }
+    
+    function showValidationMessage(type, message) {
+        let alertClass = type === 'warning' ? 'alert-warning' : 'alert-danger';
+        let icon = type === 'warning' ? 'bi-exclamation-triangle' : 'bi-x-circle';
+        
+        const existingAlert = document.querySelector('.validation-alert');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+        
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert ${alertClass} validation-alert d-flex align-items-center mt-3`;
+        alertDiv.innerHTML = `
+            <i class="bi ${icon} me-2"></i>
+            <div>${message}</div>
+        `;
+        
+        selectionInfo.parentNode.appendChild(alertDiv);
+        
+        // Auto-hide após 5 segundos para warnings
+        if (type === 'warning') {
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+    }
+    
+    function hideValidationMessage() {
+        const existingAlert = document.querySelector('.validation-alert');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+    }
+    
+    function updateRowVisualFeedback() {
+        checkboxes.forEach(checkbox => {
+            const row = checkbox.closest('tr');
+            if (checkbox.checked) {
+                row.classList.add('table-success');
+                row.style.transform = 'scale(1.01)';
+            } else {
+                row.classList.remove('table-success');
+                row.style.transform = 'scale(1)';
+            }
+        });
+    }
+
+    // Selecionar/deselecionar todos
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+                // Animação escalonada
+                setTimeout(() => {
+                    const row = checkbox.closest('tr');
+                    if (this.checked) {
+                        row.style.transform = 'scale(1.02)';
+                        setTimeout(() => row.style.transform = 'scale(1.01)', 100);
+                    }
+                }, Math.random() * 200);
+            });
+            updateSelection();
+        });
+    }
+
+    // Atualizar seleção individual
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            // Animação individual
+            const row = this.closest('tr');
+            if (this.checked) {
+                row.style.transform = 'scale(1.02)';
+                setTimeout(() => row.style.transform = 'scale(1.01)', 150);
+            } else {
+                row.style.transform = 'scale(1)';
+            }
+            
+            updateSelection();
+        });
+    });
+
+    // Validação antes do envio do formulário
+    if (nfeForm) {
+        nfeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const selected = document.querySelectorAll('.parcela-check:checked');
+            
+            if (selected.length === 0) {
+                showValidationMessage('error', 'Selecione pelo menos uma parcela para emitir a NFe.');
+                return false;
+            }
+            
+            // Mostrar confirmação com preview
+            showEmissionConfirmation(selected);
+        });
+    }
+     
+     function showEmissionConfirmation(selected) {
+         const total = Array.from(selected).reduce((sum, cb) => {
+             const row = cb.closest('tr');
+             const valorText = row.querySelector('.valor-destaque').textContent;
+             const valor = parseFloat(valorText.replace('R$ ', '').replace('.', '').replace(',', '.'));
+             return sum + valor;
+         }, 0);
+         
+         if (typeof Swal !== 'undefined') {
+             Swal.fire({
+                 title: 'Confirmar Emissão de NFe',
+                 html: `
+                     <div class="text-start">
+                         <p><strong>Resumo da Emissão:</strong></p>
+                         <ul class="list-unstyled">
+                             <li><i class="bi bi-receipt text-primary me-2"></i>Quantidade: ${selected.length} NFe(s)</li>
+                             <li><i class="bi bi-currency-dollar text-success me-2"></i>Valor Total: R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</li>
+                             <li><i class="bi bi-clock text-warning me-2"></i>Tempo estimado: ${Math.ceil(selected.length * 0.5)} minuto(s)</li>
+                         </ul>
+                         <div class="alert alert-info mt-3">
+                             <i class="bi bi-info-circle me-2"></i>
+                             As NFe serão processadas sequencialmente e você receberá notificações do progresso.
+                         </div>
+                     </div>
+                 `,
+                 icon: 'question',
+                 showCancelButton: true,
+                 confirmButtonColor: '#28a745',
+                 cancelButtonColor: '#6c757d',
+                 confirmButtonText: '<i class="bi bi-check-circle me-2"></i>Confirmar Emissão',
+                 cancelButtonText: '<i class="bi bi-x-circle me-2"></i>Cancelar',
+                 customClass: {
+                     popup: 'swal-wide'
+                 }
+             }).then((result) => {
+                 if (result.isConfirmed) {
+                     startEmissionProcess(selected);
+                 }
+             });
+         } else {
+             if (confirm(`Confirma a emissão de ${selected.length} NFe(s) no valor total de R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}?`)) {
+                 startEmissionProcess(selected);
+             }
+         }
+     }
+     
+     function startEmissionProcess(selected) {
+         // Mostrar modal de progresso
+         showProgressModal(selected.length);
+         
+         // Desabilitar interface
+         btnEmitir.disabled = true;
+         document.getElementById('btnPreview').disabled = true;
+         
+         // Simular processo de emissão com progresso
+         simulateEmissionProgress(selected);
+     }
+     
+     function showProgressModal(totalNFe) {
+         const progressModal = document.getElementById('progressModal');
+         const progressBar = document.getElementById('emissionProgress');
+         const progressText = document.getElementById('progressText');
+         const currentNFe = document.getElementById('currentNFe');
+         
+         progressBar.style.width = '0%';
+         progressBar.setAttribute('aria-valuenow', 0);
+         progressText.textContent = '0%';
+         currentNFe.textContent = `Iniciando emissão de ${totalNFe} NFe(s)...`;
+         
+         const modal = new bootstrap.Modal(progressModal, {
+             backdrop: 'static',
+             keyboard: false
+         });
+         modal.show();
+     }
+     
+     function simulateEmissionProgress(selected) {
+         let currentIndex = 0;
+         const totalNFe = selected.length;
+         
+         function processNext() {
+             if (currentIndex >= totalNFe) {
+                 // Processo concluído
+                 completeEmissionProcess();
+                 return;
+             }
+             
+             const progress = Math.round(((currentIndex + 1) / totalNFe) * 100);
+             const progressBar = document.getElementById('emissionProgress');
+             const progressText = document.getElementById('progressText');
+             const currentNFe = document.getElementById('currentNFe');
+             
+             // Atualizar progresso
+             progressBar.style.width = progress + '%';
+             progressBar.setAttribute('aria-valuenow', progress);
+             progressText.textContent = progress + '%';
+             
+             // Obter dados da parcela atual
+             const checkbox = selected[currentIndex];
+             const row = checkbox.closest('tr');
+             const contrato = row.querySelector('.contrato-badge').textContent;
+             const inquilino = row.querySelector('td:nth-child(3) strong').textContent;
+             
+             currentNFe.innerHTML = `
+                 <div class="d-flex align-items-center">
+                     <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                     <div>
+                         Processando NFe ${currentIndex + 1}/${totalNFe}<br>
+                         <small class="text-muted">Contrato ${contrato} - ${inquilino}</small>
+                     </div>
+                 </div>
+             `;
+             
+             currentIndex++;
+             
+             // Simular tempo de processamento (1-3 segundos por NFe)
+             setTimeout(processNext, Math.random() * 2000 + 1000);
+         }
+         
+         processNext();
+     }
+     
+     function completeEmissionProcess() {
+         const progressBar = document.getElementById('emissionProgress');
+         const progressText = document.getElementById('progressText');
+         const currentNFe = document.getElementById('currentNFe');
+         const progressFooter = document.querySelector('#progressModal .modal-footer');
+         
+         // Finalizar progresso
+         progressBar.style.width = '100%';
+         progressBar.setAttribute('aria-valuenow', 100);
+         progressBar.classList.remove('bg-primary');
+         progressBar.classList.add('bg-success');
+         progressText.textContent = '100%';
+         
+         currentNFe.innerHTML = `
+             <div class="d-flex align-items-center text-success">
+                 <i class="bi bi-check-circle-fill me-2"></i>
+                 <div>
+                     <strong>Emissão Concluída!</strong><br>
+                     <small>Todas as NFe foram processadas com sucesso.</small>
+                 </div>
+             </div>
+         `;
+         
+         // Mostrar botão de fechar
+         progressFooter.innerHTML = `
+             <button type="button" class="btn btn-success" onclick="finishEmission()">
+                 <i class="bi bi-check-circle me-2"></i>Concluir
+             </button>
+         `;
+         
+         // Auto-fechar após 3 segundos
+         setTimeout(() => {
+             finishEmission();
+         }, 3000);
+     }
+     
+     function finishEmission() {
+         // Fechar modal
+         const modal = bootstrap.Modal.getInstance(document.getElementById('progressModal'));
+         modal.hide();
+         
+         // Mostrar notificação de sucesso
+         if (typeof Swal !== 'undefined') {
+             Swal.fire({
+                 title: 'Sucesso!',
+                 text: 'Todas as NFe foram emitidas com sucesso.',
+                 icon: 'success',
+                 confirmButtonText: 'Ver NFe Emitidas',
+                 showCancelButton: true,
+                 cancelButtonText: 'Continuar Aqui'
+             }).then((result) => {
+                 if (result.isConfirmed) {
+                     window.location.href = '{% url "financeiro:listar_nfe" %}';
+                 } else {
+                     // Recarregar página para limpar seleções
+                     window.location.reload();
+                 }
+             });
+         } else {
+             if (confirm('NFe emitidas com sucesso! Deseja ver a lista de NFe emitidas?')) {
+                 window.location.href = '{% url "financeiro:listar_nfe" %}';
+             } else {
+                 window.location.reload();
+             }
+         }
+     }
+
+    // Adicionar estilos CSS para transições
+    const style = document.createElement('style');
+    style.textContent = `
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+        .table tbody tr.table-success {
+            background-color: rgba(25, 135, 84, 0.1) !important;
+            border-left: 4px solid #198754;
+        }
+        .validation-alert {
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Inicializar
+    updateSelection();
+});
+
+// Função para mostrar preview da NFe
+function showPreview() {
+    const selected = document.querySelectorAll('.parcela-check:checked');
+    if (selected.length === 0) return;
+    
+    let previewContent = `
+        <div class="nfe-preview">
+            <div class="text-center mb-4">
+                <h4 class="text-primary">Nota Fiscal Eletrônica - Preview</h4>
+                <p class="text-muted">Visualização das NFe que serão emitidas</p>
+            </div>
+            <div class="row">
+    `;
+    
+    selected.forEach((checkbox, index) => {
+        const row = checkbox.closest('tr');
+        const contrato = row.querySelector('.contrato-badge').textContent;
+        const inquilino = row.querySelector('td:nth-child(3) strong').textContent;
+        const cpfCnpj = row.querySelector('td:nth-child(3) small').textContent;
+        const imovel = row.querySelector('td:nth-child(4) span').textContent;
+        const valor = row.querySelector('.valor-destaque').textContent;
+        const vencimento = row.querySelector('td:nth-child(5) .badge').textContent;
+        
+        previewContent += `
+            <div class="col-md-6 mb-3">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">NFe ${index + 1} - Contrato ${contrato}</h6>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Cliente:</strong> ${inquilino}</p>
+                        <p><strong>CPF/CNPJ:</strong> ${cpfCnpj}</p>
+                        <p><strong>Imóvel:</strong> ${imovel}</p>
+                        <p><strong>Vencimento:</strong> ${vencimento}</p>
+                        <p><strong>Valor:</strong> <span class="text-success">${valor}</span></p>
+                        <p><strong>Descrição:</strong> Serviços de locação de imóvel</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    previewContent += `
+            </div>
+            <div class="alert alert-info mt-3">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Total de NFe a serem emitidas:</strong> ${selected.length}
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('previewContent').innerHTML = previewContent;
+    
+    // Mostrar modal usando Bootstrap
+    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    modal.show();
+}
+
+// Função para confirmar emissão após preview
+function confirmEmission() {
+    // Fechar modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('previewModal'));
+    modal.hide();
+    
+    // Submeter formulário
+    setTimeout(() => {
+        document.getElementById('nfeForm').submit();
+    }, 300);
+}
+</script>
+
+<!-- Modal de Preview da NFe -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="previewModalLabel">
+                    <i class="bi bi-eye me-2"></i>Preview da Nota Fiscal Eletrônica
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="previewContent">
+                    <!-- Conteúdo do preview será inserido aqui -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>Cancelar
+                </button>
+                <button type="button" class="btn btn-success" onclick="confirmEmission()">
+                    <i class="bi bi-check-circle me-2"></i>Confirmar e Emitir NFe
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+ <!-- Modal de Progresso da Emissão -->
+ <div class="modal fade" id="progressModal" tabindex="-1" aria-labelledby="progressModalLabel" aria-hidden="true">
+     <div class="modal-dialog modal-lg">
+         <div class="modal-content">
+             <div class="modal-header bg-primary text-white">
+                 <h5 class="modal-title" id="progressModalLabel">
+                     <i class="bi bi-gear me-2"></i>Emitindo Notas Fiscais
+                 </h5>
+             </div>
+             <div class="modal-body">
+                 <div class="text-center mb-4">
+                     <div class="progress mb-3" style="height: 25px;">
+                         <div id="emissionProgress" class="progress-bar bg-primary progress-bar-striped progress-bar-animated" 
+                              role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                             <span id="progressText">0%</span>
+                         </div>
+                     </div>
+                     <div id="currentNFe" class="text-muted">
+                         Preparando emissão...
+                     </div>
+                 </div>
+                 <div class="alert alert-info">
+                     <i class="bi bi-info-circle me-2"></i>
+                     <strong>Aguarde:</strong> As NFe estão sendo processadas. Não feche esta janela durante o processo.
+                 </div>
+             </div>
+             <div class="modal-footer">
+                 <div class="text-muted small">
+                     <i class="bi bi-clock me-1"></i>Processamento em andamento...
+                 </div>
+             </div>
+         </div>
+     </div>
+ </div>
+ 
+ {% endblock %}

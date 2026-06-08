@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Aguardando Confirmação de Pagamento{% endblock %}
+
+{% block extra_css %}
+<style>
+    .waiting-container {
+        max-width: 600px;
+        margin: 50px auto;
+        text-align: center;
+        padding: 40px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .waiting-icon {
+        color: #ffc107;
+        font-size: 5rem;
+        margin-bottom: 30px;
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+    .payment-details {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 30px 0;
+        text-align: left;
+    }
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .detail-row:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    .pix-code {
+        background-color: #e3f2fd;
+        border: 2px dashed #2196f3;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        word-break: break-all;
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+    .copy-button {
+        margin-top: 10px;
+    }
+    .status-check {
+        margin-top: 30px;
+    }
+    .refresh-info {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 20px;
+    }
+    .qr-code-container {
+        background-color: white;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: center;
+    }
+    .qr-code-image {
+        max-width: 200px;
+        height: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin: 10px 0;
+    }
+    .qr-tabs {
+        margin: 20px 0;
+    }
+    .tab-content {
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="waiting-container">
+    <i class="fas fa-clock waiting-icon"></i>
+    
+    <h2 class="text-warning mb-3">Aguardando Confirmação de Pagamento</h2>
+    <p class="lead">Seu pagamento está sendo processado. Aguarde a confirmação.</p>
+    
+    <div class="payment-details">
+        <h5 class="mb-3"><i class="fas fa-receipt"></i> Detalhes do Pagamento</h5>
+        
+        <div class="detail-row">
+            <span><strong>Inquilino:</strong></span>
+            <span>{{ pagamento.parcela.contrato.inquilino.nome }}</span>
+        </div>
+        
+        <div class="detail-row">
+            <span><strong>Valor:</strong></span>
+            <span class="text-primary font-weight-bold">R$ {{ pagamento.valor_total|floatformat:2 }}</span>
+        </div>
+        
+        <div class="detail-row">
+            <span><strong>Método:</strong></span>
+            <span>{{ pagamento.get_metodo_pagamento_display }}</span>
+        </div>
+        
+        <div class="detail-row">
+            <span><strong>Status:</strong></span>
+            <span class="badge badge-warning">{{ pagamento.get_status_display }}</span>
+        </div>
+        
+        {% if pagamento.transacao_id %}
+        <div class="detail-row">
+            <span><strong>ID da Transação:</strong></span>
+            <span><code>{{ pagamento.transacao_id }}</code></span>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if pagamento.metodo_pagamento == 'PIX' and pagamento.gateway_response.codigo_pix %}
+    <div class="alert alert-info">
+        <h5><i class="fab fa-pix"></i> Pagamento via PIX</h5>
+        <p>Escolha uma das opções abaixo para realizar o pagamento:</p>
+        
+        <!-- Abas para diferentes métodos -->
+        <ul class="nav nav-tabs qr-tabs" id="paymentTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="qr-pix-tab" data-toggle="tab" href="#qr-pix" role="tab">
+                    <i class="fas fa-qrcode"></i> QR Code PIX
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="code-pix-tab" data-toggle="tab" href="#code-pix" role="tab">
+                    <i class="fas fa-code"></i> Código PIX
+                </a>
+            </li>
+            {% if pagamento.gateway_response.qr_code_link %}
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="qr-link-tab" data-toggle="tab" href="#qr-link" role="tab">
+                    <i class="fas fa-link"></i> Link de Pagamento
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+        
+        <div class="tab-content" id="paymentTabContent">
+            <!-- QR Code PIX -->
+            <div class="tab-pane fade show active" id="qr-pix" role="tabpanel">
+                <div class="qr-code-container">
+                    <h6><i class="fab fa-pix"></i> Escaneie o QR Code com seu app bancário</h6>
+                    {% if pagamento.gateway_response.qr_code_pix %}
+                        <img src="data:image/png;base64,{{ pagamento.gateway_response.qr_code_pix }}" 
+                             alt="QR Code PIX" class="qr-code-image">
+                    {% else %}
+                        <div class="alert alert-warning">QR Code não disponível</div>
+                    {% endif %}
+                    <p class="text-muted mt-2">
+                        <small>Abra o app do seu banco e escaneie o código acima</small>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Código PIX -->
+            <div class="tab-pane fade" id="code-pix" role="tabpanel">
+                <div class="pix-code">
+                    <div id="pix-code-text">{{ pagamento.gateway_response.codigo_pix }}</div>
+                    <button class="btn btn-sm btn-primary copy-button" onclick="copyPixCode()">
+                        <i class="fas fa-copy"></i> Copiar Código PIX
+                    </button>
+                </div>
+                <p class="text-muted mt-2">
+                    <small>Copie e cole este código no seu app bancário</small>
+                </p>
+            </div>
+            
+            {% if pagamento.gateway_response.qr_code_link %}
+            <!-- QR Code Link de Pagamento -->
+            <div class="tab-pane fade" id="qr-link" role="tabpanel">
+                <div class="qr-code-container">
+                    <h6><i class="fas fa-link"></i> QR Code do Link de Pagamento</h6>
+                    <img src="data:image/png;base64,{{ pagamento.gateway_response.qr_code_link }}" 
+                         alt="QR Code Link de Pagamento" class="qr-code-image">
+                    <p class="text-muted mt-2">
+                        <small>Escaneie para acessar a página de pagamento</small>
+                    </p>
+                    {% if pagamento.gateway_response.link_pagamento %}
+                    <div class="mt-3">
+                        <a href="{{ pagamento.gateway_response.link_pagamento }}" 
+                           class="btn btn-sm btn-outline-primary" target="_blank">
+                            <i class="fas fa-external-link-alt"></i> Abrir Link
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <small class="text-muted">
+            Após realizar o pagamento, a confirmação pode levar alguns minutos.
+        </small>
+    </div>
+    {% endif %}
+    
+    <div class="status-check">
+        <button class="btn btn-outline-primary" onclick="checkStatus()">
+            <i class="fas fa-sync-alt"></i> Verificar Status
+        </button>
+    </div>
+    
+    <div class="refresh-info">
+        <i class="fas fa-info-circle"></i>
+        <strong>Atualização Automática:</strong> Esta página será atualizada automaticamente a cada 30 segundos.
+    </div>
+    
+    <div class="mt-4">
+        <small class="text-muted">
+            Em caso de problemas, entre em contato:<br>
+            <i class="fas fa-phone"></i> {{ sistema.telefone }}<br>
+            <i class="fas fa-envelope"></i> {{ sistema.email }}
+        </small>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyPixCode() {
+    const pixCode = document.getElementById('pix-code-text').textContent;
+    navigator.clipboard.writeText(pixCode).then(function() {
+        alert('Código PIX copiado para a área de transferência!');
+    }).catch(function(err) {
+        console.error('Erro ao copiar código PIX: ', err);
+    });
+}
+
+function checkStatus() {
+    fetch(`/pagamentos/api/status/{{ pagamento.id }}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'APROVADO') {
+                window.location.href = `/pagamentos/sucesso/{{ pagamento.id }}/`;
+            } else if (data.status === 'REJEITADO') {
+                alert('Pagamento foi rejeitado. Tente novamente ou entre em contato conosco.');
+            } else {
+                alert('Pagamento ainda está sendo processado.');
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao verificar status:', error);
+            alert('Erro ao verificar status. Tente novamente.');
+        });
+}
+
+// Auto-refresh a cada 30 segundos
+setInterval(function() {
+    checkStatus();
+}, 30000);
+
+// Verificar status ao carregar a página
+$(document).ready(function() {
+    setTimeout(checkStatus, 5000); // Primeira verificação após 5 segundos
+});
+</script>
+{% endblock %}

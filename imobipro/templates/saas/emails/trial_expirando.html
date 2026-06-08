@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seu período gratuito está expirando</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+        .alert {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 5px;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: #007bff;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .planos {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .plano {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🕐 Seu período gratuito está expirando!</h1>
+        <p>{{ tenant.nome_empresa }}</p>
+    </div>
+    
+    <div class="content">
+        <div class="alert">
+            <strong>⚠️ Atenção!</strong> 
+            {% if dias_restantes > 1 %}
+                Restam apenas <strong>{{ dias_restantes }} dias</strong> do seu período gratuito de 7 dias.
+            {% elif dias_restantes == 1 %}
+                Este é o <strong>último dia</strong> do seu período gratuito!
+            {% else %}
+                Seu período gratuito <strong>expirou hoje</strong>!
+            {% endif %}
+        </div>
+        
+        <h2>🚀 Continue aproveitando todas as funcionalidades!</h2>
+        
+        <p>Olá, <strong>{{ tenant.usuario_admin.first_name }}</strong>!</p>
+        
+        <p>Esperamos que você esteja aproveitando ao máximo o <strong>Sistema Imobiliário ImobilPro</strong> durante seu período gratuito de 7 dias.</p>
+        
+        {% if dias_restantes > 0 %}
+            <p>Para garantir que você não perca acesso às funcionalidades que já está usando, escolha um de nossos planos antes que o período gratuito expire.</p>
+        {% else %}
+            <p>Seu período gratuito expirou, mas você ainda pode escolher um plano para continuar usando todas as funcionalidades do sistema.</p>
+        {% endif %}
+        
+        <div class="planos">
+            <h3>📋 Planos Disponíveis</h3>
+            {% for plano in planos_disponiveis %}
+                <div class="plano">
+                    <div>
+                        <strong>{{ plano.nome }}</strong><br>
+                        <small>Múltiplos usuários • Gestão de imóveis • Armazenamento seguro</small>
+                    </div>
+                    <div>
+                        <strong>R$ {{ plano.preco_mensal }}/mês</strong>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{ url_planos }}" class="btn btn-primary">🛒 Escolher Plano Agora</a>
+            <a href="{{ url_dashboard }}" class="btn btn-success">📊 Acessar Dashboard</a>
+        </div>
+        
+        <h3>✨ O que você continuará tendo acesso:</h3>
+        <ul>
+            <li>📊 Dashboard completo com relatórios</li>
+            <li>🏠 Gestão ilimitada de imóveis</li>
+            <li>📄 Contratos digitais</li>
+            <li>💰 Controle financeiro</li>
+            <li>🔧 Sistema de manutenção</li>
+            <li>📱 Notificações automáticas</li>
+            <li>🔒 Backup automático dos dados</li>
+            <li>🎯 Suporte prioritário</li>
+        </ul>
+        
+        <p><strong>💡 Dica:</strong> Escolhendo o plano anual, você economiza até 20% comparado ao plano mensal!</p>
+    </div>
+    
+    <div class="footer">
+        <p>Este email foi enviado automaticamente pelo Sistema Imobiliário ImobilPro.</p>
+        <p>Se você tiver dúvidas, entre em contato conosco.</p>
+        <p>© 2024 ImobilPro - Todos os direitos reservados</p>
+    </div>
+</body>
+</html>

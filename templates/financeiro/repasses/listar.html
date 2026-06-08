@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Repasses - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Repasses</h1>
+            <p class="mb-0 text-muted">Gerencie os repasses para proprietários</p>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" name="search" class="form-control" value="{{ request.GET.search }}" placeholder="Nome do proprietário ou número da parcela...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="PENDENTE" {% if request.GET.status == 'PENDENTE' %}selected{% endif %}>Pendente</option>
+                        <option value="PROCESSADO" {% if request.GET.status == 'PROCESSADO' %}selected{% endif %}>Processado</option>
+                        <option value="ERRO" {% if request.GET.status == 'ERRO' %}selected{% endif %}>Erro</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div>
+                        <button type="submit" class="btn btn-primary">Filtrar</button>
+                        <a href="{% url 'financeiro:listar_repasses' %}" class="btn btn-outline-secondary">Limpar</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Repasses -->
+    <div class="card">
+        <div class="card-body">
+            {% if repasses %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Proprietário</th>
+                                <th>Parcela</th>
+                                <th>Data Repasse</th>
+                                <th>Valor Repasse</th>
+                                <th>Honorário</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for repasse in repasses %}
+                            <tr>
+                                <td>{{ repasse.proprietario.nome }}</td>
+                                <td>
+                                    <small class="text-muted">Contrato: {{ repasse.parcela.contrato.numero }}</small><br>
+                                    Parcela {{ repasse.parcela.numero_parcela }}
+                                </td>
+                                <td>{{ repasse.data_repasse|date:"d/m/Y" }}</td>
+                                <td>R$ {{ repasse.valor_repasse|floatformat:2 }}</td>
+                                <td>R$ {{ repasse.valor_honorario|floatformat:2 }}</td>
+                                <td>
+                                    {% if repasse.status == 'PROCESSADO' %}
+                                        <span class="badge bg-success">{{ repasse.get_status_display }}</span>
+                                    {% elif repasse.status == 'ERRO' %}
+                                        <span class="badge bg-danger">{{ repasse.get_status_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">{{ repasse.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalRepasse{{ repasse.pk }}">
+                                            <i class="bi bi-eye"></i> Ver
+                                        </button>
+                                        {% if repasse.status == 'PENDENTE' %}
+                                            <button type="button" class="btn btn-sm btn-success" onclick="processarRepasse({{ repasse.pk }})">
+                                                <i class="bi bi-check-circle"></i> Processar
+                                            </button>
+                                        {% endif %}
+                                        {% if repasse.comprovante %}
+                                            <button type="button" class="btn btn-sm btn-outline-info" title="Ver Comprovante" onclick="alert('Funcionalidade em desenvolvimento')">
+                                                <i class="bi bi-file-earmark-pdf"></i>
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação -->
+                {% if repasses.has_other_pages %}
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            {% if repasses.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ repasses.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Anterior</a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in repasses.paginator.page_range %}
+                                {% if repasses.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if repasses.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ repasses.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Próximo</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-arrow-repeat" style="font-size: 3rem; color: #6c757d;"></i>
+                    <h5 class="mt-3 text-muted">Nenhum repasse encontrado</h5>
+                    <p class="text-muted">Não há repasses cadastrados no sistema.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modais para detalhes dos repasses -->
+{% for repasse in repasses %}
+<div class="modal fade" id="modalRepasse{{ repasse.pk }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes do Repasse</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Proprietário:</strong><br>
+                        {{ repasse.proprietario.nome }}<br>
+                        <small class="text-muted">{{ repasse.proprietario.email }}</small>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Contrato:</strong><br>
+                        {{ repasse.parcela.contrato.numero }}<br>
+                        <small class="text-muted">Parcela {{ repasse.parcela.numero_parcela }}</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>Valor Repasse:</strong><br>
+                        <span class="h5 text-success">R$ {{ repasse.valor_repasse|floatformat:2 }}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Honorário:</strong><br>
+                        <span class="h5 text-primary">R$ {{ repasse.valor_honorario|floatformat:2 }}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Data:</strong><br>
+                        {{ repasse.data_repasse|date:"d/m/Y" }}
+                    </div>
+                </div>
+                {% if repasse.observacoes %}
+                <hr>
+                <strong>Observações:</strong><br>
+                {{ repasse.observacoes }}
+                {% endif %}
+                {% if repasse.comprovante %}
+                <hr>
+                <strong>Comprovante:</strong><br>
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="alert('Funcionalidade em desenvolvimento')">
+                    <i class="bi bi-download"></i> Baixar Comprovante
+                </button>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                {% if repasse.status == 'PENDENTE' %}
+                    <button type="button" class="btn btn-success" onclick="processarRepasse({{ repasse.pk }})">
+                        <i class="bi bi-check-circle"></i> Processar
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+function processarRepasse(repasseId) {
+    if (confirm('Tem certeza que deseja processar este repasse?')) {
+        // Aqui você pode implementar a lógica para processar o repasse
+        // Por exemplo, fazer uma requisição AJAX para o backend
+        console.log('Processando repasse ID:', repasseId);
+        
+        // Exemplo de implementação com fetch:
+        /*
+        fetch(`/financeiro/repasses/${repasseId}/processar/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erro ao processar repasse: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao processar repasse');
+        });
+        */
+    }
+}
+</script>
+{% endblock %}

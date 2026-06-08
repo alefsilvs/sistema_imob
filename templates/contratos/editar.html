@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Contrato {{ contrato.numero }} - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Editar Contrato {{ contrato.numero }}</h1>
+            <p class="mb-0 text-muted">Edite as informações do contrato de locação</p>
+        </div>
+        <a href="{% url 'contratos:detalhar' contrato.pk %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.numero.id_for_label }}" class="form-label">{{ form.numero.label }}</label>
+                                {{ form.numero }}
+                                {% if form.numero.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.numero.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.imovel.id_for_label }}" class="form-label">{{ form.imovel.label }}</label>
+                                {{ form.imovel }}
+                                {% if form.imovel.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.imovel.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.inquilino.id_for_label }}" class="form-label">{{ form.inquilino.label }}</label>
+                                {{ form.inquilino }}
+                                {% if form.inquilino.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.inquilino.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.data_inicio.id_for_label }}" class="form-label">{{ form.data_inicio.label }}</label>
+                                {{ form.data_inicio }}
+                                {% if form.data_inicio.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.data_inicio.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.data_fim.id_for_label }}" class="form-label">{{ form.data_fim.label }}</label>
+                                {{ form.data_fim }}
+                                {% if form.data_fim.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.data_fim.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.valor_aluguel.id_for_label }}" class="form-label">{{ form.valor_aluguel.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    {{ form.valor_aluguel }}
+                                </div>
+                                {% if form.valor_aluguel.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.valor_aluguel.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.valor_condominio.id_for_label }}" class="form-label">{{ form.valor_condominio.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    {{ form.valor_condominio }}
+                                </div>
+                                {% if form.valor_condominio.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.valor_condominio.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.valor_iptu.id_for_label }}" class="form-label">{{ form.valor_iptu.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    {{ form.valor_iptu }}
+                                </div>
+                                {% if form.valor_iptu.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.valor_iptu.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.dia_vencimento.id_for_label }}" class="form-label">{{ form.dia_vencimento.label }}</label>
+                                {{ form.dia_vencimento }}
+                                {% if form.dia_vencimento.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.dia_vencimento.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.tipo_reajuste.id_for_label }}" class="form-label">{{ form.tipo_reajuste.label }}</label>
+                                {{ form.tipo_reajuste }}
+                                {% if form.tipo_reajuste.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.tipo_reajuste.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.percentual_reajuste.id_for_label }}" class="form-label">{{ form.percentual_reajuste.label }}</label>
+                                <div class="input-group">
+                                    {{ form.percentual_reajuste }}
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                {% if form.percentual_reajuste.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.percentual_reajuste.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.periodicidade_reajuste.id_for_label }}" class="form-label">{{ form.periodicidade_reajuste.label }}</label>
+                                {{ form.periodicidade_reajuste }}
+                                {% if form.periodicidade_reajuste.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.periodicidade_reajuste.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.percentual_honorario.id_for_label }}" class="form-label">{{ form.percentual_honorario.label }}</label>
+                                <div class="input-group">
+                                    {{ form.percentual_honorario }}
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                {% if form.percentual_honorario.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.percentual_honorario.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.caucao.id_for_label }}" class="form-label">{{ form.caucao.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    {{ form.caucao }}
+                                </div>
+                                {% if form.caucao.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.caucao.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.observacoes.id_for_label }}" class="form-label">{{ form.observacoes.label }}</label>
+                            {{ form.observacoes }}
+                            {% if form.observacoes.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.observacoes.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'contratos:detalhar' contrato.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Salvar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IPTU {{ iptu.ano_exercicio }} - {{ iptu.imovel.codigo }} - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">IPTU {{ iptu.ano_exercicio }}</h1>
+            <p class="mb-0 text-muted">{{ iptu.imovel.codigo }} - {{ iptu.imovel.endereco }}</p>
+        </div>
+        <div>
+            <a href="{% url 'financeiro:editar_iptu' iptu.pk %}" class="btn btn-primary me-2">
+                <i class="bi bi-pencil"></i> Editar
+            </a>
+            <a href="{% url 'financeiro:listar_iptus' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Informações Gerais -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-info-circle"></i> Informações Gerais
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Imóvel</label>
+                                <div class="fw-bold">{{ iptu.imovel.codigo }}</div>
+                                <div class="text-muted small">{{ iptu.imovel.endereco }}</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Ano de Exercício</label>
+                                <div class="fw-bold">{{ iptu.ano_exercicio }}</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Status</label>
+                                <div>
+                                    {% if iptu.status == 'PAGO' %}
+                                        <span class="badge bg-success fs-6">{{ iptu.get_status_display }}</span>
+                                    {% elif iptu.status == 'VENCIDO' %}
+                                        <span class="badge bg-danger fs-6">{{ iptu.get_status_display }}</span>
+                                    {% elif iptu.status == 'PARCELADO' %}
+                                        <span class="badge bg-warning fs-6">{{ iptu.get_status_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary fs-6">{{ iptu.get_status_display }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Valor Total</label>
+                                <div class="fw-bold fs-5 text-primary">R$ {{ iptu.valor_total|floatformat:2 }}</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Desconto à Vista</label>
+                                <div class="fw-bold">R$ {{ iptu.valor_desconto_vista|floatformat:2 }}</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Valor com Desconto</label>
+                                <div class="fw-bold text-success">R$ {{ iptu.valor_com_desconto|floatformat:2 }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informações de Pagamento -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-credit-card"></i> Informações de Pagamento
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Forma de Pagamento</label>
+                                <div class="fw-bold">
+                                    <span class="badge bg-info fs-6">{{ iptu.get_forma_pagamento_display }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Data Vencimento à Vista</label>
+                                <div class="fw-bold">{{ iptu.data_vencimento_vista|date:'d/m/Y' }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Número de Parcelas</label>
+                                <div class="fw-bold">{{ iptu.numero_parcelas }}x</div>
+                            </div>
+                            
+                            {% if iptu.numero_parcelas > 1 %}
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Valor por Parcela</label>
+                                <div class="fw-bold">R$ {{ iptu.valor_parcela|floatformat:2 }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observações -->
+            {% if iptu.observacoes %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-chat-text"></i> Observações
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ iptu.observacoes|linebreaks }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Ações Rápidas -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-lightning"></i> Ações Rápidas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'financeiro:editar_iptu' iptu.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil"></i> Editar IPTU
+                        </a>
+                        <a href="{% url 'imoveis:detalhes_imovel' iptu.imovel.pk %}" class="btn btn-outline-info">
+                            <i class="bi bi-building"></i> Ver Imóvel
+                        </a>
+                        {% if iptu.imovel.proprietario %}
+                        <a href="{% url 'core:detalhes_proprietario' iptu.imovel.proprietario.pk %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-person"></i> Ver Proprietário
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informações do Sistema -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-clock-history"></i> Informações do Sistema
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <small class="text-muted">Cadastrado em:</small><br>
+                        <small class="fw-bold">{{ iptu.created_at|date:'d/m/Y H:i' }}</small>
+                    </div>
+                    <div>
+                        <small class="text-muted">Última atualização:</small><br>
+                        <small class="fw-bold">{{ iptu.updated_at|date:'d/m/Y H:i' }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

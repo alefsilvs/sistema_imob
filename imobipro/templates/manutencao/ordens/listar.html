@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ordens de Serviço - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Ordens de Serviço</h1>
+            <p class="mb-0 text-muted">Gerencie todas as ordens de serviço</p>
+        </div>
+        <a href="{% url 'manutencao:cadastrar_ordem' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nova Ordem
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" name="search" class="form-control" placeholder="Descrição, imóvel..." value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">Todos</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Responsável</label>
+                    <select name="responsavel" class="form-select">
+                        <option value="">Todos</option>
+                        {% for value, label in responsavel_choices %}
+                            <option value="{{ value }}" {% if request.GET.responsavel == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-search"></i> Filtrar
+                    </button>
+                    <a href="{% url 'manutencao:listar_ordens' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="card">
+        <div class="card-body">
+            {% if ordens %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Imóvel</th>
+                                <th>Descrição</th>
+                                <th>Fornecedor</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ordem in ordens %}
+                                <tr>
+                                    <td><strong>{{ ordem.numero }}</strong></td>
+                                    <td>{{ ordem.imovel.endereco }}</td>
+                                    <td>{{ ordem.descricao|truncatechars:50 }}</td>
+                                    <td>{{ ordem.fornecedor.nome|default:"-" }}</td>
+                                    <td>R$ {{ ordem.valor_total|floatformat:2 }}</td>
+                                    <td>
+                                        {% if ordem.status == 'pendente' %}
+                                            <span class="badge bg-warning">Pendente</span>
+                                        {% elif ordem.status == 'em_andamento' %}
+                                            <span class="badge bg-info">Em Andamento</span>
+                                        {% elif ordem.status == 'concluida' %}
+                                            <span class="badge bg-success">Concluída</span>
+                                        {% elif ordem.status == 'cancelada' %}
+                                            <span class="badge bg-danger">Cancelada</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ ordem.data_abertura|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'manutencao:detalhar_ordem' ordem.pk %}" class="btn btn-sm btn-outline-primary" title="Ver detalhes">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'manutencao:editar_ordem' ordem.pk %}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação -->
+                {% if ordens.has_other_pages %}
+                    <nav aria-label="Paginação">
+                        <ul class="pagination justify-content-center">
+                            {% if ordens.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ ordens.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.responsavel %}&responsavel={{ request.GET.responsavel }}{% endif %}">
+                                        Anterior
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in ordens.paginator.page_range %}
+                                {% if ordens.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.responsavel %}&responsavel={{ request.GET.responsavel }}{% endif %}">
+                                            {{ num }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if ordens.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ ordens.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.responsavel %}&responsavel={{ request.GET.responsavel }}{% endif %}">
+                                        Próxima
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-inbox display-1 text-muted"></i>
+                    <h4 class="mt-3">Nenhuma ordem de serviço encontrada</h4>
+                    <p class="text-muted">Cadastre a primeira ordem de serviço para começar.</p>
+                    <a href="{% url 'manutencao:cadastrar_ordem' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Cadastrar Primeira Ordem
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

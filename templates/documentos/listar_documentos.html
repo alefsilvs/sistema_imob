@@ -1,0 +1,465 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Documentos - Repositório Digital{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filter-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        border: 1px solid #e9ecef;
+    }
+    
+    .document-card {
+        background: white;
+        border-radius: 10px;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .document-card:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+        border-color: #007bff;
+    }
+    
+    .document-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .status-badge {
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .confidencialidade-badge {
+        border-radius: 15px;
+        padding: 2px 8px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    
+    .document-actions {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .document-card:hover .document-actions {
+        opacity: 1;
+    }
+    
+    .search-box {
+        border-radius: 25px;
+        border: 2px solid #e9ecef;
+        padding: 12px 20px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .search-box:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="bi bi-files"></i>
+                        Documentos
+                    </h2>
+                    <p class="text-muted mb-0">Gerencie todos os seus documentos</p>
+                </div>
+                <div>
+                    <a href="{% url 'documentos:upload_documento' %}" class="btn btn-primary">
+                        <i class="bi bi-cloud-upload"></i>
+                        Enviar Documento
+                    </a>
+                    <a href="{% url 'documentos:repositorio_dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        Voltar ao Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="filter-card p-3">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" 
+                               name="busca" 
+                               class="form-control search-box" 
+                               placeholder="Buscar por nome, descrição ou tags..."
+                               value="{{ filtros.busca }}">
+                    </div>
+                    <div class="col-md-2">
+                        <select name="categoria" class="form-select">
+                            <option value="">Todas as categorias</option>
+                            {% for categoria in categorias %}
+                                <option value="{{ categoria }}" 
+                                        {% if filtros.categoria == categoria %}selected{% endif %}>
+                                    {{ categoria }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="tipo" class="form-select">
+                            <option value="">Todos os tipos</option>
+                            {% for tipo in tipos %}
+                                <option value="{{ tipo.id }}" 
+                                        {% if filtros.tipo == tipo.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ tipo.nome }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="status" class="form-select">
+                            <option value="">Todos os status</option>
+                            {% comment %}
+                            {% for status in status_choices %}
+                                <option value="{{ status.0 }}" 
+                                        {% if filtros.status == status.0 %}selected{% endif %}>
+                                    {{ status.1 }}
+                                </option>
+                            {% endfor %}
+                            {% endcomment %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-fill">
+                                <i class="bi bi-search"></i>
+                                Filtrar
+                            </button>
+                            <a href="{% url 'documentos:listar_documentos' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x"></i>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="text-muted">
+                    {{ page_obj.paginator.count }} documento{{ page_obj.paginator.count|pluralize }} encontrado{{ page_obj.paginator.count|pluralize }}
+                </span>
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="view-mode" id="grid-view" checked>
+                    <label class="btn btn-outline-secondary" for="grid-view">
+                        <i class="bi bi-grid"></i>
+                    </label>
+                    <input type="radio" class="btn-check" name="view-mode" id="list-view">
+                    <label class="btn btn-outline-secondary" for="list-view">
+                        <i class="bi bi-list"></i>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid de Documentos -->
+    <div id="documents-grid" class="row">
+        {% for documento in page_obj %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="document-card card h-100 p-3" onclick="visualizarDocumento({{ documento.id }})">
+                <div class="d-flex align-items-start mb-3">
+                    <div class="document-icon bg-primary bg-opacity-10 text-primary me-3">
+                        {% if documento.arquivo.name|slice:"-4:" == ".pdf" %}
+                            <i class="bi bi-file-pdf"></i>
+                        {% elif documento.arquivo.name|slice:"-4:" == ".doc" or documento.arquivo.name|slice:"-5:" == ".docx" %}
+                            <i class="bi bi-file-word"></i>
+                        {% elif documento.arquivo.name|slice:"-4:" == ".xls" or documento.arquivo.name|slice:"-5:" == ".xlsx" %}
+                            <i class="bi bi-file-excel"></i>
+                        {% elif documento.arquivo.name|slice:"-4:" == ".jpg" or documento.arquivo.name|slice:"-5:" == ".jpeg" or documento.arquivo.name|slice:"-4:" == ".png" %}
+                            <i class="bi bi-file-image"></i>
+                        {% else %}
+                            <i class="bi bi-file-earmark"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1 text-truncate" title="{{ documento.nome_arquivo }}">
+                                    {{ documento.nome_arquivo|truncatechars:25 }}
+                                </h6>
+                                <small class="text-muted">{{ documento.tipo_documento.nome }}</small>
+                            </div>
+                            <div class="document-actions">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'documentos:visualizar_documento' documento.id %}">
+                                                <i class="bi bi-eye"></i> Visualizar
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'documentos:download_documento' documento.id %}">
+                                                <i class="bi bi-download"></i> Download
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item" onclick="compartilharDocumento({{ documento.id }})">
+                                                <i class="bi bi-share"></i> Compartilhar
+                                            </button>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <button class="dropdown-item text-danger" onclick="excluirDocumento({{ documento.id }})">
+                                                <i class="bi bi-trash"></i> Excluir
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    {% if documento.categoria %}
+                        <span class="badge" style="background-color: {{ documento.categoria.cor }}20; color: {{ documento.categoria.cor }}">
+                            <i class="{{ documento.categoria.icone }}"></i>
+                            {{ documento.categoria.nome }}
+                        </span>
+                    {% endif %}
+                    
+                    <span class="status-badge 
+                        {% if documento.status == 'ATIVO' %}bg-success text-white
+                        {% elif documento.status == 'ARQUIVADO' %}bg-secondary text-white
+                        {% elif documento.status == 'VENCIDO' %}bg-danger text-white
+                        {% endif %}">
+                        {{ documento.get_status_display }}
+                    </span>
+                </div>
+                
+                {% if documento.descricao %}
+                <p class="text-muted small mb-3">{{ documento.descricao|truncatechars:80 }}</p>
+                {% endif %}
+                
+                <div class="mt-auto">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            {{ documento.created_at|date:"d/m/Y" }}
+                        </small>
+                        <div>
+                            {% if documento.confidencialidade == 'CONFIDENCIAL' %}
+                                <span class="confidencialidade-badge bg-danger text-white">
+                                    <i class="bi bi-lock"></i> Confidencial
+                                </span>
+                            {% elif documento.confidencialidade == 'RESTRITO' %}
+                                <span class="confidencialidade-badge bg-warning text-dark">
+                                    <i class="bi bi-shield"></i> Restrito
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if documento.data_vencimento %}
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            <i class="bi bi-calendar"></i>
+                            Vence em: {{ documento.data_vencimento|date:"d/m/Y" }}
+                        </small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="bi bi-file-x fs-1 text-muted"></i>
+                <h4 class="mt-3 text-muted">Nenhum documento encontrado</h4>
+                <p class="text-muted">Tente ajustar os filtros ou envie um novo documento.</p>
+                <a href="{% url 'documentos:upload_documento' %}" class="btn btn-primary">
+                    <i class="bi bi-cloud-upload"></i>
+                    Enviar Primeiro Documento
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginação -->
+    {% if page_obj.has_other_pages %}
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="Navegação de documentos">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.busca %}&busca={{ request.GET.busca }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                <i class="bi bi-chevron-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.busca %}&busca={{ request.GET.busca }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.busca %}&busca={{ request.GET.busca }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.busca %}&busca={{ request.GET.busca }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.busca %}&busca={{ request.GET.busca }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">
+                                <i class="bi bi-chevron-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal de Compartilhamento -->
+<div class="modal fade" id="compartilharModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Compartilhar Documento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="compartilharForm">
+                    <div class="mb-3">
+                        <label class="form-label">Email do destinatário</label>
+                        <input type="email" class="form-control" name="email_externo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de acesso</label>
+                        <select class="form-select" name="tipo_acesso">
+                            <option value="LEITURA">Somente Leitura</option>
+                            <option value="DOWNLOAD">Leitura e Download</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Data de expiração (opcional)</label>
+                        <input type="date" class="form-control" name="data_expiracao">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="enviarCompartilhamento()">Compartilhar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let documentoParaCompartilhar = null;
+
+function visualizarDocumento(id) {
+    window.location.href = `/documentos/repositorio/documento/${id}/`;
+}
+
+function compartilharDocumento(id) {
+    documentoParaCompartilhar = id;
+    new bootstrap.Modal(document.getElementById('compartilharModal')).show();
+}
+
+function enviarCompartilhamento() {
+    const form = document.getElementById('compartilharForm');
+    const formData = new FormData(form);
+    
+    const data = {
+        email_externo: formData.get('email_externo'),
+        tipo_acesso: formData.get('tipo_acesso'),
+        data_expiracao: formData.get('data_expiracao')
+    };
+    
+    fetch(`/documentos/repositorio/documento/${documentoParaCompartilhar}/compartilhar/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Documento compartilhado com sucesso!');
+            bootstrap.Modal.getInstance(document.getElementById('compartilharModal')).hide();
+        } else {
+            alert('Erro ao compartilhar documento: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Erro ao compartilhar documento');
+        console.error(error);
+    });
+}
+
+function excluirDocumento(id) {
+    if (confirm('Tem certeza que deseja excluir este documento?')) {
+        // Implementar exclusão
+        alert('Funcionalidade de exclusão em desenvolvimento');
+    }
+}
+
+// Alternar entre visualizações
+document.getElementById('list-view').addEventListener('change', function() {
+    if (this.checked) {
+        document.getElementById('documents-grid').className = 'row';
+        // Implementar visualização em lista
+    }
+});
+
+document.getElementById('grid-view').addEventListener('change', function() {
+    if (this.checked) {
+        document.getElementById('documents-grid').className = 'row';
+    }
+});
+</script>
+{% endblock %}

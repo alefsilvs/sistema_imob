@@ -1,0 +1,428 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sistema de Notificações{% endblock %}
+
+{% block extra_css %}
+<style>
+.notification-card {
+    border-left: 4px solid #007bff;
+    transition: all 0.3s ease;
+}
+.notification-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.status-badge {
+    font-size: 0.8em;
+    padding: 0.3em 0.6em;
+}
+.stats-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-bell"></i> Sistema de Notificações</h2>
+                <div>
+                    <a href="{% url 'notificacoes:whatsapp_dashboard' %}" class="btn btn-primary">
+                        <i class="fab fa-whatsapp"></i> WhatsApp Dashboard
+                    </a>
+                    <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#agendarModal">
+                        <i class="fas fa-calendar-plus"></i> Agendar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <h3>{{ total_enviadas|default:0 }}</h3>
+                    <p class="mb-0">Enviadas Hoje</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3>{{ taxa_entrega|default:0 }}%</h3>
+                    <p class="mb-0">Taxa de Entrega</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3>{{ taxa_abertura|default:0 }}%</h3>
+                    <p class="mb-0">Taxa de Abertura</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h3>{{ agendadas|default:0 }}</h3>
+                    <p class="mb-0">Agendadas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros Avançados -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5><i class="fas fa-filter"></i> Filtros Avançados</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">Todos os Status</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Canal</label>
+                    <select name="canal" class="form-select">
+                        <option value="">Todos os Canais</option>
+                        {% for value, label in canal_choices %}
+                            <option value="{{ value }}" {% if request.GET.canal == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Período</label>
+                    <input type="date" name="data_inicio" class="form-control" value="{{ request.GET.data_inicio }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Buscar</label>
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Nome ou assunto..." value="{{ request.GET.search }}">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Notificações -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5><i class="fas fa-list"></i> Histórico de Notificações</h5>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="exportarCSV()">
+                    <i class="fas fa-download"></i> Exportar
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="limparHistorico()">
+                    <i class="fas fa-trash"></i> Limpar
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if notificacoes %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Destinatário</th>
+                                <th>Assunto</th>
+                                <th>Canal</th>
+                                <th>Status</th>
+                                <th>Estatísticas</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for notificacao in notificacoes %}
+                            <tr>
+                                <td>
+                                    <small class="text-muted">{{ notificacao.created_at|date:"d/m/Y H:i" }}</small>
+                                </td>
+                                <td>
+                                    <strong>{{ notificacao.inquilino.nome }}</strong><br>
+                                    <small class="text-muted">{{ notificacao.destinatario }}</small>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">{{ notificacao.assunto|truncatechars:50 }}</div>
+                                    {% if notificacao.template %}
+                                        <small class="badge bg-secondary">{{ notificacao.template.categoria.nome }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ notificacao.get_canal_display }}</span>
+                                </td>
+                                <td>
+                                    {% if notificacao.status == 'ENVIADA' %}
+                                        <span class="badge bg-success status-badge">{{ notificacao.get_status_display }}</span>
+                                    {% elif notificacao.status == 'ERRO' %}
+                                        <span class="badge bg-danger status-badge">{{ notificacao.get_status_display }}</span>
+                                    {% elif notificacao.status == 'ABERTA' %}
+                                        <span class="badge bg-primary status-badge">{{ notificacao.get_status_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-warning status-badge">{{ notificacao.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="small">
+                                        {% if notificacao.data_entrega %}
+                                            <i class="fas fa-check text-success"></i> Entregue<br>
+                                        {% endif %}
+                                        {% if notificacao.data_abertura %}
+                                            <i class="fas fa-eye text-primary"></i> Aberta<br>
+                                        {% endif %}
+                                        {% if notificacao.data_clique %}
+                                            <i class="fas fa-mouse-pointer text-info"></i> Clicada
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" onclick="visualizarNotificacao({{ notificacao.id }})" title="Visualizar">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {% if notificacao.status == 'ERRO' %}
+                                            <button class="btn btn-outline-warning" onclick="reenviarNotificacao({{ notificacao.id }})" title="Reenviar">
+                                                <i class="fas fa-redo"></i>
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação -->
+                {% if notificacoes.has_other_pages %}
+                    <nav aria-label="Paginação">
+                        <ul class="pagination justify-content-center">
+                            {% if notificacoes.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ notificacoes.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.canal %}&canal={{ request.GET.canal }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                                        Anterior
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in notificacoes.paginator.page_range %}
+                                {% if notificacoes.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.canal %}&canal={{ request.GET.canal }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                                            {{ num }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if notificacoes.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ notificacoes.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.canal %}&canal={{ request.GET.canal }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                                        Próximo
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nenhuma notificação encontrada</h5>
+                    <p class="text-muted">Use o WhatsApp Dashboard para configurar e enviar mensagens.</p>
+                    <a href="{% url 'notificacoes:whatsapp_dashboard' %}" class="btn btn-primary">
+                        <i class="fab fa-whatsapp"></i> Abrir WhatsApp Dashboard
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Agendar Notificação -->
+<div class="modal fade" id="agendarModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-calendar-plus"></i> Agendar Notificação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'notificacoes:agendar' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Nome da Campanha</label>
+                            <input type="text" name="nome_campanha" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Template</label>
+                            <select name="template" class="form-select" required>
+                                <option value="">Selecione um template</option>
+                                <!-- Templates serão carregados via AJAX -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Data de Envio</label>
+                            <input type="datetime-local" name="data_envio" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Recorrência</label>
+                            <select name="recorrencia" class="form-select">
+                                <option value="UNICA">Única</option>
+                                <option value="DIARIA">Diária</option>
+                                <option value="SEMANAL">Semanal</option>
+                                <option value="MENSAL">Mensal</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">Destinatários</label>
+                        <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                            <!-- Lista de inquilinos será carregada via AJAX -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Agendar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Visualizar Notificação -->
+<div class="modal fade" id="visualizarModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-eye"></i> Detalhes da Notificação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detalhesNotificacao">
+                <!-- Conteúdo carregado via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function visualizarNotificacao(id) {
+    fetch(`/notificacoes/detalhes/${id}/`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('detalhesNotificacao').innerHTML = data.html;
+            new bootstrap.Modal(document.getElementById('visualizarModal')).show();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao carregar detalhes da notificação');
+        });
+}
+
+function reenviarNotificacao(id) {
+    if (confirm('Deseja reenviar esta notificação?')) {
+        fetch(`/notificacoes/reenviar/${id}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erro ao reenviar notificação: ' + data.error);
+            }
+        });
+    }
+}
+
+function exportarCSV() {
+    const params = new URLSearchParams(window.location.search);
+    params.set('export', 'csv');
+    window.location.href = '?' + params.toString();
+}
+
+function limparHistorico() {
+    if (confirm('Deseja realmente limpar o histórico de notificações? Esta ação não pode ser desfeita.')) {
+        fetch('/notificacoes/limpar-historico/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erro ao limpar histórico: ' + data.error);
+            }
+        });
+    }
+}
+
+// Carregar templates e inquilinos no modal de agendamento
+document.getElementById('agendarModal').addEventListener('show.bs.modal', function() {
+    // Carregar templates
+    fetch('/notificacoes/api/templates/')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.querySelector('#agendarModal select[name="template"]');
+            select.innerHTML = '<option value="">Selecione um template</option>';
+            data.templates.forEach(template => {
+                select.innerHTML += `<option value="${template.id}">${template.categoria} - ${template.nome}</option>`;
+            });
+        });
+    
+    // Carregar inquilinos
+    fetch('/notificacoes/api/inquilinos/')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.querySelector('#agendarModal .border.rounded');
+            container.innerHTML = '';
+            data.inquilinos.forEach(inquilino => {
+                container.innerHTML += `
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="inquilinos" value="${inquilino.id}" id="inquilino_${inquilino.id}">
+                        <label class="form-check-label" for="inquilino_${inquilino.id}">
+                            ${inquilino.nome} - ${inquilino.email || inquilino.telefone || 'Sem contato'}
+                        </label>
+                    </div>
+                `;
+            });
+        });
+});
+</script>
+{% endblock %}

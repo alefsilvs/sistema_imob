@@ -1,2 +1,112 @@
-BackEnd/Config/App.php
-Front/node_modules/
+# ========================================
+# GITIGNORE - Sistema Imobiliário
+# ========================================
+
+# Arquivos de ambiente e configuração sensível
+.env
+.env.local
+.env.production
+.env.*
+*.env
+
+# Banco de dados local
+*.sqlite3
+*.db
+
+# Arquivos Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Ambiente virtual
+.venv/
+venv/
+ENV/
+env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Arquivos de mídia (uploads)
+media/uploads/
+media/temp/
+media/
+imobipro/media/
+
+# Arquivos estáticos coletados
+staticfiles/
+static_collected/
+imobipro/staticfiles/
+
+# Cache
+.cache/
+*.cache
+
+# Arquivos temporários
+*.tmp
+*.temp
+temp/
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node.js (Evolution API)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+evolution-api/node_modules/
+evolution-api/npm-debug.log*
+evolution-api/yarn-debug.log*
+evolution-api/yarn-error.log*
+evolution-api/.npm
+evolution-api/.eslintcache
+
+# Backups
+backups/
+*.backup
+*.bak
+
+# Certificados SSL
+*.pem
+*.key
+*.crt
+*.csr
+
+# Arquivos de configuração do servidor
+nginx.conf
+apache.conf
+supervisor.conf
+
+# Arquivos de deploy (contêm informações sensíveis)
+deploy_config.json
+server_config.json

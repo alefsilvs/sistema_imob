@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#007bff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0056b3;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="houseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f8f9fa;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#bgGradient)" filter="url(#shadow)"/>
+  
+  <!-- House Base -->
+  <rect x="180" y="280" width="152" height="120" fill="url(#houseGradient)" stroke="#007bff" stroke-width="2"/>
+  
+  <!-- House Roof -->
+  <polygon points="256,180 160,280 352,280" fill="#dc3545" stroke="#b02a37" stroke-width="2"/>
+  
+  <!-- Door -->
+  <rect x="230" y="330" width="30" height="50" fill="#6c757d" stroke="#495057" stroke-width="1"/>
+  <circle cx="255" cy="355" r="2" fill="#ffc107"/>
+  
+  <!-- Windows -->
+  <rect x="200" y="310" width="20" height="20" fill="#17a2b8" stroke="#138496" stroke-width="1"/>
+  <rect x="292" y="310" width="20" height="20" fill="#17a2b8" stroke="#138496" stroke-width="1"/>
+  
+  <!-- Window Frames -->
+  <line x1="210" y1="310" x2="210" y2="330" stroke="#138496" stroke-width="1"/>
+  <line x1="200" y1="320" x2="220" y2="320" stroke="#138496" stroke-width="1"/>
+  <line x1="302" y1="310" x2="302" y2="330" stroke="#138496" stroke-width="1"/>
+  <line x1="292" y1="320" x2="312" y2="320" stroke="#138496" stroke-width="1"/>
+  
+  <!-- Chimney -->
+  <rect x="300" y="200" width="15" height="40" fill="#6c757d" stroke="#495057" stroke-width="1"/>
+  
+  <!-- Key Icon (representing real estate) -->
+  <g transform="translate(350, 200) scale(0.8)">
+    <circle cx="20" cy="20" r="8" fill="none" stroke="#ffc107" stroke-width="3"/>
+    <line x1="28" y1="28" x2="45" y2="45" stroke="#ffc107" stroke-width="3"/>
+    <line x1="35" y1="35" x2="40" y2="30" stroke="#ffc107" stroke-width="2"/>
+    <line x1="40" y1="40" x2="45" y2="35" stroke="#ffc107" stroke-width="2"/>
+  </g>
+  
+  <!-- Dollar Sign (representing financial management) -->
+  <g transform="translate(140, 200) scale(0.9)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#28a745">$</text>
+  </g>
+  
+  <!-- Document Icon (representing documentation) -->
+  <g transform="translate(380, 350) scale(0.7)">
+    <rect x="0" y="0" width="20" height="25" fill="#ffffff" stroke="#007bff" stroke-width="1"/>
+    <line x1="3" y1="5" x2="17" y2="5" stroke="#007bff" stroke-width="1"/>
+    <line x1="3" y1="9" x2="17" y2="9" stroke="#007bff" stroke-width="1"/>
+    <line x1="3" y1="13" x2="17" y2="13" stroke="#007bff" stroke-width="1"/>
+    <line x1="3" y1="17" x2="12" y2="17" stroke="#007bff" stroke-width="1"/>
+  </g>
+  
+  <!-- Chart Icon (representing analytics) -->
+  <g transform="translate(120, 350) scale(0.8)">
+    <rect x="0" y="15" width="4" height="10" fill="#28a745"/>
+    <rect x="6" y="10" width="4" height="15" fill="#ffc107"/>
+    <rect x="12" y="5" width="4" height="20" fill="#dc3545"/>
+    <rect x="18" y="8" width="4" height="17" fill="#17a2b8"/>
+  </g>
+  
+  <!-- System Title -->
+  <text x="256" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#ffffff">SISTEMA IMO</text>
+</svg>

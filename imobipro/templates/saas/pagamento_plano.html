@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamento - {{ plano.nome }}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .payment-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .payment-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .payment-body {
+            padding: 40px;
+        }
+        
+        .plan-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .payment-method {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-method:hover {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+        
+        .payment-method.selected {
+            border-color: #007bff;
+            background: #e7f3ff;
+        }
+        
+        .btn-pay {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 10px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+        }
+        
+        .security-info {
+            background: #e8f5e8;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="payment-container">
+            {% if erro %}
+                <div class="payment-header">
+                    <h2><i class="fas fa-exclamation-triangle"></i> Erro</h2>
+                </div>
+                <div class="payment-body text-center">
+                    <div class="alert alert-danger">
+                        {{ erro }}
+                    </div>
+                    <a href="{% url 'saas:planos' %}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left"></i> Voltar aos Planos
+                    </a>
+                </div>
+            {% else %}
+                <div class="payment-header">
+                    <h2><i class="fas fa-credit-card"></i> Finalizar Pagamento</h2>
+                    <p class="mb-0">Você está assinando o plano {{ plano.nome }}</p>
+                </div>
+                
+                <div class="payment-body">
+                    <div class="plan-info">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h4 class="mb-1">{{ plano.nome }}</h4>
+                                <p class="text-muted mb-0">{{ plano.get_tipo_display }}</p>
+                                <small class="text-muted">Pagamento mensal</small>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="price">R$ {{ pagamento.valor|floatformat:2 }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form id="paymentForm">
+                        {% csrf_token %}
+                        
+                        <h5 class="mb-3">Forma de Pagamento</h5>
+                        
+                        {% if config.pix_habilitado %}
+                        <div class="payment-method" data-method="pix">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <i class="fas fa-qrcode fa-2x text-success"></i>
+                                </div>
+                                <div class="col">
+                                    <h6 class="mb-1">PIX</h6>
+                                    <small class="text-muted">Pagamento instantâneo</small>
+                                </div>
+                                <div class="col-auto">
+                                    <input type="radio" name="metodo_pagamento" value="pix" class="form-check-input">
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if config.cartao_habilitado %}
+                        <div class="payment-method" data-method="cartao">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <i class="fas fa-credit-card fa-2x text-primary"></i>
+                                </div>
+                                <div class="col">
+                                    <h6 class="mb-1">Cartão de Crédito</h6>
+                                    <small class="text-muted">Visa, Mastercard, Elo</small>
+                                </div>
+                                <div class="col-auto">
+                                    <input type="radio" name="metodo_pagamento" value="cartao" class="form-check-input">
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if config.boleto_habilitado %}
+                        <div class="payment-method" data-method="boleto">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <i class="fas fa-barcode fa-2x text-warning"></i>
+                                </div>
+                                <div class="col">
+                                    <h6 class="mb-1">Boleto Bancário</h6>
+                                    <small class="text-muted">Vencimento em 3 dias úteis</small>
+                                </div>
+                                <div class="col-auto">
+                                    <input type="radio" name="metodo_pagamento" value="boleto" class="form-check-input">
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <button type="submit" class="btn btn-success btn-pay mt-4" id="btnPagar" disabled>
+                            <i class="fas fa-lock"></i> Pagar R$ {{ pagamento.valor|floatformat:2 }}
+                        </button>
+                    </form>
+                    
+                    <div class="security-info">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <i class="fas fa-shield-alt text-success"></i>
+                            </div>
+                            <div class="col">
+                                <small>
+                                    <strong>Pagamento 100% seguro</strong><br>
+                                    Seus dados são protegidos com criptografia SSL
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentMethods = document.querySelectorAll('.payment-method');
+            const btnPagar = document.getElementById('btnPagar');
+            const form = document.getElementById('paymentForm');
+            
+            // Gerenciar seleção de método de pagamento
+            paymentMethods.forEach(method => {
+                method.addEventListener('click', function() {
+                    // Remover seleção anterior
+                    paymentMethods.forEach(m => m.classList.remove('selected'));
+                    
+                    // Selecionar método atual
+                    this.classList.add('selected');
+                    const radio = this.querySelector('input[type="radio"]');
+                    radio.checked = true;
+                    
+                    // Habilitar botão de pagamento
+                    btnPagar.disabled = false;
+                });
+            });
+            
+            // Processar pagamento
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                const btnText = btnPagar.innerHTML;
+                
+                // Mostrar loading
+                btnPagar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+                btnPagar.disabled = true;
+                
+                fetch('{% url "saas:processar_pagamento_final" pagamento.token_pagamento %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        btnPagar.innerHTML = '<i class="fas fa-external-link-alt"></i> Redirecionando...';
+                        window.location.href = data.redirect_url;
+                    } else {
+                        alert('Erro: ' + data.message);
+                        btnPagar.innerHTML = btnText;
+                        btnPagar.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao processar pagamento. Tente novamente.');
+                    btnPagar.innerHTML = btnText;
+                    btnPagar.disabled = false;
+                });
+            });
+        });
+    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,1100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pagamento Profissional{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        --card-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        --input-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .payment-container {
+        padding: 2rem 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+    }
+
+    .payment-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        border: none;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        position: relative;
+    }
+
+    .payment-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: var(--primary-gradient);
+    }
+
+    .card-header {
+        background: transparent;
+        border: none;
+        padding: 2rem 2rem 1rem;
+        text-align: center;
+    }
+
+    .card-header h3 {
+        color: #2d3748;
+        font-weight: 700;
+        margin: 0;
+        font-size: 1.8rem;
+    }
+
+    .payment-info {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        padding: 1.5rem;
+        margin: 0 2rem 2rem;
+        border-radius: 15px;
+        border-left: 4px solid #667eea;
+    }
+
+    .payment-methods {
+        padding: 0 2rem 2rem;
+    }
+
+    .method-card {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transform: translateY(0);
+    }
+
+    .method-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .method-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .method-card:hover::before {
+        left: 100%;
+    }
+
+    .method-card:hover::after {
+        opacity: 1;
+    }
+
+    .method-card:hover {
+        border-color: #667eea;
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.15);
+    }
+
+    .method-card.active {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .method-card.active::after {
+        opacity: 1;
+    }
+
+    .method-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-right: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .method-icon::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: all 0.3s ease;
+    }
+
+    .method-card:hover .method-icon::before {
+        width: 100%;
+        height: 100%;
+    }
+
+    .method-card:hover .method-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .credit-card-icon {
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .pix-icon {
+        background: var(--success-gradient);
+        color: white;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: white;
+        box-shadow: var(--input-shadow);
+        position: relative;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), 0 8px 25px rgba(102, 126, 234, 0.1);
+        outline: none;
+        transform: translateY(-1px);
+    }
+
+    .form-control:hover {
+        border-color: #a0aec0;
+        transform: translateY(-1px);
+    }
+
+    .form-control.is-valid {
+        border-color: #28a745;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='m2.3 6.73.94-.94 2.94 2.94L8.5 6.4l.94.94L6.5 10.27z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 4.6 2.4 2.4m0-2.4L5.8 7'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+    }
+
+    .field-error {
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-brand-icon {
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        .security-badge i {
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+        
+        .progress-indicator {
+            width: 100%;
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            }
+            50% {
+                box-shadow: 0 4px 25px rgba(40, 167, 69, 0.5);
+            }
+            100% {
+                box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            }
+        }
+
+    .btn-payment {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: white;
+        width: 100%;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-payment::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .btn-payment:hover::before {
+        left: 100%;
+    }
+
+    .btn-payment:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-payment:active {
+        transform: translateY(-1px) scale(0.98);
+        transition: all 0.1s ease;
+    }
+
+    .btn-payment:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .security-badges {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .security-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #718096;
+        font-size: 0.875rem;
+    }
+
+    .alert-custom {
+        border-radius: 12px;
+        border: none;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1rem;
+        animation: slideIn 0.3s ease;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+        color: #22543d;
+        border-left: 4px solid #38a169;
+    }
+
+    .alert-danger {
+        background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+        color: #742a2a;
+        border-left: 4px solid #e53e3e;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .card-form {
+        display: none;
+        animation: fadeIn 0.5s ease;
+    }
+
+    .card-form.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { 
+            opacity: 0; 
+            transform: translateY(30px) scale(0.95); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0) scale(1); 
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes bounce {
+        0%, 20%, 53%, 80%, 100% {
+            transform: translate3d(0,0,0);
+        }
+        40%, 43% {
+            transform: translate3d(0, -8px, 0);
+        }
+        70% {
+            transform: translate3d(0, -4px, 0);
+        }
+        90% {
+            transform: translate3d(0, -2px, 0);
+        }
+    }
+
+    .row-cols-2 > * {
+        padding-right: 0.5rem;
+        padding-left: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .payment-container {
+            padding: 1rem;
+        }
+        
+        .card-header, .payment-methods {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .payment-info {
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="payment-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-7">
+                <div class="card payment-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-credit-card me-2"></i>Pagamento Seguro</h3>
+                    </div>
+                    
+                    <div class="payment-info">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong><i class="fas fa-tag me-2"></i>Produto:</strong> Plano Profissional
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <strong><i class="fas fa-dollar-sign me-2"></i>Valor:</strong> 
+                                <span class="text-success fw-bold">R$ {{ pagamento.valor|default:'100,00' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="payment-methods">
+                        <h5 class="mb-3"><i class="fas fa-payment me-2"></i>Escolha sua forma de pagamento</h5>
+                        
+                        <!-- Cartão de Crédito -->
+                        <div class="method-card" onclick="selectPaymentMethod('card')" id="card-method">
+                            <div class="d-flex align-items-center">
+                                <div class="method-icon credit-card-icon">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">Cartão de Crédito</h6>
+                                    <small class="text-muted">Visa, Mastercard, Elo</small>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="card_radio" value="card">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PIX -->
+                        <div class="method-card" onclick="selectPaymentMethod('pix')" id="pix-method">
+                            <div class="d-flex align-items-center">
+                                <div class="method-icon pix-icon">
+                                    <i class="fas fa-qrcode"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">PIX</h6>
+                                    <small class="text-muted">Pagamento instantâneo</small>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="pix_radio" value="pix">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Formulário do Cartão -->
+                        <div class="card-form mt-4" id="card-form">
+                            <h6 class="mb-3"><i class="fas fa-lock me-2"></i>Dados do Cartão</h6>
+                            
+                            <div class="progress-indicator">
+                                <div class="progress-bar" id="form-progress"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-credit-card me-2"></i>Número do Cartão
+                                </label>
+                                <input type="text" class="form-control" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+                            </div>
+
+                            <div class="row row-cols-2">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label class="form-label">Validade</label>
+                                        <input type="text" class="form-control" id="card-expiry" placeholder="MM/AA" maxlength="5">
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label class="form-label">CVV</label>
+                                        <input type="text" class="form-control" id="card-cvv" placeholder="123" maxlength="4">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Nome no Cartão</label>
+                                <input type="text" class="form-control" id="card-name" placeholder="Nome como está no cartão">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Parcelas</label>
+                                <select class="form-control" id="installments">
+                                    <option value="1">1x de R$ {{ pagamento.valor|default:'100,00' }} sem juros</option>
+                                    <option value="2">2x de R$ {{ pagamento.valor|default:'50,00' }} sem juros</option>
+                                    <option value="3">3x de R$ {{ pagamento.valor|default:'33,33' }} sem juros</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <div class="security-badge">
+                                <i class="fas fa-shield-alt"></i>
+                                Pagamento 100% Seguro - SSL 256 bits
+                            </div>
+                            
+                            <button type="button" class="btn btn-payment mt-3" id="pay-button" onclick="processPayment()">
+                                <span id="button-text">
+                                    <i class="fas fa-shield-alt me-2"></i>Pagar com Segurança
+                                </span>
+                                <span id="button-loading" style="display: none;">
+                                    <span class="loading-spinner me-2"></span>Processando...
+                                </span>
+                            </button>
+                            
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Seus dados são protegidos por criptografia de ponta
+                                </small>
+                                <br>
+                                <small class="mt-2">
+                                    <a href="/pagamentos/informacoes-cobranca/" class="text-primary" target="_blank">
+                                        <i class="fas fa-question-circle me-1"></i>
+                                        Como funciona a cobrança automática?
+                                    </a>
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="security-badges">
+                            <div class="security-badge">
+                                <i class="fas fa-lock"></i>
+                                <span>SSL 256-bit</span>
+                            </div>
+                            <div class="security-badge">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>PCI Compliant</span>
+                            </div>
+                            <div class="security-badge">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Dados Protegidos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedMethod = null;
+
+function selectPaymentMethod(method) {
+    selectedMethod = method;
+    
+    // Remove active class from all methods
+    document.querySelectorAll('.method-card').forEach(card => {
+        card.classList.remove('active');
+    });
+    
+    // Add active class to selected method
+    document.getElementById(method + '-method').classList.add('active');
+    
+    // Check the radio button
+    document.getElementById(method + '_radio').checked = true;
+    
+    // Show/hide card form
+    const cardForm = document.getElementById('card-form');
+    if (method === 'card') {
+        cardForm.classList.add('active');
+    } else {
+        cardForm.classList.remove('active');
+    }
+}
+
+function formatCardNumber(value) {
+    return value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim();
+}
+
+function formatExpiry(value) {
+    return value.replace(/\D/g, '').replace(/(\d{2})(\d)/, '$1/$2');
+}
+
+function validateCardNumber(number) {
+     const cleaned = number.replace(/\s/g, '');
+     if (!/^\d{13,19}$/.test(cleaned)) return false;
+     
+     // Algoritmo de Luhn para validação
+     let sum = 0;
+     let alternate = false;
+     for (let i = cleaned.length - 1; i >= 0; i--) {
+         let digit = parseInt(cleaned.charAt(i));
+         if (alternate) {
+             digit *= 2;
+             if (digit > 9) digit = (digit % 10) + 1;
+         }
+         sum += digit;
+         alternate = !alternate;
+     }
+     return (sum % 10) === 0;
+ }
+
+ function validateExpiry(expiry) {
+     const match = expiry.match(/^(\d{2})\/(\d{2})$/);
+     if (!match) return false;
+     
+     const month = parseInt(match[1]);
+     const year = parseInt('20' + match[2]);
+     const now = new Date();
+     const currentYear = now.getFullYear();
+     const currentMonth = now.getMonth() + 1;
+     
+     return month >= 1 && month <= 12 && 
+            (year > currentYear || (year === currentYear && month >= currentMonth));
+ }
+
+ function validateCVV(cvv) {
+     return /^\d{3,4}$/.test(cvv);
+ }
+
+ function validateCardName(name) {
+     return /^[a-zA-Z\u00C0-\u017F\s]{2,}$/.test(name.trim());
+ }
+
+ function getCardBrand(number) {
+     const cleaned = number.replace(/\s/g, '');
+     if (/^4/.test(cleaned)) return 'visa';
+     if (/^5[1-5]/.test(cleaned)) return 'mastercard';
+     if (/^3[47]/.test(cleaned)) return 'amex';
+     if (/^6/.test(cleaned)) return 'discover';
+     if (/^50|^63|^67/.test(cleaned)) return 'elo';
+     return null;
+ }
+
+ function showFieldError(fieldId, message) {
+     const field = document.getElementById(fieldId);
+     const parent = field.parentElement;
+     
+     // Remove erro anterior
+     const existingError = parent.querySelector('.field-error');
+     if (existingError) existingError.remove();
+     
+     if (message) {
+         field.classList.add('is-invalid');
+         field.classList.remove('is-valid');
+         
+         const errorDiv = document.createElement('div');
+         errorDiv.className = 'field-error text-danger mt-1';
+         errorDiv.style.fontSize = '0.875rem';
+         errorDiv.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i>' + message;
+         parent.appendChild(errorDiv);
+     } else {
+         field.classList.remove('is-invalid');
+         field.classList.add('is-valid');
+     }
+ }
+
+ function validateFieldRealTime(fieldId, value) {
+     switch(fieldId) {
+         case 'card-number':
+             if (!value) {
+                 showFieldError(fieldId, 'Número do cartão é obrigatório');
+                 return false;
+             }
+             if (value.replace(/\s/g, '').length < 13) {
+                 showFieldError(fieldId, 'Número muito curto');
+                 return false;
+             }
+             if (!validateCardNumber(value)) {
+                 showFieldError(fieldId, 'Número do cartão inválido');
+                 return false;
+             }
+             showFieldError(fieldId, null);
+              updateFormProgress();
+              return true;
+              
+          case 'card-expiry':
+              if (!value) {
+                  showFieldError(fieldId, 'Validade é obrigatória');
+                  updateFormProgress();
+                  return false;
+              }
+              if (!/^\d{2}\/\d{2}$/.test(value)) {
+                  showFieldError(fieldId, 'Use o formato MM/AA');
+                  updateFormProgress();
+                  return false;
+              }
+              if (!validateExpiry(value)) {
+                  showFieldError(fieldId, 'Data de validade inválida');
+                  updateFormProgress();
+                  return false;
+              }
+              showFieldError(fieldId, null);
+              updateFormProgress();
+              return true;
+              
+          case 'card-cvv':
+              if (!value) {
+                  showFieldError(fieldId, 'CVV é obrigatório');
+                  updateFormProgress();
+                  return false;
+              }
+              if (!validateCVV(value)) {
+                  showFieldError(fieldId, 'CVV deve ter 3 ou 4 dígitos');
+                  updateFormProgress();
+                  return false;
+              }
+              showFieldError(fieldId, null);
+              updateFormProgress();
+              return true;
+              
+          case 'card-name':
+              if (!value) {
+                  showFieldError(fieldId, 'Nome é obrigatório');
+                  updateFormProgress();
+                  return false;
+              }
+              if (!validateCardName(value)) {
+                  showFieldError(fieldId, 'Nome deve ter pelo menos 2 caracteres');
+                  updateFormProgress();
+                  return false;
+              }
+              showFieldError(fieldId, null);
+              updateFormProgress();
+              return true;
+     }
+     return false;
+ }
+
+function showAlert(message, type) {
+    const existingAlert = document.querySelector('.alert-custom');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-custom alert-' + type;
+    alert.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-triangle') + ' me-2"></i>' + message;
+    
+    const paymentMethods = document.querySelector('.payment-methods');
+    paymentMethods.insertBefore(alert, paymentMethods.firstChild);
+    
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+function setFieldValidation(fieldId, isValid) {
+    const field = document.getElementById(fieldId);
+    field.classList.remove('is-valid', 'is-invalid');
+    field.classList.add(isValid ? 'is-valid' : 'is-invalid');
+}
+
+function processPayment() {
+    if (!selectedMethod) {
+        showAlert('Selecione uma forma de pagamento', 'danger');
+        return;
+    }
+    
+    if (selectedMethod === 'card') {
+        const cardNumber = document.getElementById('card-number').value;
+        const expiry = document.getElementById('card-expiry').value;
+        const cvv = document.getElementById('card-cvv').value;
+        const name = document.getElementById('card-name').value;
+        const installments = document.getElementById('installments').value;
+        
+        let isValid = true;
+        
+        if (!validateCardNumber(cardNumber)) {
+            showAlert('Numero do cartao invalido', 'danger');
+            setFieldValidation('card-number', false);
+            isValid = false;
+        } else {
+            setFieldValidation('card-number', true);
+        }
+        
+        if (!validateExpiry(expiry)) {
+            showAlert('Validade invalida', 'danger');
+            setFieldValidation('card-expiry', false);
+            isValid = false;
+        } else {
+            setFieldValidation('card-expiry', true);
+        }
+        
+        if (!validateCVV(cvv)) {
+            showAlert('CVV invalido', 'danger');
+            setFieldValidation('card-cvv', false);
+            isValid = false;
+        } else {
+            setFieldValidation('card-cvv', true);
+        }
+        
+        if (!validateCardName(name)) {
+            showAlert('Nome do portador invalido', 'danger');
+            setFieldValidation('card-name', false);
+            isValid = false;
+        } else {
+            setFieldValidation('card-name', true);
+        }
+        
+        if (!installments || installments < 1 || installments > 12) {
+            showAlert('Numero de parcelas invalido (1-12)', 'danger');
+            isValid = false;
+        }
+        
+        if (!isValid) return;
+        
+        const cardData = {
+            number: cardNumber.replace(/\s/g, ''),
+            expiry: expiry,
+            cvv: cvv,
+            name: name,
+            installments: installments
+        };
+        
+        showLoading(true);
+        
+        setTimeout(() => {
+            showLoading(false);
+            showAlert('Pagamento processado com sucesso!', 'success');
+            setTimeout(() => {
+                window.location.href = '/pagamentos/sucesso/' + '{{ pagamento.token_pagamento|default:"exemplo-token" }}' + '/';
+            }, 2000);
+        }, 3000);
+        
+    } else if (selectedMethod === 'pix') {
+        showPixModal();
+    }
+}
+
+function showLoading(show) {
+    const buttonText = document.getElementById('button-text');
+    const buttonLoading = document.getElementById('button-loading');
+    const payButton = document.getElementById('pay-button');
+    
+    if (show) {
+        buttonText.style.display = 'none';
+        buttonLoading.style.display = 'inline-flex';
+        payButton.disabled = true;
+    } else {
+        buttonText.style.display = 'inline-flex';
+        buttonLoading.style.display = 'none';
+        payButton.disabled = false;
+    }
+}
+
+function showPixModal() {
+    const qrCode = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+    const codigoPix = '00020126580014br.gov.bcb.pix0136xwpasl5204000053039865802BR5925SISTEMA IMOBILIARIO LTDA6009SAO PAULO62070503***6304';
+    
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999;';
+    modal.innerHTML = '<div style="background: white; padding: 2rem; border-radius: 20px; text-align: center; max-width: 400px; margin: 1rem;"><h4 style="margin-bottom: 1rem;"><i class="fas fa-qrcode me-2"></i>Pagamento PIX</h4><img src="' + qrCode + '" style="width: 200px; height: 200px; border: 1px solid #ddd; margin-bottom: 1rem;"><p style="margin-bottom: 1rem;">Escaneie o QR Code ou copie o código abaixo:</p><div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; word-break: break-all; font-family: monospace; font-size: 0.8rem;">' + codigoPix + '</div><div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #2196f3;"><i class="fas fa-info-circle" style="color: #2196f3; margin-right: 8px;"></i><strong>Período Gratuito:</strong> Você tem 7 dias grátis. Após esse período, o valor será cobrado automaticamente.</div><button onclick="copiarCodigoPix()" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; margin-right: 0.5rem;"><i class="fas fa-copy me-1"></i>Copiar Código</button><button onclick="confirmarPagamentoPix()" style="background: #007bff; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; margin-right: 0.5rem;"><i class="fas fa-check me-1"></i>Confirmar</button><button onclick="this.parentElement.parentElement.remove()" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px;">Fechar</button></div>';
+    
+    document.body.appendChild(modal);
+    
+    window.codigoPix = codigoPix;
+}
+
+function copiarCodigoPix() {
+    const codigo = '00020126580014br.gov.bcb.pix0136xwpasl5204000053039865802BR5925SISTEMA IMOBILIARIO LTDA6009SAO PAULO62070503***6304';
+    navigator.clipboard.writeText(codigo).then(() => {
+        showAlert('Código PIX copiado para a área de transferência!', 'success');
+    }).catch(() => {
+        // Fallback para navegadores mais antigos
+        const textArea = document.createElement('textarea');
+        textArea.value = codigo;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showAlert('Código PIX copiado!', 'success');
+    });
+}
+
+function confirmarPagamentoPix() {
+    showAlert('Verificando pagamento PIX... Aguarde alguns instantes.', 'info');
+    
+    // Simular verificação de pagamento
+    setTimeout(() => {
+        showAlert('Pagamento PIX confirmado com sucesso! Redirecionando...', 'success');
+        setTimeout(() => {
+            window.location.href = '/pagamentos/sucesso/';
+        }, 2000);
+    }, 3000);
+}
+
+// Event listeners for input formatting and real-time validation
+ document.addEventListener('DOMContentLoaded', function() {
+     const cardNumberInput = document.getElementById('card-number');
+     const expiryInput = document.getElementById('card-expiry');
+     const cvvInput = document.getElementById('card-cvv');
+     const nameInput = document.getElementById('card-name');
+     
+     if (cardNumberInput) {
+         cardNumberInput.addEventListener('input', function(e) {
+             // Formatar número do cartão
+             let value = e.target.value.replace(/\D/g, '');
+             if (value.length > 19) value = value.substring(0, 19);
+             e.target.value = formatCardNumber(value);
+             
+             // Detectar bandeira do cartão
+             const brand = getCardBrand(value);
+             updateCardBrandIcon(brand);
+             
+             // Validação em tempo real
+             if (value.length >= 13) {
+                 validateFieldRealTime('card-number', e.target.value);
+             }
+         });
+         
+         cardNumberInput.addEventListener('blur', function(e) {
+             validateFieldRealTime('card-number', e.target.value);
+         });
+     }
+     
+     if (expiryInput) {
+         expiryInput.addEventListener('input', function(e) {
+             let value = e.target.value.replace(/\D/g, '');
+             if (value.length >= 2) {
+                 value = value.substring(0,2) + '/' + value.substring(2,4);
+             }
+             e.target.value = value;
+             
+             if (value.length === 5) {
+                 validateFieldRealTime('card-expiry', value);
+             }
+         });
+         
+         expiryInput.addEventListener('blur', function(e) {
+             validateFieldRealTime('card-expiry', e.target.value);
+         });
+     }
+     
+     if (cvvInput) {
+         cvvInput.addEventListener('input', function(e) {
+             let value = e.target.value.replace(/\D/g, '');
+             if (value.length > 4) value = value.substring(0, 4);
+             e.target.value = value;
+             
+             if (value.length >= 3) {
+                 validateFieldRealTime('card-cvv', value);
+             }
+         });
+         
+         cvvInput.addEventListener('blur', function(e) {
+             validateFieldRealTime('card-cvv', e.target.value);
+         });
+     }
+     
+     if (nameInput) {
+         nameInput.addEventListener('input', function(e) {
+             e.target.value = e.target.value.replace(/[^a-zA-Z\u00C0-\u017F\s]/g, '').toUpperCase();
+             
+             if (e.target.value.length >= 2) {
+                 validateFieldRealTime('card-name', e.target.value);
+             }
+         });
+         
+         nameInput.addEventListener('blur', function(e) {
+             validateFieldRealTime('card-name', e.target.value);
+         });
+     }
+ });
+ 
+ function updateCardBrandIcon(brand) {
+     const cardNumberInput = document.getElementById('card-number');
+     const parent = cardNumberInput.parentElement;
+     
+     // Remove ícone anterior
+     const existingIcon = parent.querySelector('.card-brand-icon');
+     if (existingIcon) existingIcon.remove();
+     
+     if (brand) {
+         const icon = document.createElement('div');
+         icon.className = 'card-brand-icon';
+         icon.style.cssText = 'position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; z-index: 10;';
+         
+         switch(brand) {
+             case 'visa':
+                 icon.innerHTML = '<i class="fab fa-cc-visa" style="color: #1a1f71;"></i>';
+                 break;
+             case 'mastercard':
+                 icon.innerHTML = '<i class="fab fa-cc-mastercard" style="color: #eb001b;"></i>';
+                 break;
+             case 'amex':
+                 icon.innerHTML = '<i class="fab fa-cc-amex" style="color: #006fcf;"></i>';
+                 break;
+             case 'discover':
+                 icon.innerHTML = '<i class="fab fa-cc-discover" style="color: #ff6000;"></i>';
+                 break;
+             case 'elo':
+                 icon.innerHTML = '<span style="color: #ffcb05; font-weight: bold;">ELO</span>';
+                 break;
+         }
+         
+         parent.style.position = 'relative';
+         parent.appendChild(icon);
+     }
+ }
+ 
+ function updateFormProgress() {
+     const fields = ['card-number', 'card-expiry', 'card-cvv', 'card-name'];
+     let completedFields = 0;
+     
+     fields.forEach(fieldId => {
+         const field = document.getElementById(fieldId);
+         if (field && field.value.trim() && field.classList.contains('is-valid')) {
+             completedFields++;
+         }
+     });
+     
+     const progress = (completedFields / fields.length) * 100;
+     const progressBar = document.getElementById('form-progress');
+     if (progressBar) {
+         progressBar.style.width = progress + '%';
+     }
+ }
+</script>
+{% endblock %}

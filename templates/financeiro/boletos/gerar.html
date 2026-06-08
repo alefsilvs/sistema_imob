@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gerar Boletos - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Gerar Boletos</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'financeiro:listar_parcelas' %}">Financeiro</a></li>
+                    <li class="breadcrumb-item active">Gerar Boletos</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <!-- Filtros -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Filtros para Geração</h6>
+                </div>
+                <div class="card-body">
+                    <form method="get">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Mês/Ano</label>
+                                <input type="month" class="form-control" name="mes_ano" value="{{ request.GET.mes_ano }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" name="status">
+                                    <option value="">Todos</option>
+                                    <option value="PENDENTE" {% if request.GET.status == 'PENDENTE' %}selected{% endif %}>Pendente</option>
+                                    <option value="PAGO" {% if request.GET.status == 'PAGO' %}selected{% endif %}>Pago</option>
+                                    <option value="VENCIDO" {% if request.GET.status == 'VENCIDO' %}selected{% endif %}>Vencido</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Imóvel</label>
+                                <select class="form-select" name="imovel">
+                                    <option value="">Todos</option>
+                                    {% for imovel in imoveis %}
+                                        <option value="{{ imovel.id }}" {% if request.GET.imovel == imovel.id|stringformat:'s' %}selected{% endif %}>
+                                            {{ imovel.codigo }} - {{ imovel.endereco }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="bi bi-search"></i> Filtrar
+                                </button>
+                                <a href="{% url 'financeiro:gerar_boletos' %}" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-clockwise"></i> Limpar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Lista de Parcelas -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Parcelas para Geração de Boletos</h6>
+                    {% if parcelas %}
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="gerar_selecionados">
+                            <button type="submit" class="btn btn-success btn-sm" id="btn-gerar-selecionados" disabled>
+                                <i class="bi bi-file-earmark-pdf"></i> Gerar Selecionados
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if parcelas %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <input type="checkbox" id="select-all" class="form-check-input">
+                                        </th>
+                                        <th>Contrato</th>
+                                        <th>Imóvel</th>
+                                        <th>Inquilino</th>
+                                        <th>Vencimento</th>
+                                        <th>Valor</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for parcela in parcelas %}
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" name="parcelas_selecionadas" value="{{ parcela.id }}" class="form-check-input parcela-checkbox">
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'contratos:detalhar' parcela.contrato.pk %}" class="text-decoration-none">
+                                                {{ parcela.contrato.numero }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <small>
+                                                <strong>{{ parcela.contrato.imovel.codigo }}</strong><br>
+                                                {{ parcela.contrato.imovel.endereco }}
+                                            </small>
+                                        </td>
+                                        <td>{{ parcela.contrato.inquilino.nome }}</td>
+                                        <td>
+                                            <span class="{% if parcela.status == 'VENCIDO' %}text-danger{% elif parcela.vencimento|date:'Y-m-d' <= today|date:'Y-m-d' %}text-warning{% endif %}">
+                                                {{ parcela.vencimento|date:"d/m/Y" }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong class="text-success">R$ {{ parcela.valor_total|floatformat:2 }}</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if parcela.status == 'PAGO' %}bg-success{% elif parcela.status == 'VENCIDO' %}bg-danger{% else %}bg-warning{% endif %}">
+                                                {{ parcela.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <form method="post" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="gerar_individual">
+                                                <input type="hidden" name="parcela_id" value="{{ parcela.id }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-primary" title="Gerar Boleto">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Paginação -->
+                        {% if is_paginated %}
+                            <nav aria-label="Navegação de páginas">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1{% if request.GET.mes_ano %}&mes_ano={{ request.GET.mes_ano }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.imovel %}&imovel={{ request.GET.imovel }}{% endif %}">&laquo; Primeira</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.mes_ano %}&mes_ano={{ request.GET.mes_ano }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.imovel %}&imovel={{ request.GET.imovel }}{% endif %}">Anterior</a>
+                                        </li>
+                                    {% endif %}
+
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                                    </li>
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.mes_ano %}&mes_ano={{ request.GET.mes_ano }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.imovel %}&imovel={{ request.GET.imovel }}{% endif %}">Próxima</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.mes_ano %}&mes_ano={{ request.GET.mes_ano }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.imovel %}&imovel={{ request.GET.imovel }}{% endif %}">Última &raquo;</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-file-earmark-pdf text-muted" style="font-size: 4rem;"></i>
+                            <h5 class="mt-3 text-muted">Nenhuma parcela encontrada</h5>
+                            <p class="text-muted">Não há parcelas que atendam aos critérios selecionados.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Controle de seleção de checkboxes
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('select-all');
+    const parcelaCheckboxes = document.querySelectorAll('.parcela-checkbox');
+    const btnGerarSelecionados = document.getElementById('btn-gerar-selecionados');
+    
+    // Selecionar/deselecionar todos
+    selectAll.addEventListener('change', function() {
+        parcelaCheckboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        updateGerarButton();
+    });
+    
+    // Atualizar botão quando checkboxes individuais mudam
+    parcelaCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateGerarButton);
+    });
+    
+    function updateGerarButton() {
+        const checkedBoxes = document.querySelectorAll('.parcela-checkbox:checked');
+        btnGerarSelecionados.disabled = checkedBoxes.length === 0;
+    }
+});
+</script>
+{% endblock %}

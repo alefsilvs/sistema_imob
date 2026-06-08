@@ -1,0 +1,65 @@
+{% extends "notificacoes/email_templates/base_email.html" %}
+
+{% block content %}
+<div class="greeting">
+    Olá, {{ inquilino_nome|default:"Cliente" }}!
+</div>
+
+<div class="alert alert-warning">
+    <strong>⚠️ Atenção:</strong> Seu contrato está próximo do vencimento!
+</div>
+
+<div class="message-content">
+    Informamos que o contrato do imóvel <strong>{{ imovel_endereco }}</strong> 
+    vencerá em <strong>{{ dias_para_vencer }} dias</strong>, 
+    na data de <strong>{{ data_vencimento|date:"d/m/Y" }}</strong>.
+</div>
+
+<div class="info-card">
+    <h3>📋 Detalhes do Contrato</h3>
+    <div class="info-row">
+        <span class="info-label">Número do Contrato:</span>
+        <span class="info-value">{{ contrato_numero|default:"N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Imóvel:</span>
+        <span class="info-value">{{ imovel_endereco|default:"N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Valor do Aluguel:</span>
+        <span class="info-value">R$ {{ valor_aluguel|default:"0,00" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Data de Vencimento:</span>
+        <span class="info-value">{{ data_vencimento|date:"d/m/Y"|default:"N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Dias Restantes:</span>
+        <span class="info-value">{{ dias_para_vencer }} dias</span>
+    </div>
+</div>
+
+<div class="message-content">
+    <strong>O que você precisa fazer:</strong>
+    <ul style="margin-left: 20px; margin-top: 15px;">
+        <li>Entre em contato conosco para discutir a renovação</li>
+        <li>Verifique se há pendências financeiras</li>
+        <li>Prepare a documentação necessária</li>
+        <li>Agende uma visita se necessário</li>
+    </ul>
+</div>
+
+<div class="btn-container">
+    <a href="#" class="btn btn-success">
+        📞 Entrar em Contato
+    </a>
+    <a href="#" class="btn btn-secondary">
+        📄 Ver Contrato
+    </a>
+</div>
+
+<div class="alert alert-info">
+    <strong>💡 Dica:</strong> Entre em contato conosco com antecedência para garantir 
+    a continuidade do seu contrato sem interrupções.
+</div>
+{% endblock %}

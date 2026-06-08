@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cadastrar Reajuste - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Cadastrar Reajuste</h1>
+            <p class="mb-0 text-muted">Registre um novo reajuste para o contrato {{ contrato.numero }}</p>
+        </div>
+        <a href="{% url 'contratos:detalhar' contrato.pk %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-graph-up"></i> Informações do Reajuste
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Informações do Contrato -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="alert-heading">Contrato {{ contrato.numero }}</h6>
+                        <p class="mb-1"><strong>Imóvel:</strong> {{ contrato.imovel.endereco_completo }}</p>
+                        <p class="mb-1"><strong>Inquilino:</strong> {{ contrato.inquilino.nome }}</p>
+                        <p class="mb-0"><strong>Valor Atual:</strong> R$ {{ contrato.valor_aluguel|floatformat:2 }}</p>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.data_reajuste.id_for_label }}" class="form-label">{{ form.data_reajuste.label }}</label>
+                                {{ form.data_reajuste }}
+                                {% if form.data_reajuste.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.data_reajuste.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.indice_aplicado.id_for_label }}" class="form-label">{{ form.indice_aplicado.label }}</label>
+                                {{ form.indice_aplicado }}
+                                {% if form.indice_aplicado.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.indice_aplicado.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.valor_anterior.id_for_label }}" class="form-label">{{ form.valor_anterior.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    {{ form.valor_anterior }}
+                                </div>
+                                {% if form.valor_anterior.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.valor_anterior.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.valor_novo.id_for_label }}" class="form-label">{{ form.valor_novo.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    {{ form.valor_novo }}
+                                </div>
+                                {% if form.valor_novo.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.valor_novo.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.observacoes.id_for_label }}" class="form-label">{{ form.observacoes.label }}</label>
+                            {{ form.observacoes }}
+                            {% if form.observacoes.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.observacoes.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'contratos:detalhar' contrato.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Salvar Reajuste
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-calculator"></i> Calculadora de Reajuste
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Valor Atual</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input type="number" class="form-control" id="valorAtual" value="{{ contrato.valor_aluguel }}" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Índice (%)</label>
+                        <input type="number" class="form-control" id="indiceCalc" step="0.0001" placeholder="Ex: 1.0523">
+                    </div>
+                    
+                    <button type="button" class="btn btn-outline-primary w-100 mb-3" onclick="calcularReajuste()">
+                        <i class="bi bi-calculator"></i> Calcular
+                    </button>
+                    
+                    <div class="alert alert-light" id="resultadoCalculo" style="display: none;">
+                        <strong>Novo Valor:</strong> <span id="novoValor">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function calcularReajuste() {
+    const valorAtual = parseFloat(document.getElementById('valorAtual').value) || 0;
+    const indice = parseFloat(document.getElementById('indiceCalc').value) || 0;
+    
+    if (valorAtual > 0 && indice > 0) {
+        const novoValor = valorAtual * indice;
+        document.getElementById('novoValor').textContent = 'R$ ' + novoValor.toFixed(2).replace('.', ',');
+        document.getElementById('resultadoCalculo').style.display = 'block';
+        
+        // Preencher os campos do formulário
+        document.getElementById('id_valor_novo').value = novoValor.toFixed(2);
+        document.getElementById('id_indice_aplicado').value = indice.toFixed(4);
+    } else {
+        alert('Por favor, preencha o valor atual e o índice corretamente.');
+    }
+}
+</script>
+{% endblock %}

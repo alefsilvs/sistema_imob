@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Informações de Cobrança - Sistema Imobiliário{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .info-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+    }
+    
+    .info-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .info-header h1 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 15px;
+        border-left: 5px solid #667eea;
+    }
+    
+    .info-section h3 {
+        color: #667eea;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .info-section h3 i {
+        margin-right: 10px;
+        font-size: 1.2rem;
+    }
+    
+    .security-badge {
+        display: inline-flex;
+        align-items: center;
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin: 10px 5px;
+    }
+    
+    .security-badge i {
+        margin-right: 8px;
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #667eea;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+        padding-left: 2rem;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 5px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #667eea;
+    }
+    
+    .timeline-item h5 {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .alert-custom {
+        border: none;
+        border-radius: 15px;
+        padding: 1rem 1.5rem;
+        margin: 1rem 0;
+    }
+    
+    .alert-info-custom {
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        color: #1565c0;
+        border-left: 5px solid #2196f3;
+    }
+    
+    .alert-success-custom {
+        background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+        color: #2e7d32;
+        border-left: 5px solid #4caf50;
+    }
+    
+    .btn-back {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-back i {
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="info-container">
+    <div class="info-header">
+        <h1><i class="fas fa-info-circle me-2"></i>Informações de Cobrança</h1>
+        <p class="text-muted">Entenda como funciona o sistema de pagamentos e onde seus dados ficam armazenados</p>
+    </div>
+    
+    <div class="info-section">
+        <h3><i class="fas fa-calendar-alt"></i>Período Gratuito de 7 Dias</h3>
+        <p>Você tem <strong>7 dias gratuitos</strong> para testar todas as funcionalidades do sistema. Durante este período:</p>
+        <ul>
+            <li>Acesso completo a todas as funcionalidades</li>
+            <li>Sem cobrança de taxas</li>
+            <li>Possibilidade de cancelar a qualquer momento</li>
+            <li>Suporte técnico incluído</li>
+        </ul>
+        
+        <div class="alert alert-info-custom">
+            <i class="fas fa-clock me-2"></i>
+            <strong>Importante:</strong> Após os 7 dias, a cobrança será feita automaticamente no cartão cadastrado.
+        </div>
+    </div>
+    
+    <div class="info-section">
+        <h3><i class="fas fa-credit-card"></i>Armazenamento Seguro dos Dados</h3>
+        <p>Seus dados de cartão são armazenados com a <strong>máxima segurança</strong>:</p>
+        
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="security-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    Criptografia SSL 256 bits
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="security-badge">
+                    <i class="fas fa-lock"></i>
+                    Tokenização de Dados
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="security-badge">
+                    <i class="fas fa-certificate"></i>
+                    Certificação PCI DSS
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="security-badge">
+                    <i class="fas fa-server"></i>
+                    Servidores Seguros
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert alert-success-custom mt-3">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>Garantia:</strong> Seus dados nunca são armazenados em texto simples e seguem os padrões internacionais de segurança.
+        </div>
+    </div>
+    
+    <div class="info-section">
+        <h3><i class="fas fa-sync-alt"></i>Como Funciona a Cobrança Automática</h3>
+        
+        <div class="timeline">
+            <div class="timeline-item">
+                <h5>Dia 1 - Cadastro</h5>
+                <p>Você cadastra seus dados de cartão de forma segura no sistema.</p>
+            </div>
+            
+            <div class="timeline-item">
+                <h5>Dias 1-7 - Período Gratuito</h5>
+                <p>Uso completo do sistema sem nenhuma cobrança.</p>
+            </div>
+            
+            <div class="timeline-item">
+                <h5>Dia 8 - Primeira Cobrança</h5>
+                <p>Cobrança automática do valor da mensalidade no cartão cadastrado.</p>
+            </div>
+            
+            <div class="timeline-item">
+                <h5>Mensalmente - Renovação</h5>
+                <p>Cobrança recorrente todo mês na mesma data.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="info-section">
+        <h3><i class="fas fa-cog"></i>Onde Gerenciar seus Dados</h3>
+        <p>Você pode gerenciar seus dados de pagamento através de:</p>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-cog fa-2x text-primary mb-2"></i>
+                        <h6>Painel do Cliente</h6>
+                        <p class="small text-muted">Acesse suas configurações de conta</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-credit-card fa-2x text-success mb-2"></i>
+                        <h6>Métodos de Pagamento</h6>
+                        <p class="small text-muted">Altere ou adicione cartões</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="info-section">
+        <h3><i class="fas fa-question-circle"></i>Dúvidas Frequentes</h3>
+        
+        <div class="accordion" id="faqAccordion">
+            <div class="accordion-item border-0 mb-2">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                        Posso cancelar a qualquer momento?
+                    </button>
+                </h2>
+                <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        Sim! Você pode cancelar sua assinatura a qualquer momento através do painel do cliente. O cancelamento é efetivo imediatamente.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item border-0 mb-2">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                        Como alterar meu cartão de crédito?
+                    </button>
+                </h2>
+                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        Acesse o painel do cliente > Métodos de Pagamento > Adicionar/Alterar Cartão. As alterações são aplicadas na próxima cobrança.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item border-0 mb-2">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                        O que acontece se o pagamento falhar?
+                    </button>
+                </h2>
+                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        Tentaremos a cobrança por 3 dias consecutivos. Se não conseguirmos, você receberá um e-mail para atualizar os dados de pagamento.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-center mt-4">
+        <a href="/pagamentos/pro/exemplo-token/" class="btn-back">
+            <i class="fas fa-arrow-left"></i>
+            Voltar ao Pagamento
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Adicionar animações aos elementos quando carregam
+    document.addEventListener('DOMContentLoaded', function() {
+        const sections = document.querySelectorAll('.info-section');
+        sections.forEach((section, index) => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                section.style.transition = 'all 0.6s ease';
+                section.style.opacity = '1';
+                section.style.transform = 'translateY(0)';
+            }, index * 200);
+        });
+    });
+</script>
+{% endblock %}

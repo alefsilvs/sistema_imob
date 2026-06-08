@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Caixa - Sessões</title>
+  <style>
+    body{font-family:Arial, sans-serif;}
+    table{width:100%; border-collapse:collapse;}
+    th,td{border:1px solid #ddd; padding:8px;}
+    th{background:#f3f3f3;}
+  </style>
+  </head>
+<body>
+  <h1>Caixa das Bancas</h1>
+  <p><a href="{% url 'financeiro:caixa_abrir' %}">Abrir nova sessão</a></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Banca</th>
+        <th>Status</th>
+        <th>Saldo inicial</th>
+        <th>Receitas</th>
+        <th>Despesas</th>
+        <th>Saldo final</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in sessoes %}
+      <tr>
+        <td>{{ s.data }}</td>
+        <td>{{ s.banca_feira.codigo }}</td>
+        <td>{{ s.get_status_display }}</td>
+        <td>R$ {{ s.saldo_inicial }}</td>
+        <td>R$ {{ s.total_receitas }}</td>
+        <td>R$ {{ s.total_despesas }}</td>
+        <td>R$ {{ s.saldo_final }}</td>
+        <td><a href="{% url 'financeiro:caixa_detalhe' s.id %}">Detalhes</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8">Nenhuma sessão encontrada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

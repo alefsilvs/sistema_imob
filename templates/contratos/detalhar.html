@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contrato {{ contrato.numero }} - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Contrato {{ contrato.numero }}</h1>
+            <p class="mb-0 text-muted">Detalhes do contrato de locação</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'contratos:editar' contrato.pk %}" class="btn btn-warning">
+                <i class="bi bi-pencil"></i> Editar
+            </a>
+            <a href="{% url 'contratos:excluir' contrato.pk %}" class="btn btn-danger" 
+               onclick="return confirm('Tem certeza que deseja excluir este contrato? Esta ação não pode ser desfeita.')">
+                <i class="bi bi-trash"></i> Excluir
+            </a>
+            <a href="{% url 'contratos:listar' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-file-text"></i> Informações do Contrato
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Número do Contrato</label>
+                            <p class="fw-bold">{{ contrato.numero }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Status</label>
+                            <p>
+                                {% if contrato.status == 'ATIVO' %}
+                                    <span class="badge bg-success">{{ contrato.get_status_display }}</span>
+                                {% elif contrato.status == 'VENCIDO' %}
+                                    <span class="badge bg-warning">{{ contrato.get_status_display }}</span>
+                                {% elif contrato.status == 'RESCINDIDO' %}
+                                    <span class="badge bg-danger">{{ contrato.get_status_display }}</span>
+                                {% else %}
+                                    <span class="badge bg-info">{{ contrato.get_status_display }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Imóvel</label>
+                            <p class="fw-bold">{{ contrato.imovel.endereco_completo }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Inquilino</label>
+                            <p class="fw-bold">{{ contrato.inquilino.nome }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Data de Início</label>
+                            <p>{{ contrato.data_inicio|date:"d/m/Y" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Data de Fim</label>
+                            <p>{{ contrato.data_fim|date:"d/m/Y" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted">Valor do Aluguel</label>
+                            <p class="fw-bold text-success">R$ {{ contrato.valor_aluguel|floatformat:2 }}</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted">Valor do Condomínio</label>
+                            <p>R$ {{ contrato.valor_condominio|floatformat:2 }}</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted">Valor do IPTU</label>
+                            <p>R$ {{ contrato.valor_iptu|floatformat:2 }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted">Valor Total Mensal</label>
+                            <p class="fw-bold text-primary">R$ {{ contrato.valor_total_mensal|floatformat:2 }}</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted">Dia de Vencimento</label>
+                            <p>{{ contrato.dia_vencimento }}</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted">Caução</label>
+                            <p>R$ {{ contrato.caucao|floatformat:2 }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted">Tipo de Reajuste</label>
+                            <p>{{ contrato.get_tipo_reajuste_display }}</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted">Percentual de Reajuste</label>
+                            <p>{{ contrato.percentual_reajuste|floatformat:2 }}%</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted">Periodicidade</label>
+                            <p>{{ contrato.periodicidade_reajuste }} meses</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted">Percentual de Honorário</label>
+                            <p>{{ contrato.percentual_honorario|floatformat:2 }}%</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted">Valor do Honorário</label>
+                            <p class="text-info">R$ {{ contrato.valor_honorario|floatformat:2 }}</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-muted">Valor de Repasse</label>
+                            <p class="text-success">R$ {{ contrato.valor_repasse|floatformat:2 }}</p>
+                        </div>
+                    </div>
+
+                    {% if contrato.observacoes %}
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Observações</label>
+                        <p>{{ contrato.observacoes|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-graph-up"></i> Reajustes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if contrato.reajustes.exists %}
+                        <div class="list-group list-group-flush">
+                            {% for reajuste in contrato.reajustes.all %}
+                            <div class="list-group-item px-0">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ reajuste.data_reajuste|date:"d/m/Y" }}</h6>
+                                        <p class="mb-1 small text-muted">
+                                            De R$ {{ reajuste.valor_anterior|floatformat:2 }} para R$ {{ reajuste.valor_novo|floatformat:2 }}
+                                        </p>
+                                        <small class="text-muted">Índice: {{ reajuste.indice_aplicado|floatformat:4 }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">Nenhum reajuste registrado</p>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <a href="{% url 'contratos:cadastrar_reajuste' contrato.pk %}" class="btn btn-outline-primary btn-sm w-100">
+                            <i class="bi bi-plus"></i> Novo Reajuste
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-info-circle"></i> Informações Adicionais
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <small class="text-muted">
+                        <strong>Criado em:</strong> {{ contrato.created_at|date:"d/m/Y H:i" }}<br>
+                        <strong>Atualizado em:</strong> {{ contrato.updated_at|date:"d/m/Y H:i" }}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

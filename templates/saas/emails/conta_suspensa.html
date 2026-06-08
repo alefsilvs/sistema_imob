@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conta suspensa - Reative agora</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+        .alert {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 5px;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: #007bff;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-info {
+            background: #17a2b8;
+        }
+        .planos {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .plano {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .plano.destaque {
+            border: 2px solid #28a745;
+            background: #f8fff9;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .oferta {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .garantia {
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚠️ Conta Suspensa</h1>
+        <p>{{ tenant.nome_empresa }}</p>
+    </div>
+    
+    <div class="content">
+        <div class="alert">
+            <strong>🔒 Acesso Suspenso!</strong> 
+            Sua conta foi suspensa devido ao vencimento do período gratuito. Reative agora para continuar usando o sistema.
+        </div>
+        
+        <h2>🔄 Reative sua conta em 2 minutos!</h2>
+        
+        <p>Olá, <strong>{{ tenant.usuario_admin.first_name }}</strong>!</p>
+        
+        <p>Sua conta do <strong>Sistema Imobiliário ImobilPro</strong> foi temporariamente suspensa, mas a reativação é simples e rápida!</p>
+        
+        <div class="oferta">
+            <h3>🎉 Oferta Especial de Reativação!</h3>
+            <p><strong>30% de desconto</strong> nos primeiros 3 meses</p>
+            <p>+ <strong>7 dias extras grátis</strong> para testar</p>
+            <p><small>Código promocional: <strong>VOLTA30</strong></small></p>
+        </div>
+        
+        <div class="planos">
+            <h3>📋 Escolha seu Plano e Reative Agora</h3>
+            {% for plano in planos_disponiveis %}
+                <div class="plano {% if forloop.counter == 2 %}destaque{% endif %}">
+                    <div>
+                        <strong>{{ plano.nome }}</strong>
+                        {% if forloop.counter == 2 %}<span style="background: #28a745; color: white; padding: 2px 8px; border-radius: 3px; font-size: 12px; margin-left: 10px;">RECOMENDADO</span>{% endif %}
+                        <br>
+                        <small>{{ plano.max_usuarios }} usuários • {{ plano.max_imoveis }} imóveis • {{ plano.storage_gb }}GB</small>
+                        {% if plano.suporte_prioritario %}<br><small>✅ Suporte prioritário</small>{% endif %}
+                        {% if plano.backup_automatico %}<br><small>✅ Backup automático</small>{% endif %}
+                        {% if plano.subdominio_personalizado %}<br><small>✅ Subdomínio personalizado</small>{% endif %}
+                    </div>
+                    <div>
+                        <strong style="text-decoration: line-through; color: #6c757d;">R$ {{ plano.preco_mensal }}/mês</strong>
+                        <br>
+                        <strong style="color: #28a745;">R$ {{ plano.preco_mensal|floatformat:2|add:"-30%" }}/mês</strong>
+                        <br><small style="color: #28a745;">nos primeiros 3 meses</small>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{ url_planos }}" class="btn btn-success">🚀 Reativar Conta Agora</a>
+            <a href="{{ url_suporte }}" class="btn btn-info">💬 Falar com Consultor</a>
+        </div>
+        
+        <div class="garantia">
+            <h4>🛡️ Garantia de Satisfação</h4>
+            <p><strong>Não gostou? Devolvemos seu dinheiro!</strong></p>
+            <p>Oferecemos 7 dias de garantia total. Se não ficar satisfeito, devolvemos 100% do valor pago, sem perguntas.</p>
+        </div>
+        
+        <h3>🔒 Seus dados estão protegidos!</h3>
+        <p>Enquanto sua conta estiver suspensa, seus dados permanecem seguros em nossos servidores:</p>
+        <ul>
+            <li>📊 Todos os imóveis e propriedades</li>
+            <li>📄 Contratos e documentos importantes</li>
+            <li>💰 Histórico financeiro completo</li>
+            <li>👥 Base de clientes e inquilinos</li>
+            <li>📈 Relatórios e análises</li>
+            <li>⚙️ Configurações personalizadas</li>
+        </ul>
+        
+        <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <h4>⏰ Atenção: Oferta por tempo limitado!</h4>
+            <p>Esta oferta especial de reativação é válida por apenas <strong>48 horas</strong>. Após este período, os preços voltam ao normal.</p>
+        </div>
+        
+        <h3>🌟 Por que nossos clientes escolhem o ImobilPro?</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+            <div style="background: white; padding: 15px; border-radius: 5px; border: 1px solid #dee2e6;">
+                <strong>🚀 Fácil de usar</strong>
+                <p style="margin: 5px 0; font-size: 14px;">Interface intuitiva que qualquer pessoa consegue usar</p>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 5px; border: 1px solid #dee2e6;">
+                <strong>📱 Acesso total</strong>
+                <p style="margin: 5px 0; font-size: 14px;">Use no computador, tablet ou celular</p>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 5px; border: 1px solid #dee2e6;">
+                <strong>🔐 Segurança máxima</strong>
+                <p style="margin: 5px 0; font-size: 14px;">Seus dados protegidos com criptografia</p>
+            </div>
+            <div style="background: white; padding: 15px; border-radius: 5px; border: 1px solid #dee2e6;">
+                <strong>🤝 Suporte dedicado</strong>
+                <p style="margin: 5px 0; font-size: 14px;">Equipe especializada sempre disponível</p>
+            </div>
+        </div>
+        
+        <p style="text-align: center; margin: 30px 0;">
+            <strong>Tem dúvidas?</strong> Nossa equipe está pronta para ajudar!<br>
+            <a href="{{ url_suporte }}" style="color: #007bff;">Clique aqui para falar conosco</a>
+        </p>
+    </div>
+    
+    <div class="footer">
+        <p>Este email foi enviado automaticamente pelo Sistema Imobiliário ImobilPro.</p>
+        <p>Reative sua conta e volte a crescer seu negócio!</p>
+        <p>© 2024 ImobilPro - Todos os direitos reservados</p>
+    </div>
+</body>
+</html>

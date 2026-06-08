@@ -1,0 +1,61 @@
+name: sistema-imobiliario
+services:
+- name: web
+  source_dir: /
+  github:
+    repo: alefsilvs/sistema-imobili-rio
+    branch: main
+  run_command: gunicorn sistema_imobiliario.wsgi:application --bind 0.0.0.0:$PORT
+  environment_slug: python
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  http_port: 8080
+  routes:
+  - path: /
+  health_check:
+    http_path: /
+  envs:
+  - key: DJANGO_SETTINGS_MODULE
+    value: sistema_imobiliario.settings_digitalocean
+  - key: DEBUG
+    value: "False"
+  - key: PYTHONPATH
+    value: .
+  - key: SECRET_KEY
+    scope: RUN_AND_BUILD_TIME
+    type: SECRET
+  - key: EMAIL_HOST_USER
+    scope: RUN_TIME
+    type: SECRET
+  - key: EMAIL_HOST_PASSWORD
+    scope: RUN_TIME
+    type: SECRET
+  - key: TWILIO_ACCOUNT_SID
+    scope: RUN_TIME
+    type: SECRET
+  - key: TWILIO_AUTH_TOKEN
+    scope: RUN_TIME
+    type: SECRET
+  - key: TWILIO_WHATSAPP_FROM
+    scope: RUN_TIME
+    type: SECRET
+
+databases:
+- name: sistema-imo-db
+  engine: PG
+  version: "14"
+  size: db-s-dev-database
+
+workers:
+- name: celery-worker
+  source_dir: /
+  github:
+    repo: alefsilvs/sistema-imobili-rio
+    branch: main
+  run_command: celery -A sistema_imobiliario worker --loglevel=info
+  environment_slug: python
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  envs:
+  - key: DJANGO_SETTINGS_MODULE
+    value: sistema_imobiliario.settings_digitalocean

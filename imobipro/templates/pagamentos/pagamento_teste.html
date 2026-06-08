@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Teste Pagamento{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Teste de Pagamento</h4>
+                </div>
+                <div class="card-body">
+                    <p>Token: {{ pagamento.token_pagamento|default:'exemplo-token' }}</p>
+                    <p>Valor: R$ {{ pagamento.valor|default:'100.00' }}</p>
+                    
+                    <button type="button" class="btn btn-primary" onclick="testarPix()">Testar PIX</button>
+                    <button type="button" class="btn btn-success" onclick="testarCartao()">Testar Cartão</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function testarPix() {
+    alert('PIX funcionando!');
+}
+
+function testarCartao() {
+    alert('Cartao funcionando!');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Imóveis - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Imóveis</h1>
+            <p class="mb-0 text-muted">Gerencie todos os imóveis da carteira</p>
+        </div>
+        <a href="{% url 'imoveis:cadastrar' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Cadastrar Imóvel
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" name="search" class="form-control" placeholder="Código, endereço, bairro..." value="{{ search }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Tipo</label>
+                    <select name="tipo" class="form-select">
+                        <option value="">Todos os tipos</option>
+                        {% for value, label in tipos %}
+                            <option value="{{ value }}" {% if value == tipo_selected %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">Todos os status</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if value == status_selected %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="bi bi-search"></i> Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Imóveis -->
+    <div class="card">
+        <div class="card-body">
+            {% if page_obj %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Endereço</th>
+                                <th>Tipo</th>
+                                <th>Proprietário</th>
+                                <th>Valor Aluguel</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for imovel in page_obj %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ imovel.codigo }}</strong>
+                                    </td>
+                                    <td>
+                                        {{ imovel.endereco }}, {{ imovel.numero }}<br>
+                                        <small class="text-muted">{{ imovel.bairro }} - {{ imovel.cidade }}/{{ imovel.estado }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ imovel.get_tipo_display }}</span>
+                                    </td>
+                                    <td>{{ imovel.proprietario.nome }}</td>
+                                    <td>R$ {{ imovel.valor_aluguel|floatformat:2 }}</td>
+                                    <td>
+                                        {% if imovel.status == 'DISPONIVEL' %}
+                                            <span class="badge bg-success">{{ imovel.get_status_display }}</span>
+                                        {% elif imovel.status == 'OCUPADO' %}
+                                            <span class="badge bg-primary">{{ imovel.get_status_display }}</span>
+                                        {% elif imovel.status == 'MANUTENCAO' %}
+                                            <span class="badge bg-warning">{{ imovel.get_status_display }}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">{{ imovel.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="btn-group" role="group">
+                                            <a href="{% url 'imoveis:detalhes_imovel' imovel.pk %}" class="btn btn-sm btn-outline-info" title="Visualizar">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{% url 'imoveis:editar' imovel.pk %}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'imoveis:gerenciar_fotos' imovel.pk %}" class="btn btn-sm btn-outline-secondary" title="Fotos">
+                                                <i class="bi bi-images"></i>
+                                            </a>
+                                            <a href="{% url 'imoveis:excluir' imovel.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação -->
+                {% if page_obj.has_other_pages %}
+                    <nav aria-label="Paginação">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if tipo_selected %}&tipo={{ tipo_selected }}{% endif %}{% if status_selected %}&status={{ status_selected }}{% endif %}">Primeira</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if tipo_selected %}&tipo={{ tipo_selected }}{% endif %}{% if status_selected %}&status={{ status_selected }}{% endif %}">Anterior</a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                            </li>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if tipo_selected %}&tipo={{ tipo_selected }}{% endif %}{% if status_selected %}&status={{ status_selected }}{% endif %}">Próxima</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if tipo_selected %}&tipo={{ tipo_selected }}{% endif %}{% if status_selected %}&status={{ status_selected }}{% endif %}">Última</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-building display-1 text-muted"></i>
+                    <h4 class="mt-3">Nenhum imóvel encontrado</h4>
+                    <p class="text-muted">Comece cadastrando seu primeiro imóvel.</p>
+                    <a href="{% url 'imoveis:cadastrar' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Cadastrar Primeiro Imóvel
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

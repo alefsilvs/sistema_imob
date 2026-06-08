@@ -1,0 +1,402 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Preview de Notificação{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-eye"></i>
+                        Preview de Notificação
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Formulário de Preview -->
+                    <form id="previewForm" class="mb-4">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="template_id">Template:</label>
+                                    <select class="form-control" id="template_id" name="template_id" required>
+                                        <option value="">Selecione um template</option>
+                                        {% for template in templates %}
+                                            <option value="{{ template.id }}">{{ template.nome }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="inquilino_id">Inquilino:</label>
+                                    <select class="form-control" id="inquilino_id" name="inquilino_id" required>
+                                        <option value="">Selecione um inquilino</option>
+                                        {% for inquilino in inquilinos %}
+                                            <option value="{{ inquilino.id }}">{{ inquilino.nome }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="canal">Canal:</label>
+                                    <select class="form-control" id="canal" name="canal">
+                                        <option value="EMAIL">E-mail</option>
+                                        <option value="SMS">SMS</option>
+                                        <option value="WHATSAPP">WhatsApp</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="button" class="btn btn-primary" onclick="gerarPreview()">
+                                    <i class="fas fa-eye"></i> Gerar Preview
+                                </button>
+                                <button type="button" class="btn btn-info" onclick="previewTemplate()">
+                                    <i class="fas fa-file-alt"></i> Preview do Template
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Área de Preview -->
+                    <div id="previewArea" style="display: none;">
+                        <div class="card">
+                            <div class="card-header bg-info">
+                                <h4 class="card-title mb-0">
+                                    <i class="fas fa-envelope"></i>
+                                    Preview da Notificação
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h5>Informações do Envio</h5>
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td><strong>Template:</strong></td>
+                                                <td id="preview_template"></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Destinatário:</strong></td>
+                                                <td id="preview_inquilino"></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Contato:</strong></td>
+                                                <td id="preview_destinatario"></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Canal:</strong></td>
+                                                <td id="preview_canal"></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h5>Contexto Utilizado</h5>
+                                        <pre id="preview_contexto" class="bg-light p-2" style="font-size: 12px; max-height: 200px; overflow-y: auto;"></pre>
+                                    </div>
+                                </div>
+                                
+                                <hr>
+                                
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h5>Conteúdo da Notificação</h5>
+                                        
+                                        <div class="form-group">
+                                            <label><strong>Assunto:</strong></label>
+                                            <div class="alert alert-secondary" id="preview_assunto"></div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label><strong>Corpo da Mensagem:</strong></label>
+                                            <div class="card">
+                                                <div class="card-body" id="preview_corpo" style="white-space: pre-wrap;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview em Lote -->
+                    <div class="mt-4">
+                        <h4>Preview em Lote</h4>
+                        <p class="text-muted">Visualize como a notificação ficará para múltiplos destinatários</p>
+                        
+                        <form id="previewLoteForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="template_lote">Template:</label>
+                                        <select class="form-control" id="template_lote" name="template_id" required>
+                                            <option value="">Selecione um template</option>
+                                            {% for template in templates %}
+                                                <option value="{{ template.id }}">{{ template.nome }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="canal_lote">Canal:</label>
+                                        <select class="form-control" id="canal_lote" name="canal">
+                                            <option value="EMAIL">E-mail</option>
+                                            <option value="SMS">SMS</option>
+                                            <option value="WHATSAPP">WhatsApp</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="button" class="btn btn-success btn-block" onclick="previewLote()">
+                                            <i class="fas fa-list"></i> Preview em Lote
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Inquilinos:</label>
+                                <div class="row">
+                                    {% for inquilino in inquilinos %}
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="inquilinos_ids" value="{{ inquilino.id }}" id="inquilino_{{ inquilino.id }}">
+                                                <label class="form-check-label" for="inquilino_{{ inquilino.id }}">
+                                                    {{ inquilino.nome }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="selecionarTodos()">
+                                    Selecionar Todos
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Resultados do Preview em Lote -->
+                        <div id="previewLoteResults" style="display: none;">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Resultados do Preview em Lote</h5>
+                                    <div id="previewLoteStats" class="mt-2"></div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Inquilino</th>
+                                                    <th>Destinatário</th>
+                                                    <th>Status</th>
+                                                    <th>Assunto</th>
+                                                    <th>Prévia do Corpo</th>
+                                                    <th>Erro</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="previewLoteTable">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function gerarPreview() {
+    const templateId = document.getElementById('template_id').value;
+    const inquilinoId = document.getElementById('inquilino_id').value;
+    const canal = document.getElementById('canal').value;
+    
+    if (!templateId || !inquilinoId) {
+        alert('Selecione um template e um inquilino');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('template_id', templateId);
+    formData.append('inquilino_id', inquilinoId);
+    formData.append('canal', canal);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    
+    fetch('{% url "notificacoes:preview_notificacao" %}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarPreview(data.preview);
+        } else {
+            alert('Erro: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao gerar preview');
+    });
+}
+
+function previewTemplate() {
+    const templateId = document.getElementById('template_id').value;
+    
+    if (!templateId) {
+        alert('Selecione um template');
+        return;
+    }
+    
+    fetch(`{% url "notificacoes:preview_template" 0 %}`.replace('0', templateId))
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarPreviewTemplate(data.preview);
+        } else {
+            alert('Erro: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao gerar preview do template');
+    });
+}
+
+function mostrarPreview(preview) {
+    document.getElementById('preview_template').textContent = preview.template_nome;
+    document.getElementById('preview_inquilino').textContent = preview.inquilino_nome;
+    document.getElementById('preview_destinatario').textContent = preview.destinatario;
+    document.getElementById('preview_canal').textContent = preview.canal;
+    document.getElementById('preview_assunto').textContent = preview.assunto;
+    document.getElementById('preview_corpo').textContent = preview.corpo;
+    document.getElementById('preview_contexto').textContent = JSON.stringify(preview.contexto_usado, null, 2);
+    
+    document.getElementById('previewArea').style.display = 'block';
+}
+
+function mostrarPreviewTemplate(preview) {
+    document.getElementById('preview_template').textContent = preview.template.nome + ' (' + preview.template.tipo + ')';
+    document.getElementById('preview_inquilino').textContent = 'Dados de Exemplo';
+    document.getElementById('preview_destinatario').textContent = 'exemplo@email.com';
+    document.getElementById('preview_canal').textContent = 'EMAIL';
+    document.getElementById('preview_assunto').textContent = preview.assunto;
+    document.getElementById('preview_corpo').textContent = preview.corpo;
+    document.getElementById('preview_contexto').textContent = JSON.stringify(preview.contexto, null, 2);
+    
+    document.getElementById('previewArea').style.display = 'block';
+}
+
+function previewLote() {
+    const templateId = document.getElementById('template_lote').value;
+    const canal = document.getElementById('canal_lote').value;
+    const inquilinosIds = Array.from(document.querySelectorAll('input[name="inquilinos_ids"]:checked')).map(cb => cb.value);
+    
+    if (!templateId || inquilinosIds.length === 0) {
+        alert('Selecione um template e pelo menos um inquilino');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('template_id', templateId);
+    formData.append('canal', canal);
+    inquilinosIds.forEach(id => formData.append('inquilinos_ids', id));
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    
+    fetch('{% url "notificacoes:preview_lote" %}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarPreviewLote(data);
+        } else {
+            alert('Erro: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao gerar preview em lote');
+    });
+}
+
+function mostrarPreviewLote(data) {
+    const stats = `
+        <div class="row">
+            <div class="col-md-3">
+                <div class="info-box bg-info">
+                    <span class="info-box-icon"><i class="fas fa-users"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total</span>
+                        <span class="info-box-number">${data.total}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="info-box bg-success">
+                    <span class="info-box-icon"><i class="fas fa-check"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Válidos</span>
+                        <span class="info-box-number">${data.validos}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="info-box bg-warning">
+                    <span class="info-box-icon"><i class="fas fa-exclamation"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Inválidos</span>
+                        <span class="info-box-number">${data.invalidos}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('previewLoteStats').innerHTML = stats;
+    
+    const tbody = document.getElementById('previewLoteTable');
+    tbody.innerHTML = '';
+    
+    data.previews.forEach(preview => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td>${preview.inquilino_nome}</td>
+            <td>${preview.destinatario || 'N/A'}</td>
+            <td>
+                ${preview.valido ? 
+                    '<span class="badge badge-success">Válido</span>' : 
+                    '<span class="badge badge-danger">Inválido</span>'
+                }
+            </td>
+            <td>${preview.assunto || 'N/A'}</td>
+            <td>${preview.corpo || 'N/A'}</td>
+            <td>${preview.erro || ''}</td>
+        `;
+    });
+    
+    document.getElementById('previewLoteResults').style.display = 'block';
+}
+
+function selecionarTodos() {
+    const checkboxes = document.querySelectorAll('input[name="inquilinos_ids"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    checkboxes.forEach(cb => {
+        cb.checked = !allChecked;
+    });
+}
+</script>
+{% endblock %}

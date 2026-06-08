@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Fechar Caixa</title>
+</head>
+<body>
+  <h1>Fechar Caixa - {{ sessao.banca_feira.codigo }} {{ sessao.data }}</h1>
+  <p>Totais: Receitas R$ {{ sessao.total_receitas }} | Despesas R$ {{ sessao.total_despesas }} | Saldo Final R$ {{ sessao.saldo_final }}</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Fechar</button>
+  </form>
+  <p><a href="{% url 'financeiro:caixa_detalhe' sessao.id %}">Voltar</a></p>
+</body>
+</html>

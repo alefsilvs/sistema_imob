@@ -1,0 +1,1 @@
+web: DJANGO_SETTINGS_MODULE=sistema_imobiliario.settings_railway DEBUG=False bash -lc "python manage.py migrate --noinput --run-syncdb && python manage.py collectstatic --noinput --clear && gunicorn sistema_imobiliario.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120 --access-logfile - --error-logfile -"

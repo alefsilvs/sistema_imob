@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Ticket - Sistema IMO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .form-header {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .form-header h2 {
+            color: #495057;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-header p {
+            color: #6c757d;
+            margin: 0;
+        }
+
+        .form-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .required {
+            color: #dc3545;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-control:invalid {
+            border-color: #dc3545;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 0.5rem;
+            color: #667eea;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 0.75rem;
+            border: 2px dashed #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+        }
+
+        .file-upload-label:hover {
+            border-color: #667eea;
+            background-color: #f0f2ff;
+        }
+
+        .file-upload-label i {
+            font-size: 2rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .priority-badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .priority-badge {
+            display: none;
+        }
+
+        .priority-badge + label {
+            padding: 0.5rem 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .priority-badge:checked + label {
+            background-color: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+
+        .priority-badge + label:hover {
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .help-text {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        .messages {
+            margin-bottom: 1rem;
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .priority-badges {
+                justify-content: center;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Criar Novo Ticket</h1>
+        <p>Descreva seu problema ou solicitação detalhadamente</p>
+    </div>
+
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="form-card">
+            <div class="form-header">
+                <h2>Informações do Ticket</h2>
+                <p>Preencha todos os campos obrigatórios para criar seu ticket de suporte</p>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="form-body">
+                {% csrf_token %}
+                
+                <!-- Informações Básicas -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Informações Básicas
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="titulo">Título <span class="required">*</span></label>
+                        <input type="text" id="titulo" name="titulo" class="form-control" 
+                               placeholder="Descreva brevemente o problema ou solicitação" required>
+                        <div class="help-text">Seja claro e específico no título</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descricao">Descrição <span class="required">*</span></label>
+                        <textarea id="descricao" name="descricao" class="form-control" 
+                                  placeholder="Descreva detalhadamente o problema, incluindo passos para reproduzir, mensagens de erro, etc." required></textarea>
+                        <div class="help-text">Quanto mais detalhes, melhor poderemos ajudar</div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="categoria">Categoria <span class="required">*</span></label>
+                            <select id="categoria" name="categoria" class="form-control" required>
+                                <option value="">Selecione uma categoria</option>
+                                {% for categoria in categorias %}
+                                    <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="canal">Canal de Contato</label>
+                            <select id="canal" name="canal" class="form-control">
+                                {% for value, label in canal_choices %}
+                                    <option value="{{ value }}" {% if value == 'web' %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prioridade -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Prioridade
+                    </div>
+                    
+                    <div class="priority-badges">
+                        {% for value, label in prioridade_choices %}
+                            <input type="radio" id="prioridade_{{ value }}" name="prioridade" 
+                                   value="{{ value }}" class="priority-badge" 
+                                   {% if value == 'normal' %}checked{% endif %}>
+                            <label for="prioridade_{{ value }}">{{ label }}</label>
+                        {% endfor %}
+                    </div>
+                    <div class="help-text">Selecione a prioridade baseada na urgência e impacto do problema</div>
+                </div>
+
+                <!-- Relacionamentos -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-users"></i>
+                        Relacionamentos (Opcional)
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="proprietario">Proprietário</label>
+                            <select id="proprietario" name="proprietario" class="form-control">
+                                <option value="">Selecione um proprietário</option>
+                                <!-- Proprietários serão carregados via JavaScript ou backend -->
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inquilino">Inquilino</label>
+                            <select id="inquilino" name="inquilino" class="form-control">
+                                <option value="">Selecione um inquilino</option>
+                                <!-- Inquilinos serão carregados via JavaScript ou backend -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="banca">Banca/Feira</label>
+                        <select id="banca" name="banca" class="form-control">
+                            <option value="">Selecione uma banca</option>
+                            <!-- Bancas serão carregadas via JavaScript ou backend -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Anexos -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-paperclip"></i>
+                        Anexos
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="file-upload">
+                            <input type="file" id="anexos" name="anexos" multiple 
+                                   accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.txt,.zip">
+                            <label for="anexos" class="file-upload-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <strong>Clique para selecionar arquivos</strong><br>
+                                ou arraste e solte aqui
+                            </label>
+                        </div>
+                        <div class="help-text">
+                            Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG, GIF, TXT, ZIP<br>
+                            Tamanho máximo: 10MB por arquivo
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{% url 'suporte:listar_tickets' %}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Criar Ticket
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Atualizar label do upload de arquivos quando arquivos são selecionados
+        document.getElementById('anexos').addEventListener('change', function(e) {
+            const label = document.querySelector('.file-upload-label');
+            const files = e.target.files;
+            
+            if (files.length > 0) {
+                const fileNames = Array.from(files).map(file => file.name).join(', ');
+                label.innerHTML = `
+                    <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                    <strong>${files.length} arquivo(s) selecionado(s)</strong><br>
+                    <small>${fileNames}</small>
+                `;
+            } else {
+                label.innerHTML = `
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <strong>Clique para selecionar arquivos</strong><br>
+                    ou arraste e solte aqui
+                `;
+            }
+        });
+
+        // Validação do formulário
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const titulo = document.getElementById('titulo').value.trim();
+            const descricao = document.getElementById('descricao').value.trim();
+            const categoria = document.getElementById('categoria').value;
+
+            if (!titulo || !descricao || !categoria) {
+                e.preventDefault();
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return false;
+            }
+
+            // Mostrar loading no botão
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
+            submitBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>

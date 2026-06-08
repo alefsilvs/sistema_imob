@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ImobiPro — Plataforma de Gestão Imobiliária{% endblock %}
+
+{% block extra_css %}
+<style>
+  body {
+    background:
+      radial-gradient(900px 520px at 15% 10%, rgba(220, 38, 38, 0.22), transparent 55%),
+      radial-gradient(700px 460px at 85% 20%, rgba(14, 165, 233, 0.10), transparent 62%),
+      radial-gradient(900px 620px at 50% 120%, rgba(34, 197, 94, 0.08), transparent 60%),
+      linear-gradient(135deg, #06060a 0%, #0b0b10 100%);
+  }
+  .main-content-full .content-wrapper { padding: 0; background: transparent; min-height: auto; }
+  .navbar-header { background: rgba(0,0,0,0.35); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,0.10); box-shadow: none; }
+  .navbar-header .navbar { background: transparent !important; border-bottom: 0; }
+  .public-navbar .navbar-brand { font-weight: 800; letter-spacing: .2px; color: rgba(255,255,255,0.92); }
+  .public-navbar .navbar-brand:hover { color: #ffffff; }
+  .public-navbar .btn { border-radius: 999px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35); }
+  .public-login-btn {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+    box-shadow: 0 16px 42px rgba(220, 38, 38, 0.22) !important;
+  }
+  .public-login-btn:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    box-shadow: 0 22px 54px rgba(220, 38, 38, 0.30) !important;
+  }
+  .hero {
+    background:
+      radial-gradient(900px 420px at 10% 20%, rgba(239, 68, 68, 0.26), transparent 55%),
+      radial-gradient(700px 360px at 85% 15%, rgba(14, 165, 233, 0.14), transparent 58%),
+      radial-gradient(900px 520px at 50% 110%, rgba(34, 197, 94, 0.10), transparent 60%),
+      linear-gradient(135deg, rgba(11,11,16,0.92) 0%, rgba(17,24,39,0.92) 100%);
+    color: #fff;
+    border-radius: 0 0 56px 56px;
+    padding: 96px 0 72px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    right: -120px;
+    bottom: -140px;
+    width: 420px;
+    height: 420px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 50%;
+    filter: blur(0.8px);
+  }
+  .hero-title {
+    font-weight: 800;
+    font-size: clamp(2.4rem, 4.6vw, 3.4rem);
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.02em;
+    text-shadow: 0 10px 30px rgba(2,6,23,0.35);
+  }
+  .hero-subtitle { font-size: 1.05rem; opacity: 1; max-width: 52ch; color: #ffffff; }
+  .hero-badges { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+    font-weight: 600;
+    font-size: .92rem;
+    color: #ffffff;
+  }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+  .cta-btn { border-radius: 999px; padding: 10px 16px; box-shadow: 0 12px 28px rgba(2,6,23,0.20); }
+  .cta-btn.btn-outline-light { border-color: rgba(255,255,255,0.55); }
+  .cta-btn-login {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+    box-shadow: 0 18px 46px rgba(220, 38, 38, 0.22) !important;
+  }
+  .cta-btn-login:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    box-shadow: 0 26px 60px rgba(220, 38, 38, 0.30) !important;
+  }
+  .features {
+    margin-top: -40px;
+    background: rgba(255,255,255,0.96);
+    border-radius: 24px;
+    padding: 24px;
+    border: 1px solid rgba(255,255,255,0.10);
+  }
+  .feature-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 14px 40px rgba(2,6,23,0.08);
+    border: 1px solid rgba(0,0,0,0.06);
+    transition: transform .25s ease, box-shadow .25s ease;
+    height: 100%;
+  }
+  .feature-card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px rgba(0,0,0,0.12); }
+  .feature-icon {
+    width: 56px; height: 56px; border-radius: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    color: #fff; font-size: 26px; margin-bottom: 12px;
+  }
+  .app-badges img { height: 34px; }
+  .app-badges small { color: #ffffff; opacity: 1; }
+  .login-strip { background: rgba(15,23,42,0.06); border-radius: 18px; padding: 18px; box-shadow: 0 18px 50px rgba(2,6,23,0.10); border: 1px solid rgba(15,23,42,0.08); }
+  .hero-side-card { background: rgba(255,255,255,0.92); border-radius: 22px; border: 1px solid rgba(15,23,42,0.10); box-shadow: 0 24px 60px rgba(2,6,23,0.20); overflow: hidden; }
+  .hero-side-card .card-top { padding: 18px 18px 12px; display:flex; align-items:center; justify-content:space-between; }
+  .hero-side-card .card-top .pill { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background: rgba(37,99,235,0.10); color:#1d4ed8; border: 1px solid rgba(37,99,235,0.18); font-weight:700; font-size:.85rem; }
+  .hero-side-card .card-body-mini { padding: 0 18px 18px; }
+  .mini-metric { background: #ffffff; border-radius: 16px; border: 1px solid rgba(15,23,42,0.06); padding: 14px; }
+  .mini-metric .label { color: #64748b; font-weight: 600; font-size: .85rem; }
+  .mini-metric .value { color: #0f172a; font-weight: 800; font-size: 1.2rem; margin-top: 4px; }
+  .footer-note { color: rgba(15,23,42,0.55); }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="container-fluid p-0">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-7">
+          <div class="hero-badges">
+            <span class="hero-badge"><i class="bi bi-shield-check"></i> Seguro e organizado</span>
+            <span class="hero-badge"><i class="bi bi-phone"></i> Responsivo</span>
+            <span class="hero-badge"><i class="bi bi-lightning-charge"></i> Rápido</span>
+          </div>
+          <h1 class="hero-title">ImobiPro</h1>
+          <p class="hero-subtitle">
+            Plataforma digital completa para gestão de imóveis, contratos, inquilinos e proprietários.
+          </p>
+          <div class="cta-row">
+            <a href="/accounts/login/" class="btn cta-btn cta-btn-login">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
+            </a>
+            <a href="{% url 'core:dashboard' %}" class="btn btn-outline-light cta-btn">
+              <i class="bi bi-speedometer2 me-1"></i> Ver Dashboard
+            </a>
+          </div>
+          <div class="mt-3 app-badges d-flex gap-2 align-items-center">
+            <img src="{% static 'img/icon.svg' %}" alt="ImobiPro" />
+            <small class="ms-2">Versão web responsiva — acesso em qualquer dispositivo.</small>
+          </div>
+        </div>
+        <div class="col-lg-5 d-none d-lg-block text-end">
+          <div class="hero-side-card d-inline-block text-start">
+            <div class="card-top">
+              <div class="pill"><i class="bi bi-graph-up"></i> Visão Geral</div>
+              <div style="color:#64748b;font-weight:700;font-size:.9rem;">Dashboard</div>
+            </div>
+            <div class="card-body-mini">
+              <div class="row g-3">
+                <div class="col-6">
+                  <div class="mini-metric">
+                    <div class="label">Imóveis</div>
+                    <div class="value">Controle</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mini-metric">
+                    <div class="label">Contratos</div>
+                    <div class="value">Gestão</div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="mini-metric" style="background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.18);">
+                    <div class="label">Financeiro</div>
+                    <div class="value">Repasses e cobranças</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="container features">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="feature-card h-100">
+          <div class="feature-icon"><i class="bi bi-building"></i></div>
+          <h5>Gestão de Imóveis</h5>
+          <p class="mb-0">Cadastro completo com endereço, características e documentação.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card h-100">
+          <div class="feature-icon" style="background:linear-gradient(135deg,#11998e,#38ef7d)"><i class="bi bi-people"></i></div>
+          <h5>Inquilinos e Proprietários</h5>
+          <p class="mb-0">Controle de perfis, contatos e relacionamento em um só lugar.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="feature-card h-100">
+          <div class="feature-icon" style="background:linear-gradient(135deg,#f093fb,#f5576c)"><i class="bi bi-file-text"></i></div>
+          <h5>Contratos e Financeiro</h5>
+          <p class="mb-0">Geração de contratos, boletos, repasses e relatórios.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="login-strip d-flex align-items-center justify-content-between">
+          <span>
+            <strong>Já usa o sistema?</strong> Faça login para acessar seu painel.
+          </span>
+          <a href="/accounts/login/" class="btn btn-primary">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <p class="mt-4 footer-note text-center">ImobiPro — Plataforma de Gestão Imobiliária.</p>
+  </section>
+</main>
+{% endblock %}

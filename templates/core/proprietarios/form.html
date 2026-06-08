@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">{{ title }}</h1>
+            <p class="mb-0 text-muted">Preencha os dados do proprietário</p>
+        </div>
+        <a href="{% url 'core:listar_proprietarios' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Dados Pessoais -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Dados Pessoais</h5>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.nome.label }} <span class="text-danger">*</span></label>
+                                {{ form.nome }}
+                                {% if form.nome.errors %}
+                                    <div class="text-danger small mt-1">{{ form.nome.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.tipo.label }} <span class="text-danger">*</span></label>
+                                {{ form.tipo }}
+                                {% if form.tipo.errors %}
+                                    <div class="text-danger small mt-1">{{ form.tipo.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.data_nascimento.label }}</label>
+                                {{ form.data_nascimento }}
+                                {% if form.data_nascimento.errors %}
+                                    <div class="text-danger small mt-1">{{ form.data_nascimento.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Documentos -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Documentos</h5>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.cpf_cnpj.label }} <span class="text-danger">*</span></label>
+                                {{ form.cpf_cnpj }}
+                                {% if form.cpf_cnpj.errors %}
+                                    <div class="text-danger small mt-1">{{ form.cpf_cnpj.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.rg_ie.label }}</label>
+                                {{ form.rg_ie }}
+                                {% if form.rg_ie.errors %}
+                                    <div class="text-danger small mt-1">{{ form.rg_ie.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.profissao.label }}</label>
+                                {{ form.profissao }}
+                                {% if form.profissao.errors %}
+                                    <div class="text-danger small mt-1">{{ form.profissao.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Contato -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Contato</h5>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.telefone.label }} <span class="text-danger">*</span></label>
+                                {{ form.telefone }}
+                                {% if form.telefone.errors %}
+                                    <div class="text-danger small mt-1">{{ form.telefone.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">{{ form.email.label }} <span class="text-danger">*</span></label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Endereço -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Endereço</h5>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">{{ form.endereco.label }} <span class="text-danger">*</span></label>
+                                {{ form.endereco }}
+                                {% if form.endereco.errors %}
+                                    <div class="text-danger small mt-1">{{ form.endereco.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.cep.label }} <span class="text-danger">*</span></label>
+                                {{ form.cep }}
+                                {% if form.cep.errors %}
+                                    <div class="text-danger small mt-1">{{ form.cep.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.cidade.label }} <span class="text-danger">*</span></label>
+                                {{ form.cidade }}
+                                {% if form.cidade.errors %}
+                                    <div class="text-danger small mt-1">{{ form.cidade.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.estado.label }} <span class="text-danger">*</span></label>
+                                {{ form.estado }}
+                                {% if form.estado.errors %}
+                                    <div class="text-danger small mt-1">{{ form.estado.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Dados Financeiros -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Dados Financeiros</h5>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.renda.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    {{ form.renda }}
+                                </div>
+                                {% if form.renda.errors %}
+                                    <div class="text-danger small mt-1">{{ form.renda.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.banco.label }}</label>
+                                {{ form.banco }}
+                                {% if form.banco.errors %}
+                                    <div class="text-danger small mt-1">{{ form.banco.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.agencia.label }}</label>
+                                {{ form.agencia }}
+                                {% if form.agencia.errors %}
+                                    <div class="text-danger small mt-1">{{ form.agencia.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.conta.label }}</label>
+                                {{ form.conta }}
+                                {% if form.conta.errors %}
+                                    <div class="text-danger small mt-1">{{ form.conta.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.pix.label }}</label>
+                                {{ form.pix }}
+                                {% if form.pix.errors %}
+                                    <div class="text-danger small mt-1">{{ form.pix.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Observações -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">Observações</h5>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">{{ form.observacoes.label }}</label>
+                                {{ form.observacoes }}
+                                {% if form.observacoes.errors %}
+                                    <div class="text-danger small mt-1">{{ form.observacoes.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Botões -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{% url 'core:listar_proprietarios' %}" class="btn btn-secondary">
+                                        <i class="bi bi-arrow-left"></i> Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle"></i> 
+                                        {% if proprietario %}Atualizar{% else %}Cadastrar{% endif %} Proprietário
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações Adicionais -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-info-circle"></i> Informações Importantes
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Dica:</strong> Preencha todos os campos obrigatórios para cadastrar o proprietário.
+                    </div>
+                    
+                    {% if proprietario %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Atenção:</strong> Você está editando os dados de <strong>{{ proprietario.nome }}</strong>.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

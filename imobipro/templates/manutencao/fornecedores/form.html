@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Editar{% else %}Cadastrar{% endif %} Fornecedor - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                {% if form.instance.pk %}Editar Fornecedor{% else %}Cadastrar Fornecedor{% endif %}
+            </h1>
+            <p class="mb-0 text-muted">Preencha os dados do fornecedor</p>
+        </div>
+        <a href="{% url 'manutencao:listar_fornecedores' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Dados do Fornecedor</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="{{ form.nome.id_for_label }}" class="form-label">Nome/Razão Social *</label>
+                                {{ form.nome }}
+                                {% if form.nome.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.nome.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.cnpj.id_for_label }}" class="form-label">CNPJ</label>
+                                {{ form.cnpj }}
+                                {% if form.cnpj.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.cnpj.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.telefone.id_for_label }}" class="form-label">Telefone</label>
+                                {{ form.telefone }}
+                                {% if form.telefone.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.telefone.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.email.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.especialidade.id_for_label }}" class="form-label">Especialidade</label>
+                            {{ form.especialidade }}
+                            {% if form.especialidade.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.especialidade.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.endereco.id_for_label }}" class="form-label">Endereço</label>
+                            {{ form.endereco }}
+                            {% if form.endereco.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.endereco.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.ativo }}
+                                <label class="form-check-label" for="{{ form.ativo.id_for_label }}">
+                                    Fornecedor ativo
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'manutencao:listar_fornecedores' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Salvar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Informações</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-2"><strong>Campos obrigatórios:</strong></p>
+                    <ul class="text-muted small">
+                        <li>Nome/Razão Social</li>
+                    </ul>
+                    
+                    <hr>
+                    
+                    <p class="text-muted mb-2"><strong>Dicas:</strong></p>
+                    <ul class="text-muted small">
+                        <li>Preencha todos os dados de contato para facilitar a comunicação</li>
+                        <li>A especialidade ajuda na busca por fornecedores específicos</li>
+                        <li>Fornecedores inativos não aparecerão nas listas de seleção</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,558 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard de Suporte - Sistema Imobiliário{% endblock %}
+
+{% block extra_css %}
+<style>
+    .suporte-dashboard {
+        padding: 20px;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .dashboard-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 300;
+    }
+    
+    .dashboard-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        border-left: 4px solid;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+        border-radius: 50%;
+        transform: translate(30px, -30px);
+    }
+    
+    .stat-card.total { border-left-color: #3498db; }
+    .stat-card.abertos { border-left-color: #e74c3c; }
+    .stat-card.aguardando { border-left-color: #f39c12; }
+    .stat-card.resolvidos { border-left-color: #27ae60; }
+    .stat-card.sla { border-left-color: #9b59b6; }
+    .stat-card.avaliacao { border-left-color: #1abc9c; }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 0;
+        color: #2c3e50;
+    }
+    
+    .stat-label {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        margin: 5px 0 0 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .stat-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 2rem;
+        opacity: 0.3;
+    }
+    
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .chart-card {
+        background: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    
+    .chart-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #2c3e50;
+        border-bottom: 2px solid #ecf0f1;
+        padding-bottom: 10px;
+    }
+    
+    .tickets-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+    
+    .tickets-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    
+    .tickets-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .tickets-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .ticket-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid #ecf0f1;
+        transition: background-color 0.3s ease;
+    }
+    
+    .ticket-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .ticket-item:last-child {
+        border-bottom: none;
+    }
+    
+    .ticket-numero {
+        font-weight: bold;
+        color: #3498db;
+        text-decoration: none;
+    }
+    
+    .ticket-numero:hover {
+        color: #2980b9;
+    }
+    
+    .ticket-titulo {
+        margin: 5px 0;
+        color: #2c3e50;
+        font-size: 0.9rem;
+    }
+    
+    .ticket-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+    }
+    
+    .ticket-prioridade {
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .prioridade-baixa { background: #d5f4e6; color: #27ae60; }
+    .prioridade-normal { background: #dbeafe; color: #3498db; }
+    .prioridade-alta { background: #fef3cd; color: #f39c12; }
+    .prioridade-critica { background: #f8d7da; color: #e74c3c; }
+    
+    .ticket-tempo {
+        font-size: 0.8rem;
+        color: #7f8c8d;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .btn-action {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #7f8c8d;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+    
+    @media (max-width: 768px) {
+        .charts-grid,
+        .tickets-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+    
+    .loading {
+        text-align: center;
+        padding: 20px;
+        color: #7f8c8d;
+    }
+    
+    .refresh-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255,255,255,0.2);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .refresh-btn:hover {
+        background: rgba(255,255,255,0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="suporte-dashboard">
+    <!-- Header -->
+    <div class="mb-3">
+        <button class="refresh-btn" onclick="location.reload()">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+        <h1><i class="fas fa-headset"></i> Central de Suporte 24x7</h1>
+        <p>Gerencie tickets, monitore SLA e acompanhe a satisfação dos clientes</p>
+    </div>
+    
+    <!-- Botões de Ação -->
+    <div class="action-buttons">
+        <a href="{% url 'suporte:criar_ticket' %}" class="btn-action btn-primary">
+            <i class="fas fa-plus"></i> Novo Ticket
+        </a>
+        <a href="{% url 'suporte:listar_tickets' %}" class="btn-action btn-secondary">
+            <i class="fas fa-list"></i> Todos os Tickets
+        </a>
+        <a href="{% url 'suporte:base_conhecimento' %}" class="btn-action btn-success">
+                            <i class="fas fa-book"></i> Base de Conhecimento
+                        </a>
+        <a href="{% url 'suporte:relatorios_suporte' %}" class="btn-action btn-secondary">
+                            <i class="fas fa-chart-bar"></i> Relatórios
+                        </a>
+    </div>
+    
+    <!-- Estatísticas -->
+    <div class="stats-grid">
+        <div class="stat-card total">
+            <i class="fas fa-ticket-alt stat-icon"></i>
+            <div class="stat-number">{{ total_tickets }}</div>
+            <div class="stat-label">Total de Tickets</div>
+        </div>
+        
+        <div class="stat-card abertos">
+            <i class="fas fa-exclamation-circle stat-icon"></i>
+            <div class="stat-number">{{ tickets_abertos }}</div>
+            <div class="stat-label">Tickets Abertos</div>
+        </div>
+        
+        <div class="stat-card aguardando">
+            <i class="fas fa-clock stat-icon"></i>
+            <div class="stat-number">{{ tickets_aguardando }}</div>
+            <div class="stat-label">Aguardando Cliente</div>
+        </div>
+        
+        <div class="stat-card resolvidos">
+            <i class="fas fa-check-circle stat-icon"></i>
+            <div class="stat-number">{{ tickets_resolvidos_hoje }}</div>
+            <div class="stat-label">Resolvidos Hoje</div>
+        </div>
+        
+        <div class="stat-card sla">
+            <i class="fas fa-tachometer-alt stat-icon"></i>
+            <div class="stat-number">{{ tickets_sla_violado }}</div>
+            <div class="stat-label">SLA Violado</div>
+        </div>
+        
+        <div class="stat-card avaliacao">
+            <i class="fas fa-star stat-icon"></i>
+            <div class="stat-number">{{ avaliacao_media }}</div>
+            <div class="stat-label">Avaliação Média</div>
+        </div>
+    </div>
+    
+    <!-- Gráficos -->
+    <div class="charts-grid">
+        <div class="chart-card">
+            <div class="chart-title">
+                <i class="fas fa-chart-pie"></i> Tickets por Prioridade
+            </div>
+            <canvas id="chartPrioridade" width="400" height="200"></canvas>
+        </div>
+        
+        <div class="chart-card">
+            <div class="chart-title">
+                <i class="fas fa-chart-bar"></i> Tickets por Categoria
+            </div>
+            <canvas id="chartCategoria" width="400" height="200"></canvas>
+        </div>
+    </div>
+    
+    <!-- Listas de Tickets -->
+    <div class="tickets-grid">
+        <!-- Meus Tickets -->
+        <div class="tickets-card">
+            <div class="tickets-header">
+                <i class="fas fa-user"></i> Meus Tickets
+            </div>
+            <div class="tickets-list">
+                {% if meus_tickets %}
+                    {% for ticket in meus_tickets %}
+                    <div class="ticket-item">
+                        <a href="{% url 'detalhes_ticket' ticket.id %}" class="ticket-numero">
+                            #{{ ticket.numero }}
+                        </a>
+                        <div class="ticket-titulo">{{ ticket.titulo|truncatechars:50 }}</div>
+                        <div class="ticket-meta">
+                            <span class="ticket-prioridade prioridade-{{ ticket.prioridade }}">
+                                {{ ticket.get_prioridade_display }}
+                            </span>
+                            <span class="ticket-tempo">
+                                {{ ticket.criado_em|timesince }} atrás
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Nenhum ticket atribuído a você</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Tickets Recentes -->
+        <div class="tickets-card">
+            <div class="tickets-header">
+                <i class="fas fa-clock"></i> Tickets Recentes
+            </div>
+            <div class="tickets-list">
+                {% if tickets_recentes %}
+                    {% for ticket in tickets_recentes %}
+                    <div class="ticket-item">
+                        <a href="{% url 'detalhes_ticket' ticket.id %}" class="ticket-numero">
+                            #{{ ticket.numero }}
+                        </a>
+                        <div class="ticket-titulo">{{ ticket.titulo|truncatechars:50 }}</div>
+                        <div class="ticket-meta">
+                            <span class="ticket-prioridade prioridade-{{ ticket.prioridade }}">
+                                {{ ticket.get_prioridade_display }}
+                            </span>
+                            <span class="ticket-tempo">
+                                {{ ticket.criado_em|timesince }} atrás
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Nenhum ticket encontrado</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Gráfico de Prioridade
+    const ctxPrioridade = document.getElementById('chartPrioridade').getContext('2d');
+    const prioridadeData = [
+        {% for item in tickets_por_prioridade %}
+        {
+            label: '{{ item.prioridade|capfirst }}',
+            value: {{ item.total }}
+        },
+        {% endfor %}
+    ];
+    
+    new Chart(ctxPrioridade, {
+        type: 'doughnut',
+        data: {
+            labels: prioridadeData.map(item => item.label),
+            datasets: [{
+                data: prioridadeData.map(item => item.value),
+                backgroundColor: [
+                    '#27ae60',  // Baixa
+                    '#3498db',  // Normal
+                    '#f39c12',  // Alta
+                    '#e74c3c'   // Crítica
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                }
+            }
+        }
+    });
+    
+    // Gráfico de Categoria
+    const ctxCategoria = document.getElementById('chartCategoria').getContext('2d');
+    const categoriaData = [
+        {% for item in tickets_por_categoria %}
+        {
+            label: '{{ item.categoria__nome }}',
+            value: {{ item.total }}
+        },
+        {% endfor %}
+    ];
+    
+    new Chart(ctxCategoria, {
+        type: 'bar',
+        data: {
+            labels: categoriaData.map(item => item.label),
+            datasets: [{
+                label: 'Tickets',
+                data: categoriaData.map(item => item.value),
+                backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                borderColor: 'rgba(102, 126, 234, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+    
+    // Auto-refresh a cada 5 minutos
+    setInterval(function() {
+        // Atualizar apenas as estatísticas via AJAX
+        fetch(window.location.href)
+            .then(response => response.text())
+            .then(html => {
+                // Atualizar apenas os números das estatísticas
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                const statNumbers = document.querySelectorAll('.stat-number');
+                const newStatNumbers = doc.querySelectorAll('.stat-number');
+                
+                statNumbers.forEach((element, index) => {
+                    if (newStatNumbers[index]) {
+                        element.textContent = newStatNumbers[index].textContent;
+                    }
+                });
+            })
+            .catch(error => console.log('Erro ao atualizar:', error));
+    }, 300000); // 5 minutos
+});
+</script>
+{% endblock %}

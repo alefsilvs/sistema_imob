@@ -1,0 +1,108 @@
+{% extends "notificacoes/email_templates/base_email.html" %}
+
+{% block content %}
+<div class="greeting">
+    Seja muito bem-vindo(a), {{ inquilino_nome|default:"Cliente" }}! 🎉
+</div>
+
+<div class="alert alert-success">
+    <strong>🎊 Parabéns!</strong> Seu contrato foi aprovado e você já pode desfrutar do seu novo lar!
+</div>
+
+<div class="message-content">
+    É com grande satisfação que damos as boas-vindas à família ImobiPro! 
+    Estamos muito felizes em tê-lo(a) conosco e esperamos que tenha uma 
+    excelente experiência em seu novo imóvel.
+</div>
+
+<div class="info-card">
+    <h3>🏠 Detalhes do seu Imóvel</h3>
+    <div class="info-row">
+        <span class="info-label">Endereço:</span>
+        <span class="info-value">{{ imovel_endereco|default:"N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Número do Contrato:</span>
+        <span class="info-value">{{ contrato_numero|default:"N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Data de Início:</span>
+        <span class="info-value">{{ data_inicio|date:"d/m/Y"|default:"N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Data de Término:</span>
+        <span class="info-value">{{ data_fim|date:"d/m/Y"|default:"N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Valor do Aluguel:</span>
+        <span class="info-value">R$ {{ valor_aluguel|default:"0,00" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Dia de Vencimento:</span>
+        <span class="info-value">Todo dia {{ dia_vencimento|default:"5" }}</span>
+    </div>
+</div>
+
+<div class="message-content">
+    <strong>🔑 Próximos Passos:</strong>
+    <ul style="margin-left: 20px; margin-top: 15px;">
+        <li><strong>Entrega das Chaves:</strong> Agende a retirada das chaves</li>
+        <li><strong>Vistoria de Entrada:</strong> Documente o estado do imóvel</li>
+        <li><strong>Cadastro no Portal:</strong> Acesse sua área do cliente</li>
+        <li><strong>Configurar Pagamentos:</strong> Configure débito automático</li>
+    </ul>
+</div>
+
+<div class="btn-container">
+    <a href="#" class="btn btn-success">
+        🔑 Agendar Entrega das Chaves
+    </a>
+    <a href="#" class="btn btn-secondary">
+        👤 Acessar Portal do Cliente
+    </a>
+</div>
+
+<div class="info-card">
+    <h3>📞 Seus Contatos de Suporte</h3>
+    <div class="info-row">
+        <span class="info-label">Atendimento Geral:</span>
+        <span class="info-value">(11) 9999-9999</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">WhatsApp:</span>
+        <span class="info-value">(11) 9999-9999</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">E-mail:</span>
+        <span class="info-value">suporte@imobipro.com</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Emergências:</span>
+        <span class="info-value">24h - (11) 9999-9999</span>
+    </div>
+</div>
+
+<div class="message-content">
+    <strong>📱 Baixe nosso App:</strong><br>
+    Tenha acesso rápido a boletos, extratos, solicitações de manutenção e muito mais!
+</div>
+
+<div class="btn-container">
+    <a href="#" class="btn btn-success">
+        📱 Download Android
+    </a>
+    <a href="#" class="btn btn-success">
+        🍎 Download iOS
+    </a>
+</div>
+
+<div class="alert alert-info">
+    <strong>💡 Dica:</strong> Mantenha sempre seus dados atualizados em nosso sistema 
+    para receber informações importantes sobre seu contrato.
+</div>
+
+<div class="message-content">
+    Mais uma vez, seja muito bem-vindo(a)! Estamos aqui para tornar sua experiência 
+    a melhor possível. Qualquer dúvida, não hesite em nos contatar.
+</div>
+{% endblock %}

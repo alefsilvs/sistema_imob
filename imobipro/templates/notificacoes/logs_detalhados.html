@@ -1,0 +1,490 @@
+{% extends "base.html" %}
+{% load notificacoes_extras %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Cabeçalho -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2><i class="bi bi-search"></i> Logs Detalhados</h2>
+                <div class="btn-group">
+                    <a href="{% url 'notificacoes:dashboard_monitoramento' %}" class="btn btn-info">
+                        <i class="bi bi-speedometer"></i> Dashboard
+                    </a>
+                    <a href="{% url 'notificacoes:analise_performance' %}" class="btn btn-warning">
+                        <i class="bi bi-graph-up"></i> Performance
+                    </a>
+                    <a href="{% url 'notificacoes:relatorio_erros_detalhado' %}" class="btn btn-danger">
+                        <i class="bi bi-exclamation-triangle"></i> Relatório de Erros
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas Avançadas -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h4>{{ stats.total }}</h4>
+                    <p class="mb-0">Total</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4>{{ stats.enviadas }}</h4>
+                    <p class="mb-0">Enviadas</p>
+                    <small>{{ stats.taxa_sucesso }}%</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h4>{{ stats.pendentes }}</h4>
+                    <p class="mb-0">Pendentes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4>{{ stats.processando }}</h4>
+                    <p class="mb-0">Processando</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h4>{{ stats.erros }}</h4>
+                    <p class="mb-0">Erros</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-secondary text-white">
+                <div class="card-body text-center">
+                    <h5><i class="bi bi-download"></i></h5>
+                    <p class="mb-0">
+                        <a href="{% url 'notificacoes:exportar_logs_avancado' %}?{{ request.GET.urlencode }}" class="text-white">
+                            Exportar
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Análises Rápidas -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6><i class="bi bi-exclamation-circle"></i> Erros por Tipo</h6>
+                </div>
+                <div class="card-body">
+                    {% for tipo, count in stats.erros_por_tipo.items %}
+                    <div class="d-flex justify-content-between">
+                        <span class="badge bg-danger">{{ tipo }}</span>
+                        <strong>{{ count }}</strong>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">Nenhum erro registrado</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6><i class="bi bi-share"></i> Canais Utilizados</h6>
+                </div>
+                <div class="card-body">
+                    {% for canal, count in stats.canais_utilizados.items %}
+                    <div class="d-flex justify-content-between">
+                        <span class="badge bg-info">{{ canal }}</span>
+                        <strong>{{ count }}</strong>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">Nenhum canal utilizado</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6><i class="bi bi-file-text"></i> Templates Mais Usados</h6>
+                </div>
+                <div class="card-body">
+                    {% for template, count in stats.templates_mais_usados.items %}
+                    <div class="d-flex justify-content-between">
+                        <span class="text-truncate">{{ template }}</span>
+                        <strong>{{ count }}</strong>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">Nenhum template utilizado</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros Avançados -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-funnel"></i> Filtros Avançados
+                <button class="btn btn-sm btn-outline-secondary float-end" type="button" data-bs-toggle="collapse" data-bs-target="#filtros">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+            </h5>
+        </div>
+        <div class="collapse show" id="filtros">
+            <div class="card-body">
+                <form method="get" id="filtro-form">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label>Status:</label>
+                            <select name="status" class="form-select form-select-sm">
+                                <option value="">Todos</option>
+                                {% for status_choice in status_choices %}
+                                <option value="{{ status_choice.0 }}" {% if request.GET.status == status_choice.0 %}selected{% endif %}>
+                                    {{ status_choice.1 }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Canal:</label>
+                            <select name="canal" class="form-select form-select-sm">
+                                <option value="">Todos</option>
+                                {% for canal_choice in canal_choices %}
+                                <option value="{{ canal_choice.0 }}" {% if request.GET.canal == canal_choice.0 %}selected{% endif %}>
+                                    {{ canal_choice.1 }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Template:</label>
+                            <select name="template" class="form-select form-select-sm">
+                                <option value="">Todos</option>
+                                {% for template in templates %}
+                                <option value="{{ template.id }}" {% if request.GET.template == template.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ template.nome }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Usuário:</label>
+                            <select name="usuario" class="form-select form-select-sm">
+                                <option value="">Todos</option>
+                                {% for usuario in usuarios %}
+                                <option value="{{ usuario.id }}" {% if request.GET.usuario == usuario.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ usuario.username }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>Tipo de Erro:</label>
+                            <select name="erro_tipo" class="form-select form-select-sm">
+                                <option value="">Todos</option>
+                                {% for tipo in tipos_erro %}
+                                <option value="{{ tipo }}" {% if request.GET.erro_tipo == tipo %}selected{% endif %}>
+                                    {{ tipo }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>&nbsp;</label>
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-search"></i> Filtrar
+                                </button>
+                                <a href="{% url 'notificacoes:logs_detalhados' %}" class="btn btn-secondary btn-sm">
+                                    <i class="bi bi-x"></i> Limpar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-3">
+                            <label>Data Início:</label>
+                            <input type="date" name="data_inicio" class="form-control form-control-sm" value="{{ request.GET.data_inicio }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label>Data Fim:</label>
+                            <input type="date" name="data_fim" class="form-control form-control-sm" value="{{ request.GET.data_fim }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Buscar:</label>
+                            <input type="text" name="busca" class="form-control form-control-sm" placeholder="Assunto, inquilino, destinatário ou erro..." value="{{ request.GET.busca }}">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Logs -->
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="bi bi-list"></i> Logs de Mensagens ({{ page_obj.paginator.count }} registros)</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Data/Hora</th>
+                            <th>Inquilino</th>
+                            <th>Canal</th>
+                            <th>Status</th>
+                            <th>Template</th>
+                            <th>Tentativas</th>
+                            <th>Usuário</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for notificacao in page_obj %}
+                        <tr>
+                            <td>{{ notificacao.id }}</td>
+                            <td>
+                                <small>
+                                    {{ notificacao.created_at|date:"d/m/Y" }}<br>
+                                    {{ notificacao.created_at|time:"H:i:s" }}
+                                </small>
+                            </td>
+                            <td>
+                                <strong>{{ notificacao.inquilino.nome }}</strong><br>
+                                <small class="text-muted">{{ notificacao.destinatario }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">{{ notificacao.get_canal_display }}</span>
+                            </td>
+                            <td>
+                                {% if notificacao.status == 'ENVIADA' or notificacao.status == 'ENTREGUE' %}
+                                    <span class="badge bg-success">{{ notificacao.get_status_display }}</span>
+                                {% elif notificacao.status == 'PENDENTE' %}
+                                    <span class="badge bg-warning">{{ notificacao.get_status_display }}</span>
+                                {% elif notificacao.status == 'ENVIANDO' %}
+                                    <span class="badge bg-info">{{ notificacao.get_status_display }}</span>
+                                {% else %}
+                                    <span class="badge bg-danger">{{ notificacao.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if notificacao.template %}
+                                    <small>{{ notificacao.template.nome }}</small>
+                                {% else %}
+                                    <small class="text-muted">N/A</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ notificacao.tentativas_realizadas }}</span>
+                                {% if notificacao.tentativas_realizadas > 1 %}
+                                    <i class="bi bi-exclamation-triangle text-warning" title="Múltiplas tentativas"></i>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small>{{ notificacao.usuario.username }}</small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-info" onclick="verDetalhes({{ notificacao.id }})" title="Ver Detalhes">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    {% if notificacao.status == 'ERRO' %}
+                                    <button class="btn btn-outline-warning" onclick="reenviarNotificacao({{ notificacao.id }})" title="Reenviar">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fa-2x mb-2"></i><br>
+                                Nenhum log encontrado com os filtros aplicados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paginação -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Paginação" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">&laquo; Primeira</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Anterior</a>
+                </li>
+            {% endif %}
+            
+            <li class="page-item active">
+                <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Próxima</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">Última &raquo;</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Modal de Detalhes -->
+<div class="modal fade" id="modalDetalhes" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes da Notificação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="conteudoDetalhes">
+                <!-- Conteúdo carregado via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function verDetalhes(notificacaoId) {
+    fetch(`/notificacoes/detalhes/${notificacaoId}/`)
+        .then(response => response.json())
+        .then(data => {
+            let html = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Informações Básicas</h6>
+                        <table class="table table-sm">
+                            <tr><td><strong>ID:</strong></td><td>${data.id}</td></tr>
+                            <tr><td><strong>Inquilino:</strong></td><td>${data.inquilino}</td></tr>
+                            <tr><td><strong>Destinatário:</strong></td><td>${data.destinatario}</td></tr>
+                            <tr><td><strong>Canal:</strong></td><td>${data.canal}</td></tr>
+                            <tr><td><strong>Status:</strong></td><td>${data.status}</td></tr>
+                            <tr><td><strong>Template:</strong></td><td>${data.template}</td></tr>
+                            <tr><td><strong>Tentativas:</strong></td><td>${data.tentativas}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Datas</h6>
+                        <table class="table table-sm">
+                            <tr><td><strong>Criação:</strong></td><td>${data.data_criacao}</td></tr>
+                            <tr><td><strong>Envio:</strong></td><td>${data.data_envio}</td></tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Assunto</h6>
+                        <p class="border p-2">${data.assunto}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <h6>Corpo da Mensagem</h6>
+                        <div class="border p-2" style="max-height: 200px; overflow-y: auto;">${data.corpo}</div>
+                    </div>
+                </div>
+            `;
+            
+            if (data.log_tentativas && data.log_tentativas.length > 0) {
+                html += `
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6>Log de Tentativas</h6>
+                            <div class="accordion" id="accordionLogs">
+                `;
+                
+                data.log_tentativas.forEach((log, index) => {
+                    const statusClass = log.status === 'sucesso' ? 'success' : 'danger';
+                    html += `
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading${index}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${index}">
+                                    <span class="badge bg-${statusClass} me-2">${log.status}</span>
+                                    ${log.timestamp}
+                                </button>
+                            </h2>
+                            <div id="collapse${index}" class="accordion-collapse collapse" data-bs-parent="#accordionLogs">
+                                <div class="accordion-body">
+                                    <pre>${JSON.stringify(log, null, 2)}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('conteudoDetalhes').innerHTML = html;
+            new bootstrap.Modal(document.getElementById('modalDetalhes')).show();
+        })
+        .catch(error => {
+            console.error('Erro ao carregar detalhes:', error);
+            alert('Erro ao carregar detalhes da notificação.');
+        });
+}
+
+function reenviarNotificacao(notificacaoId) {
+    if (confirm('Deseja realmente reenviar esta notificação?')) {
+        fetch(`/notificacoes/reenviar/${notificacaoId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Notificação reenviada com sucesso!');
+                location.reload();
+            } else {
+                alert('Erro ao reenviar notificação: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao reenviar:', error);
+            alert('Erro ao reenviar notificação.');
+        });
+    }
+}
+</script>
+
+<!-- Formulário oculto para token CSRF -->
+<form style="display: none;">
+    {% csrf_token %}
+</form>
+
+{% endblock %}

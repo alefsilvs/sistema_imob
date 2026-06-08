@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ImobiPro</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --accent: #dc2626;
+            --accent-2: #ef4444;
+            --bg-0: #06060a;
+            --bg-1: #0b0b10;
+            --card-0: rgba(255, 255, 255, 0.06);
+            --card-1: rgba(255, 255, 255, 0.10);
+            --border: rgba(255, 255, 255, 0.12);
+            --text: rgba(255, 255, 255, 0.92);
+            --muted: rgba(255, 255, 255, 0.60);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background:
+                radial-gradient(900px 520px at 15% 10%, rgba(220, 38, 38, 0.22), transparent 55%),
+                radial-gradient(700px 460px at 85% 20%, rgba(14, 165, 233, 0.10), transparent 62%),
+                radial-gradient(900px 620px at 50% 120%, rgba(34, 197, 94, 0.08), transparent 60%),
+                linear-gradient(135deg, var(--bg-0) 0%, var(--bg-1) 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+            color: #ffffff;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(700px 420px at 50% 40%, rgba(255, 255, 255, 0.06), transparent 60%),
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 140px);
+            mix-blend-mode: overlay;
+            opacity: 0.35;
+        }
+
+        .auth-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 18px 18px;
+        }
+
+        .auth-top-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 10px 12px;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            backdrop-filter: blur(14px);
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent-2);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(220, 38, 38, 0.16);
+            border: 1px solid rgba(220, 38, 38, 0.28);
+        }
+
+        .top-actions a {
+            color: var(--muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: .92rem;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.04);
+            transition: all .2s ease;
+        }
+
+        .top-actions a:hover {
+            color: var(--text);
+            border-color: rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.07);
+        }
+        
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 92px 20px 20px;
+        }
+        
+        .login-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border-radius: 22px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            overflow: hidden;
+            width: 100%;
+            max-width: 450px;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(420px 220px at 20% 0%, rgba(220, 38, 38, 0.22), transparent 55%),
+                radial-gradient(420px 220px at 80% 0%, rgba(14, 165, 233, 0.14), transparent 60%);
+            pointer-events: none;
+            opacity: .9;
+        }
+        
+        .login-header {
+            text-align: center;
+            padding: 42px 40px 18px;
+            position: relative;
+        }
+        
+        .login-header h2 {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 2.05rem;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+        }
+        
+        .login-header p {
+            color: var(--muted);
+            font-size: 1rem;
+        }
+        
+        .login-form {
+            padding: 20px 40px 40px;
+            position: relative;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+        
+        .form-control {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.25);
+            color: #ffffff !important;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: rgba(239, 68, 68, 0.75);
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.14), 0 10px 30px rgba(0,0,0,0.25);
+            background: rgba(0, 0, 0, 0.35);
+            color: #ffffff !important;
+        }
+        
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .form-control::-webkit-input-placeholder {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        .form-control::-moz-placeholder {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        .form-control:-ms-input-placeholder {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        .form-control:-moz-placeholder {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        /* Garantir que o texto digitado seja sempre visível */
+        input[type="email"].form-control,
+        input[type="password"].form-control {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+        }
+        
+        input[type="email"].form-control:focus,
+        input[type="password"].form-control:focus {
+            color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important;
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, var(--accent) 0%, #b91c1c 100%);
+            border: none;
+            border-radius: 14px;
+            padding: 18px 35px;
+            font-weight: 700;
+            font-size: 16px;
+            color: #ffffff;
+            transition: all 0.3s ease;
+            box-shadow: 0 14px 34px rgba(220, 38, 38, 0.28);
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(260px 100px at 20% 0%, rgba(255,255,255,0.25), transparent 50%);
+            opacity: .75;
+            transform: translateX(-40%);
+            transition: transform .5s ease;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 22px 48px rgba(220, 38, 38, 0.34);
+            background: linear-gradient(135deg, var(--accent-2) 0%, var(--accent) 100%);
+        }
+
+        .btn-login:hover::before {
+            transform: translateX(0%);
+        }
+
+        .btn-login:active {
+            transform: translateY(-1px);
+        }
+        
+        .login-links {
+            text-align: center;
+            margin-top: 25px;
+        }
+        
+        .login-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+        
+        .login-links a:hover {
+            color: var(--accent-2);
+        }
+        
+        .divider {
+            margin: 15px 0;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .alert {
+            border-radius: 12px;
+            border: none;
+            margin-bottom: 20px;
+        }
+        
+        .alert-danger {
+            background: rgba(220, 38, 38, 0.12);
+            color: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(220, 38, 38, 0.25);
+        }
+
+        .btn-close {
+            filter: invert(1);
+            opacity: .8;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-top">
+        <div class="auth-top-inner">
+            <a href="{% url 'home' %}" class="logo">
+                <span class="logo-badge"><i class="bi bi-buildings"></i></span>
+                <span>ImobiPro</span>
+            </a>
+            <div class="top-actions">
+                <a href="{% url 'home' %}"><i class="bi bi-arrow-left me-1"></i>Voltar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>Bem-vindo de volta</h2>
+                <p>Faça login para acessar sua conta</p>
+            </div>
+            
+            <div class="login-form">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+                        <input type="text" class="form-control" id="{{ form.username.id_for_label }}" name="{{ form.username.name }}" placeholder="Digite seu usuário ou e-mail" required>
+                        {% if form.username.errors %}
+                            <div class="text-danger mt-1">{{ form.username.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
+                        <input type="password" class="form-control" id="{{ form.password.id_for_label }}" name="{{ form.password.name }}" placeholder="Digite sua senha" required>
+                        {% if form.password.errors %}
+                            <div class="text-danger mt-1">{{ form.password.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors.0 }}
+                        </div>
+                    {% endif %}
+                    
+                    <button type="submit" class="btn btn-login">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Entrar
+                    </button>
+                </form>
+                
+                <div class="login-links">
+                    <a href="{% url 'password_reset' %}">Esqueci minha senha</a>
+                    <div class="divider">•</div>
+                    <a href="/saas/registro/">Criar nova conta</a>
+                    <div class="divider">•</div>
+                    <a href="{% url 'admin:index' %}" class="small">Acessar como Admin</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

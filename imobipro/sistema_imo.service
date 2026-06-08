@@ -1,0 +1,47 @@
+# Arquivo de serviço systemd para Sistema Imobiliário
+# Salve como: /etc/systemd/system/sistema_imo.service
+
+[Unit]
+Description=Sistema Imobiliário - ImobilPro Gunicorn daemon
+Documentation=https://docs.djangoproject.com/
+After=network.target postgresql.service redis.service
+Wants=postgresql.service redis.service
+
+[Service]
+Type=notify
+User=sistema_imo
+Group=www-data
+RuntimeDirectory=sistema_imo
+WorkingDirectory=/home/sistema_imo/apps/sistema_imo
+Environment="PATH=/home/sistema_imo/apps/sistema_imo/venv/bin"
+Environment="DJANGO_SETTINGS_MODULE=sistema_imobiliario.settings_production"
+ExecStart=/home/sistema_imo/apps/sistema_imo/venv/bin/gunicorn \
+          --config /home/sistema_imo/apps/sistema_imo/gunicorn.conf.py \
+          --pid /run/sistema_imo/gunicorn.pid \
+          sistema_imobiliario.wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+Restart=on-failure
+RestartSec=5
+StartLimitInterval=60s
+StartLimitBurst=3
+
+# Configurações de segurança
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/sistema_imo/apps/sistema_imo
+ReadWritePaths=/home/sistema_imo/public_html
+ReadWritePaths=/home/sistema_imo/logs
+ReadWritePaths=/run/sistema_imo
+ReadWritePaths=/tmp
+
+# Limites de recursos
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target

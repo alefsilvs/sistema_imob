@@ -1,0 +1,275 @@
+[
+  {
+    "model": "notificacoes.categoriatemplate",
+    "pk": 1,
+    "fields": {
+      "nome": "Financeiro",
+      "descricao": "Templates relacionados a cobranças e pagamentos",
+      "cor": "#28a745",
+      "ativo": true
+    }
+  },
+  {
+    "model": "notificacoes.categoriatemplate",
+    "pk": 2,
+    "fields": {
+      "nome": "Contratos",
+      "descricao": "Templates para gestão de contratos",
+      "cor": "#007bff",
+      "ativo": true
+    }
+  },
+  {
+    "model": "notificacoes.categoriatemplate",
+    "pk": 3,
+    "fields": {
+      "nome": "Manutenção",
+      "descricao": "Templates para comunicados de manutenção",
+      "cor": "#ffc107",
+      "ativo": true
+    }
+  },
+  {
+    "model": "notificacoes.categoriatemplate",
+    "pk": 4,
+    "fields": {
+      "nome": "Comunicados",
+      "descricao": "Templates para comunicados gerais",
+      "cor": "#17a2b8",
+      "ativo": true
+    }
+  },
+  {
+    "model": "notificacoes.templatenotificacao",
+    "pk": 1,
+    "fields": {
+      "nome": "Cobrança de Aluguel - WhatsApp",
+      "categoria": 1,
+      "tipo": "COBRANCA",
+      "assunto_template": "🏠 Cobrança de Aluguel - {{imovel_endereco}} - Vencimento {{data_vencimento}}",
+      "corpo_template": "🏠 *Cobrança de Aluguel*\n\nOlá *{{inquilino_nome}}*! 👋\n\nEste é um lembrete sobre o pagamento do aluguel:\n\n📍 *Detalhes do Imóvel:*\n• Endereço: {{imovel_endereco}}\n• Valor: R$ {{valor_aluguel}}\n• Vencimento: {{data_vencimento}}\n\n👤 *Dados do Inquilino:*\n• Nome: {{inquilino_nome}}\n• CPF: {{inquilino_cpf}}\n• Telefone: {{inquilino_telefone}}\n• E-mail: {{inquilino_email}}\n• Endereço: {{inquilino_endereco}}\n\n⚠️ *Atenção:* Para evitar juros e multas, realize o pagamento até a data de vencimento.\n\n💰 *Formas de Pagamento:*\n{% if pix.disponivel %}\n🔸 *PIX:* Código PIX anexado na imagem acima\n{% endif %}\n🔸 *Link de Pagamento:* {{link_pagamento}}\n\n{% if pix.disponivel %}\n📱 *Como pagar via PIX:*\n1. Abra o app do seu banco\n2. Escaneie o QR Code anexado\n3. Confirme o pagamento\n\n*Código PIX (copie e cole):*\n`{{pix.codigo_pix}}`\n{% endif %}\n\n📞 Dúvidas? Entre em contato:\n• Telefone: {{telefone_contato}}\n• Email: {{email_contato}}\n\n---\n{{empresa_nome}} - Gestão Imobiliária",
+      "formato": "TEXTO",
+      "variaveis_disponiveis": {
+        "inquilino_nome": "Nome do inquilino",
+        "inquilino_cpf": "CPF do inquilino",
+        "inquilino_telefone": "Telefone do inquilino",
+        "inquilino_email": "E-mail do inquilino",
+        "inquilino_endereco": "Endereço do inquilino",
+        "imovel_endereco": "Endereço do imóvel",
+        "valor_aluguel": "Valor do aluguel",
+        "data_vencimento": "Data de vencimento",
+        "link_pagamento": "Link para pagamento",
+        "pix.disponivel": "Se PIX está disponível",
+        "pix.codigo_pix": "Código PIX para pagamento",
+        "pix.qr_code_base64": "QR Code PIX em base64",
+        "telefone_contato": "Telefone de contato",
+        "email_contato": "Email de contato",
+        "empresa_nome": "Nome da empresa"
+      },
+      "preview_dados": {
+        "inquilino_nome": "João Silva",
+        "inquilino_cpf": "123.456.789-00",
+        "inquilino_telefone": "(11) 98765-4321",
+        "inquilino_email": "joao.silva@email.com",
+        "inquilino_endereco": "Rua das Palmeiras, 456 - Vila Nova",
+        "imovel_endereco": "Rua das Flores, 123 - Centro",
+        "valor_aluguel": "1.500,00",
+        "data_vencimento": "10/01/2024",
+        "link_pagamento": "https://exemplo.com/pagamento/123",
+        "telefone_contato": "(11) 99999-9999",
+        "email_contato": "contato@imobiliaria.com",
+        "empresa_nome": "Imobiliária Exemplo"
+      },
+      "ativo": true,
+      "padrao": false,
+      "usuario_criador": 1
+    }
+  },
+  {
+    "model": "notificacoes.templatenotificacao",
+    "pk": 2,
+    "fields": {
+      "nome": "Lembrete de Vencimento - WhatsApp",
+      "categoria": 1,
+      "tipo": "VENCIMENTO",
+      "assunto_template": "⏰ Lembrete: Aluguel vence em {{dias_restantes}} dias - {{imovel_endereco}}",
+      "corpo_template": "⏰ *Lembrete de Vencimento*\n\nOlá *{{inquilino_nome}}*! 👋\n\nEste é um lembrete amigável de que o aluguel do seu imóvel vencerá em breve.\n\n📅 *Informações do Pagamento:*\n• Imóvel: {{imovel_endereco}}\n• Valor: R$ {{valor_aluguel}}\n• Vencimento: {{data_vencimento}}\n• ⏰ Dias restantes: *{{dias_restantes}} dias*\n\n💰 *Formas de Pagamento:*\n{% if pix.disponivel %}\n🔸 *PIX:* Código PIX anexado na imagem acima\n{% endif %}\n🔸 *Link de Pagamento:* {{link_pagamento}}\n\n{% if pix.disponivel %}\n📱 *Como pagar via PIX:*\n1. Abra o app do seu banco\n2. Escaneie o QR Code anexado\n3. Confirme o pagamento\n\n*Código PIX (copie e cole):*\n`{{pix.codigo_pix}}`\n{% endif %}\n\n✅ Pagando antecipadamente, você evita qualquer transtorno e garante a tranquilidade do seu lar.\n\n---\n{{empresa_nome}} - Gestão Imobiliária",
+      "formato": "TEXTO",
+      "variaveis_disponiveis": {
+        "inquilino_nome": "Nome do inquilino",
+        "imovel_endereco": "Endereço do imóvel",
+        "valor_aluguel": "Valor do aluguel",
+        "data_vencimento": "Data de vencimento",
+        "dias_restantes": "Dias até o vencimento",
+        "link_pagamento": "Link para pagamento",
+        "pix.disponivel": "Se o PIX está disponível",
+        "pix.codigo_pix": "Código PIX para pagamento",
+        "pix.qr_code_base64": "QR Code PIX em base64",
+        "telefone_contato": "Telefone de contato",
+        "email_contato": "Email de contato",
+        "empresa_nome": "Nome da empresa"
+      },
+      "preview_dados": {
+        "inquilino_nome": "Maria Santos",
+        "imovel_endereco": "Av. Principal, 456 - Jardins",
+        "valor_aluguel": "2.200,00",
+        "data_vencimento": "15/01/2024",
+        "dias_restantes": "3",
+        "link_pagamento": "https://exemplo.com/pagamento/456"
+      },
+      "ativo": true,
+      "padrao": false,
+      "usuario_criador": 1
+    }
+  },
+  {
+    "model": "notificacoes.templatenotificacao",
+    "pk": 3,
+    "fields": {
+      "nome": "Boas-vindas Novo Inquilino - WhatsApp",
+      "categoria": 2,
+      "tipo": "BOAS_VINDAS",
+      "assunto_template": "🎉 Bem-vindo(a) ao seu novo lar! - {{imovel_endereco}}",
+      "corpo_template": "🎉 *Bem-vindo(a) ao seu novo lar!*\n\nOlá *{{inquilino_nome}}*! 👋\n\nÉ com grande satisfação que damos as boas-vindas! Esperamos que você tenha momentos maravilhosos em seu novo imóvel.\n\n🏠 *Detalhes do seu Imóvel:*\n• Endereço: {{imovel_endereco}}\n• Início do Contrato: {{data_inicio_contrato}}\n• Valor do Aluguel: R$ {{valor_aluguel}}\n• Dia de Vencimento: {{dia_vencimento}}\n\n📋 *Informações Importantes:*\n• Mantenha sempre seus dados atualizados\n• Emergências: {{telefone_emergencia}}\n• Dúvidas financeiras: {{email_financeiro}}\n• Manutenção: {{email_manutencao}}\n\n🌐 Portal do Inquilino: {{portal_inquilino}}\n\nEstamos aqui para ajudá-lo sempre que precisar. Seja muito bem-vindo(a)! 🏡\n\n---\n{{empresa_nome}} - Gestão Imobiliária",
+      "formato": "TEXTO",
+      "variaveis_disponiveis": {
+        "inquilino_nome": "Nome do inquilino",
+        "imovel_endereco": "Endereço do imóvel",
+        "data_inicio_contrato": "Data de início do contrato",
+        "valor_aluguel": "Valor do aluguel",
+        "dia_vencimento": "Dia de vencimento",
+        "telefone_emergencia": "Telefone de emergência",
+        "email_financeiro": "Email financeiro",
+        "email_manutencao": "Email manutenção",
+        "portal_inquilino": "Link do portal do inquilino"
+      },
+      "preview_dados": {
+        "inquilino_nome": "Carlos Oliveira",
+        "imovel_endereco": "Rua dos Sonhos, 789 - Vila Nova",
+        "data_inicio_contrato": "01/01/2024",
+        "valor_aluguel": "1.800,00",
+        "dia_vencimento": "10",
+        "telefone_emergencia": "(11) 98888-8888",
+        "email_financeiro": "financeiro@imobiliaria.com",
+        "email_manutencao": "manutencao@imobiliaria.com",
+        "portal_inquilino": "https://portal.imobiliaria.com"
+      },
+      "ativo": true,
+      "padrao": false,
+      "usuario_criador": 1
+    }
+  },
+  {
+    "model": "notificacoes.templatenotificacao",
+    "pk": 4,
+    "fields": {
+      "nome": "Renovação de Contrato - WhatsApp",
+      "categoria": 2,
+      "tipo": "RENOVACAO",
+      "assunto_template": "🔄 Renovação de Contrato - {{imovel_endereco}} - Vence em {{dias_para_vencer}} dias",
+      "corpo_template": "🔄 *Renovação de Contrato*\n\nOlá *{{inquilino_nome}}*! 👋\n\nEsperamos que esteja satisfeito(a) com seu imóvel! Seu contrato está próximo do vencimento e gostaríamos de conversar sobre a renovação.\n\n📋 *Contrato Atual:*\n• Imóvel: {{imovel_endereco}}\n• Vencimento: {{data_vencimento_contrato}}\n• Dias para vencer: {{dias_para_vencer}} dias\n• Valor atual: R$ {{valor_atual}}\n\n💰 *Proposta de Renovação:*\n• Novo valor: R$ {{novo_valor}}\n• Período: {{periodo_renovacao}}\n• Reajuste: {{percentual_reajuste}}%\n\n✅ Aceitar renovação: {{link_renovacao}}\n💬 Negociar termos: {{link_contato}}\n\nEntre em contato para esclarecer dúvidas ou negociar os termos da renovação.\n\n---\n{{empresa_nome}} - Gestão Imobiliária",
+      "formato": "TEXTO",
+      "variaveis_disponiveis": {
+        "inquilino_nome": "Nome do inquilino",
+        "imovel_endereco": "Endereço do imóvel",
+        "data_vencimento_contrato": "Data de vencimento do contrato",
+        "dias_para_vencer": "Dias para vencer o contrato",
+        "valor_atual": "Valor atual do aluguel",
+        "novo_valor": "Novo valor proposto",
+        "periodo_renovacao": "Período da renovação",
+        "percentual_reajuste": "Percentual de reajuste",
+        "link_renovacao": "Link para aceitar renovação",
+        "link_contato": "Link para contato"
+      },
+      "preview_dados": {
+        "inquilino_nome": "Ana Costa",
+        "imovel_endereco": "Rua da Paz, 321 - Centro",
+        "data_vencimento_contrato": "31/03/2024",
+        "dias_para_vencer": "45",
+        "valor_atual": "1.600,00",
+        "novo_valor": "1.728,00",
+        "periodo_renovacao": "12 meses",
+        "percentual_reajuste": "8",
+        "link_renovacao": "https://exemplo.com/renovacao/789",
+        "link_contato": "https://exemplo.com/contato"
+      },
+      "ativo": true,
+      "padrao": false,
+      "usuario_criador": 1
+    }
+  },
+  {
+    "model": "notificacoes.templatenotificacao",
+    "pk": 5,
+    "fields": {
+      "nome": "Comunicado de Manutenção - WhatsApp",
+      "categoria": 3,
+      "tipo": "MANUTENCAO",
+      "assunto_template": "🔧 Manutenção Programada - {{imovel_endereco}} - {{data_manutencao}}",
+      "corpo_template": "🔧 *Manutenção Programada*\n\nOlá *{{inquilino_nome}}*! 👋\n\nInformamos que será realizada uma manutenção em seu imóvel. Pedimos sua colaboração para que tudo ocorra da melhor forma.\n\n📅 *Detalhes da Manutenção:*\n• Imóvel: {{imovel_endereco}}\n• Data: {{data_manutencao}}\n• Horário: {{horario_manutencao}}\n• Serviço: {{tipo_servico}}\n• Responsável: {{responsavel_manutencao}}\n\n⚠️ *Orientações Importantes:*\n• {{orientacao_1}}\n• {{orientacao_2}}\n• {{orientacao_3}}\n\n📞 *Emergência:* {{telefone_emergencia}}\n\nAgradecemos sua compreensão e colaboração! 🙏\n\n---\n{{empresa_nome}} - Gestão Imobiliária",
+      "formato": "TEXTO",
+      "variaveis_disponiveis": {
+        "inquilino_nome": "Nome do inquilino",
+        "imovel_endereco": "Endereço do imóvel",
+        "data_manutencao": "Data da manutenção",
+        "horario_manutencao": "Horário da manutenção",
+        "tipo_servico": "Tipo de serviço",
+        "responsavel_manutencao": "Responsável pela manutenção",
+        "orientacao_1": "Primeira orientação",
+        "orientacao_2": "Segunda orientação",
+        "orientacao_3": "Terceira orientação",
+        "telefone_emergencia": "Telefone de emergência"
+      },
+      "preview_dados": {
+        "inquilino_nome": "Pedro Santos",
+        "imovel_endereco": "Av. das Palmeiras, 654 - Bairro Alto",
+        "data_manutencao": "25/01/2024",
+        "horario_manutencao": "14:00 às 17:00",
+        "tipo_servico": "Manutenção preventiva do sistema elétrico",
+        "responsavel_manutencao": "Eletricista João - (11) 97777-7777",
+        "orientacao_1": "Mantenha-se presente no imóvel durante o serviço",
+        "orientacao_2": "Desligue equipamentos eletrônicos sensíveis",
+        "orientacao_3": "Libere acesso às áreas que serão trabalhadas",
+        "telefone_emergencia": "(11) 98888-8888"
+      },
+      "ativo": true,
+      "padrao": false,
+      "usuario_criador": 1
+    }
+  },
+  {
+    "model": "notificacoes.templatenotificacao",
+    "pk": 6,
+    "fields": {
+      "nome": "Comunicado Geral - WhatsApp",
+      "categoria": 4,
+      "tipo": "COMUNICADO",
+      "assunto_template": "📢 {{titulo_comunicado}} - {{data_comunicado}}",
+      "corpo_template": "📢 *{{titulo_comunicado}}*\n\nOlá *{{inquilino_nome}}*! 👋\n\n{{conteudo_comunicado}}\n\nℹ️ *Informações Adicionais:*\n{{informacoes_adicionais}}\n\n📅 Data do comunicado: *{{data_comunicado}}*\n\n📞 Dúvidas? Entre em contato:\n• Telefone: {{telefone_contato}}\n• Email: {{email_contato}}\n\n---\n{{empresa_nome}} - Gestão Imobiliária",
+      "formato": "TEXTO",
+      "variaveis_disponiveis": {
+        "inquilino_nome": "Nome do inquilino",
+        "titulo_comunicado": "Título do comunicado",
+        "conteudo_comunicado": "Conteúdo principal do comunicado",
+        "informacoes_adicionais": "Informações adicionais",
+        "data_comunicado": "Data do comunicado",
+        "telefone_contato": "Telefone de contato",
+        "email_contato": "Email de contato",
+        "empresa_nome": "Nome da empresa"
+      },
+      "preview_dados": {
+        "inquilino_nome": "Fernanda Lima",
+        "titulo_comunicado": "Mudança no Horário de Funcionamento",
+        "conteudo_comunicado": "Informamos que a partir do dia 01/02/2024, nosso horário de atendimento será das 8h às 18h, de segunda a sexta-feira. Aos sábados, funcionaremos das 8h às 12h. Esta mudança visa melhorar a qualidade do nosso atendimento.",
+        "informacoes_adicionais": "Para emergências fora do horário comercial, utilize nosso telefone de plantão: (11) 99999-0000",
+        "data_comunicado": "15/01/2024",
+        "telefone_contato": "(11) 99999-9999",
+        "email_contato": "contato@imobiliaria.com",
+        "empresa_nome": "Imobiliária Exemplo"
+      },
+      "ativo": true,
+      "padrao": false,
+      "usuario_criador": 1
+    }
+  }
+]

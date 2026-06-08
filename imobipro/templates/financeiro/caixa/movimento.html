@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Novo Movimento{% endblock %}
+{% block content %}
+<div class="container">
+  <h1 class="h4 mb-3"><i class="bi bi-plus-circle me-2"></i>Novo Movimento - Caixa {{ sessao.banca_feira.codigo }} {{ sessao.data }}</h1>
+  <div class="card"><div class="card-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="mt-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'financeiro:caixa_detalhe' sessao.id %}" class="btn btn-outline-secondary">Voltar</a>
+      </div>
+    </form>
+  </div></div>
+</div>
+{% endblock %}

@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirmar Assinatura - ImobilPro{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="fas fa-credit-card"></i> Finalizar Assinatura</h4>
+                </div>
+                
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Plano Selecionado</h5>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ plano.nome }}</h6>
+                                    <p class="card-text">{{ plano.descricao }}</p>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success"></i> {{ plano.limite_imoveis }} imóveis</li>
+                                        <li><i class="fas fa-check text-success"></i> {{ plano.limite_contratos }} contratos</li>
+                                        {% if plano.recursos_extras %}
+                                            {% for recurso in plano.recursos_extras.splitlines %}
+                                            <li><i class="fas fa-check text-success"></i> {{ recurso }}</li>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5>Resumo do Pagamento</h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Plano {{ plano.nome }}:</span>
+                                        <span>R$ {{ plano.preco|floatformat:2 }}</span>
+                                    </div>
+                                    {% if plano.preco == 0 %}
+                                    <div class="d-flex justify-content-between">
+                                        <span>Período gratuito:</span>
+                                        <span class="text-success">7 dias</span>
+                                    </div>
+                                    {% else %}
+                                    <div class="d-flex justify-content-between">
+                                        <span>Período de teste:</span>
+                                        <span class="text-success">Gratuito (7 dias)</span>
+                                    </div>
+                                    {% endif %}
+                                    <hr>
+                                    <div class="d-flex justify-content-between font-weight-bold">
+                                        <span>Total hoje:</span>
+                                        {% if plano.preco == 0 %}
+                                        <span class="text-success">R$ 0,00</span>
+                                        {% else %}
+                                        <span class="text-success">R$ 0,00</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if plano.preco > 0 %}
+                                    <small class="text-muted">
+                                        Cobrança de R$ {{ plano.preco|floatformat:2 }} após o período de teste
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <form method="post" id="form-assinatura">
+                        {% csrf_token %}
+                        
+                        {% if plano.preco > 0 %}
+                        <div class="form-group">
+                            <label for="metodo_pagamento">Escolha sua forma de pagamento:</label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card payment-option" data-payment="pix">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-qrcode fa-2x text-primary mb-2"></i>
+                                            <h6>PIX</h6>
+                                            <p class="small text-muted">Aprovação instantânea</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card payment-option" data-payment="cartao">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-credit-card fa-2x text-primary mb-2"></i>
+                                            <h6>Cartão de Crédito</h6>
+                                            <p class="small text-muted">Pagamento recorrente</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card payment-option" data-payment="boleto">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-barcode fa-2x text-primary mb-2"></i>
+                                            <h6>Boleto Bancário</h6>
+                                            <p class="small text-muted">Vencimento em 3 dias</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="metodo_pagamento" id="metodo_pagamento" required>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="aceito_termos" name="aceito_termos" required>
+                            <label class="form-check-label" for="aceito_termos">
+                                Aceito os <a href="#" target="_blank">termos de uso</a> e 
+                                <a href="#" target="_blank">política de privacidade</a>
+                            </label>
+                        </div>
+                        
+                        {% if plano.preco > 0 %}
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="aceito_cobranca" name="aceito_cobranca" required>
+                            <label class="form-check-label" for="aceito_cobranca">
+                                Autorizo a cobrança automática após o período de teste
+                            </label>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="text-center">
+                            {% if plano.preco == 0 %}
+                            <button type="submit" class="btn btn-success btn-lg" id="btn-confirmar">
+                                <i class="fas fa-check"></i> Ativar Plano Gratuito
+                            </button>
+                            {% else %}
+                            <button type="submit" class="btn btn-success btn-lg" id="btn-confirmar" disabled>
+                                <i class="fas fa-check"></i> Confirmar e Iniciar Teste
+                            </button>
+                            {% endif %}
+                            <a href="{% url 'assinaturas:planos' %}" class="btn btn-secondary btn-lg ml-2">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card-footer text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-shield-alt"></i> Seus dados estão protegidos com criptografia SSL
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.payment-option {
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid #e9ecef;
+}
+
+.payment-option:hover {
+    border-color: #007bff;
+    transform: translateY(-2px);
+}
+
+.payment-option.selected {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentOptions = document.querySelectorAll('.payment-option');
+    const metodoInput = document.getElementById('metodo_pagamento');
+    const btnConfirmar = document.getElementById('btn-confirmar');
+    const form = document.getElementById('form-assinatura');
+    
+    paymentOptions.forEach(function(option) {
+        option.addEventListener('click', function() {
+            // Remove selected class from all options
+            paymentOptions.forEach(opt => opt.classList.remove('selected'));
+            
+            // Add selected class to clicked option
+            this.classList.add('selected');
+            
+            // Set payment method value
+            const paymentMethod = this.getAttribute('data-payment');
+            metodoInput.value = paymentMethod;
+            
+            // Enable confirm button
+            btnConfirmar.disabled = false;
+            
+            console.log('Payment method selected:', paymentMethod);
+        });
+    });
+    
+    // Form validation
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const planoPreco = {{ plano.preco|default:0 }};
+            
+            if (planoPreco > 0) {
+                const metodoSelecionado = metodoInput.value;
+                
+                if (!metodoSelecionado || metodoSelecionado.trim() === '') {
+                    e.preventDefault();
+                    alert('Por favor, selecione uma forma de pagamento antes de continuar.');
+                    return false;
+                }
+            }
+            
+            return true;
+        });
+    }
+});
+</script>
+{% endblock %}

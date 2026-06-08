@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Operacional - ImobiPro</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    
+    <link href="/static/css/custom.css" rel="stylesheet">
+    
+    
+<style>
+:root {
+    --netflix-red: #e50914;
+    --netflix-dark: #141414;
+    --netflix-gray: #2f2f2f;
+    --netflix-light-gray: #b3b3b3;
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --gradient-warning: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-info: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+body {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #374151;
+}
+
+.dashboard-header {
+    background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
+    color: white;
+    padding: 3rem 0;
+    margin: -2rem -2rem 3rem -2rem;
+    border-radius: 0 0 30px 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+    opacity: 0.3;
+}
+
+.dashboard-title {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.dashboard-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--accent-gradient);
+    border-radius: 20px 20px 0 0;
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.stat-card:hover::after {
+    opacity: 1;
+}
+
+.stat-card.primary { --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.stat-card.success { --accent-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+.stat-card.warning { --accent-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.stat-card.info { --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.stat-card.purple { --accent-gradient: linear-gradient(135deg, #a855f7 0%, #e879f9 100%); }
+.stat-card.rose { --accent-gradient: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); }
+
+.stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: #374151;
+    background: var(--accent-gradient);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.75rem;
+    position: relative;
+    z-index: 2;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #374151;
+    margin-bottom: 0.75rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 2;
+}
+
+.stat-change {
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.stat-change.positive { 
+    color: #38ef7d;
+    text-shadow: 0 0 10px rgba(56, 239, 125, 0.3);
+}
+.stat-change.negative { 
+    color: #f5576c;
+    text-shadow: 0 0 10px rgba(245, 87, 108, 0.3);
+}
+.stat-change.neutral { 
+    color: var(--netflix-light-gray);
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.action-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    text-decoration: none;
+    color: #374151;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.action-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--accent-gradient);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+}
+
+.action-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: var(--shadow-hover);
+    text-decoration: none;
+    color: #374151;
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.action-card:hover::before {
+    opacity: 0.1;
+}
+
+.action-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto 1.5rem;
+    color: white;
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.action-card.primary .action-icon { background: linear-gradient(135deg, #667eea, #764ba2); }
+.action-card.success .action-icon { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.action-card.warning .action-icon { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.action-card.info .action-icon { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.action-card.purple .action-icon { background: linear-gradient(135deg, #a855f7, #e879f9); }
+.action-card.rose .action-icon { background: linear-gradient(135deg, #f43f5e, #fb7185); }
+
+.action-card:hover .action-icon {
+    transform: scale(1.1) rotate(-5deg);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+.action-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.action-subtitle {
+    font-size: 0.9rem;
+    color: #6b7280;
+    position: relative;
+    z-index: 2;
+}
+
+.contracts-section {
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.contracts-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, var(--netflix-red) 0%, #b81d24 100%);
+    border-radius: 20px 20px 0 0;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.section-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--netflix-red), #b81d24);
+    color: white;
+    margin-right: 1.5rem;
+    font-size: 1.5rem;
+    box-shadow: 0 8px 25px rgba(229, 9, 20, 0.3);
+}
+
+.section-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #374151;
+    margin: 0;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.contract-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #f8f9fa 0%, #ffffff 100%);
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--netflix-red);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.contract-item:hover {
+    transform: translateX(8px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.contract-info h6 {
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.contract-info p {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.contract-status {
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.status-urgent {
+    background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+    color: #ffffff;
+    border: none;
+}
+
+.status-pending {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: #ffffff;
+    border: none;
+}
+
+@media (max-width: 768px) {
+    body {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    }
+    
+    .dashboard-header {
+        padding: 2rem 0;
+        margin: -1rem -1rem 2rem -1rem;
+    }
+    
+    .dashboard-title {
+        font-size: 2rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .action-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+    }
+    
+    .stat-card, .action-card, .contracts-section {
+        margin: 0 0.5rem;
+    }
+    
+    .contract-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}
+</style>
+
+
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Mobile Overlay -->
+    
+    <div class="sidebar-overlay d-lg-none" id="sidebarOverlay"></div>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <header class="sidebar-header">
+            <div class="sidebar-brand">
+                <i class="bi bi-buildings"></i>
+                <span>ImobiPro</span>
+            </div>
+            <button class="sidebar-toggle d-lg-none" id="sidebarToggle">
+                <i class="bi bi-x"></i>
+            </button>
+        </header>
+        
+        <nav class="sidebar-nav">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/dashboard/">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#imoveisMenu">
+                        <i class="bi bi-building"></i>
+                        <span>Imóveis</span>
+                        <i class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+                    <div class="collapse" id="imoveisMenu">
+                        <ul class="nav flex-column ms-3">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/imoveis/">Listar Imóveis</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/imoveis/cadastrar/">Cadastrar Imóvel</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#contratosMenu">
+                        <i class="bi bi-file-text"></i>
+                        <span>Contratos</span>
+                        <i class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+                    <div class="collapse" id="contratosMenu">
+                        <ul class="nav flex-column ms-3">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/contratos/">Listar Contratos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/contratos/cadastrar/">Novo Contrato</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/contratos/reajustes/">Reajustes</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#financeiroMenu">
+                        <i class="bi bi-cash-coin"></i>
+                        <span>Financeiro</span>
+                        <i class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+                    <div class="collapse" id="financeiroMenu">
+                        <ul class="nav flex-column ms-3">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/financeiro/parcelas/">Parcelas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/financeiro/boletos/gerar/">Boletos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/financeiro/repasses/">Repasses</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#iptuMenu">
+                                    <i class="bi bi-receipt"></i> IPTU
+                                    <i class="bi bi-chevron-down ms-auto"></i>
+                                </a>
+                                <div class="collapse" id="iptuMenu">
+                                    <ul class="nav flex-column ms-3">
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="/financeiro/iptu/">Listar IPTUs</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="/financeiro/iptu/cadastrar/">Cadastrar IPTU</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="/financeiro/iptu/relatorios/">Relatórios IPTU</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#seguroMenu">
+                                    <i class="bi bi-shield-check"></i> Seguros
+                                    <i class="bi bi-chevron-down ms-auto"></i>
+                                </a>
+                                <div class="collapse" id="seguroMenu">
+                                    <ul class="nav flex-column ms-3">
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="/financeiro/seguros/">Listar Seguros</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="/financeiro/seguros/cadastrar/">Cadastrar Seguro</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#sangriaMenu">
+                                    <i class="bi bi-arrow-down-circle"></i> Sangrias
+                                    <i class="bi bi-chevron-down ms-auto"></i>
+                                </a>
+                                <div class="collapse" id="sangriaMenu">
+                                    <ul class="nav flex-column ms-3">
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="/financeiro/sangrias/">Listar Sangrias</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="/financeiro/sangrias/cadastrar/">Cadastrar Sangria</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#pessoasMenu">
+                        <i class="bi bi-people"></i>
+                        <span>Pessoas</span>
+                        <i class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+                    <div class="collapse" id="pessoasMenu">
+                        <ul class="nav flex-column ms-3">
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#inquilinosMenu">
+                                    <i class="bi bi-person-check"></i> Inquilinos
+                                    <i class="bi bi-chevron-down ms-auto"></i>
+                                </a>
+                                <div class="collapse" id="inquilinosMenu">
+                                    <ul class="nav flex-column ms-3">
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="/dashboard/inquilinos/">Listar Inquilinos</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="/dashboard/inquilinos/cadastrar/">Cadastrar Inquilino</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#proprietariosMenu">
+                                    <i class="bi bi-person-badge"></i> Proprietários
+                                    <i class="bi bi-chevron-down ms-auto"></i>
+                                </a>
+                                <div class="collapse" id="proprietariosMenu">
+                                    <ul class="nav flex-column ms-3">
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="/dashboard/proprietarios/">Listar Proprietários</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="/dashboard/proprietarios/cadastrar/">Cadastrar Proprietário</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#manutencaoMenu">
+                        <i class="bi bi-tools"></i>
+                        <span>Manutenção</span>
+                        <i class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+                    <div class="collapse" id="manutencaoMenu">
+                        <ul class="nav flex-column ms-3">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/manutencao/ordens/">Ordens de Serviço</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#documentosMenu">
+                        <i class="bi bi-folder"></i>
+                        <span>Documentos</span>
+                        <i class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+                    <div class="collapse" id="documentosMenu">
+                        <ul class="nav flex-column ms-3">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/documentos/repositorio/">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/documentos/repositorio/documentos/">Listar Documentos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/documentos/repositorio/upload/">Upload Documento</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/documentos/vistorias/">Vistorias</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/documentos/repositorio/categorias/">Categorias</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#bancasMenu">
+                        <i class="bi bi-shop"></i>
+                        <span>Bancas de Feira</span>
+                        <i class="bi bi-chevron-down ms-auto"></i>
+                    </a>
+                    <div class="collapse" id="bancasMenu">
+                        <ul class="nav flex-column ms-3">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/imoveis/bancas/">Listar Bancas</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/imoveis/bancas/cadastrar/">Cadastrar Banca</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/imoveis/bancas/mapa/">
+                                    <i class="bi bi-map"></i> Mapa das Bancas
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/imoveis/layouts/">
+                                    <i class="bi bi-grid-3x3-gap"></i> Gerenciar Layouts
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                
+                <!-- Sobre o Sistema -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard/sobre/">
+                        <i class="bi bi-info-circle"></i>
+                        <span>Sobre o Sistema</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+    
+    
+    <!-- Top Navbar -->
+    
+    <header class="navbar-header">
+        <nav class="navbar navbar-expand-lg shadow-sm">
+        <div class="container-fluid">
+            <button class="btn btn-link d-lg-none" id="sidebarToggleTop">
+                <i class="bi bi-list"></i>
+            </button>
+            
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                        <div class="avatar me-2">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <span class="d-none d-md-inline">Teste</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/dashboard/perfil/"><i class="bi bi-person me-2"></i>Perfil</a></li>
+                        <li><a class="dropdown-item" href="/dashboard/configuracoes/"><i class="bi bi-gear me-2"></i>Configurações</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form method="post" action="/security/logout/" style="display: inline;">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="vSIE24Wy0neE0wBW1hLzY3a4RFSz4fO7mpLX6kG7c34xQOSXPjDV5d9bbLjOVO6X">
+                            <button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+                                <i class="bi bi-box-arrow-right me-2"></i>Sair
+                            </button>
+                        </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        </nav>
+    </header>
+    
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-wrapper">
+            <!-- Messages -->
+            
+            
+            
+<div class="container-fluid">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="dashboard-title">Dashboard Operacional</h1>
+                    <p class="dashboard-subtitle">Visão geral das operações e desempenho importantes do sistema imobiliário</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="d-flex align-items-center justify-content-md-end">
+                        <i class="bi bi-clock me-2"></i>
+                        <span>Última atualização: 09/10/2025 17:42</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card primary card-green-enhanced">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Imóveis Ativos</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-arrow-up"></i>
+                        0,0% vs mês anterior
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-building"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card success card-green-enhanced">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Contratos Vigentes</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-arrow-up"></i>
+                        0,0% vs mês anterior
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-file-text"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card info card-green-enhanced">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Receita Mensal</div>
+                    <div class="stat-value">R$ 0,00</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-arrow-up"></i>
+                        +18,1% vs mês anterior
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card warning card-green-enhanced">">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Pendências</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-change negative">
+                        <i class="bi bi-arrow-down"></i>
+                        Atenção necessária
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card purple">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Bancas de Feira</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-change neutral">
+                        <i class="bi bi-shop"></i>
+                        0 ocupadas
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-shop"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card rose">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Receita Bancas</div>
+                    <div class="stat-value">R$ 0,00</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-currency-dollar"></i>
+                        Mensal das bancas
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card info">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Inquilinos Imóveis</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-change neutral">
+                        <i class="bi bi-people"></i>
+                        0 total cadastrados
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card warning">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Inquilinos Bancas</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-change neutral">
+                        <i class="bi bi-shop"></i>
+                        Feirantes ativos
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Novos Indicadores de Inadimplência -->
+        <div class="stat-card warning">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Taxa Inadimplência</div>
+                    <div class="stat-value">0,0%</div>
+                    <div class="stat-change negative">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        0 parcelas
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card warning">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Valor Inadimplência</div>
+                    <div class="stat-value">R$ 0,00</div>
+                    <div class="stat-change negative">
+                        <i class="bi bi-currency-dollar"></i>
+                        Últimos 30 dias
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Indicadores Imobiliários -->
+        <div class="stat-card success card-green-enhanced">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Taxa de Ocupação</div>
+                    <div class="stat-value">0,0%</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-house-check"></i>
+                        0 disponíveis
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-house-check"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card info card-green-enhanced">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Aluguel Médio</div>
+                    <div class="stat-value">R$ 0,00</div>
+                    <div class="stat-change neutral">
+                        <i class="bi bi-currency-dollar"></i>
+                        Valor médio mensal
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card purple card-green-enhanced">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Tempo Médio Locação</div>
+                    <div class="stat-value">0 meses</div>
+                    <div class="stat-change neutral">
+                        <i class="bi bi-clock"></i>
+                        Duração média
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-clock"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Indicadores Financeiros -->
+        <div class="stat-card success card-green-enhanced">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Receita Líquida</div>
+                    <div class="stat-value">R$ 0,00</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-graph-up"></i>
+                        Mensal atual
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card info card-green-enhanced">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Margem de Lucro</div>
+                    <div class="stat-value">0,0%</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-percent"></i>
+                        Sobre receita bruta
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-percent"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card rose card-green-enhanced">">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">ROI Mensal</div>
+                    <div class="stat-value">0,0%</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-trophy"></i>
+                        Retorno investimento
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-trophy"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card warning">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Despesas Mensais</div>
+                    <div class="stat-value">R$ 0,00</div>
+                    <div class="stat-change neutral">
+                        <i class="bi bi-cash-stack"></i>
+                        Ordens de serviço
+                    </div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions Grid -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="bi bi-lightning-charge"></i>
+                </div>
+                <h2 class="section-title">Ações Rápidas</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-grid">
+        <a href="/contratos/cadastrar/" class="action-card primary">
+            <div class="action-icon">
+                <i class="bi bi-file-plus"></i>
+            </div>
+            <div class="action-title">Gerar Boletos</div>
+            <div class="action-subtitle">Gere boletos rapidamente para locatários de contratos com vencimentos próximos</div>
+        </a>
+
+        <a href="/financeiro/parcelas/" class="action-card warning">
+            <div class="action-icon">
+                <i class="bi bi-arrow-repeat"></i>
+            </div>
+            <div class="action-title">Processar Repasses</div>
+            <div class="action-subtitle">Processe repasses pendentes para beneficiários utilizando filtros inteligentes</div>
+        </a>
+
+        <a href="/contratos/cadastrar/" class="action-card success">
+            <div class="action-icon">
+                <i class="bi bi-file-text"></i>
+            </div>
+            <div class="action-title">Registrar Contratos</div>
+            <div class="action-subtitle">Adicione rapidamente novos contratos com vencimentos neste mês</div>
+        </a>
+
+        <a href="/documentos/vistorias/agendar/" class="action-card info">
+            <div class="action-icon">
+                <i class="bi bi-calendar-event"></i>
+            </div>
+            <div class="action-title">Agendar Vistoria</div>
+            <div class="action-subtitle">Agende vistorias para imóveis com contratos próximos ao vencimento</div>
+        </a>
+
+        <a href="/financeiro/nfe/emitir/" class="action-card purple">
+            <div class="action-icon">  
+                <i class="bi bi-receipt"></i>
+            </div>
+            <div class="action-title">Emitir NFe</div>
+            <div class="action-subtitle">Emita notas fiscais eletrônicas automaticamente</div>
+        </a>
+
+        <a href="/notificacoes/enviar/" class="action-card rose">
+            <div class="action-icon">
+                <i class="bi bi-bell"></i>
+            </div>
+            <div class="action-title">Enviar Notificações</div>
+            <div class="action-subtitle">Envie notificações em lote para inquilinos</div>
+        </a>
+
+        <a href="/imoveis/bancas/" class="action-card purple">
+            <div class="action-icon">
+                <i class="bi bi-shop"></i>
+            </div>
+            <div class="action-title">Gerenciar Bancas</div>
+            <div class="action-subtitle">Visualize e gerencie todas as bancas de feira</div>
+        </a>
+
+        <a href="/imoveis/bancas/cadastrar/" class="action-card info">
+            <div class="action-icon">
+                <i class="bi bi-plus-circle"></i>
+            </div>
+            <div class="action-title">Nova Banca</div>
+            <div class="action-subtitle">Cadastre uma nova banca de feira rapidamente</div>
+        </a>
+
+        <a href="/dashboard/inquilinos/?tipo=bancas" class="action-card success">
+            <div class="action-icon">
+                <i class="bi bi-person-badge"></i>
+            </div>
+            <div class="action-title">Feirantes</div>
+            <div class="action-subtitle">Gerencie inquilinos das bancas de feira</div>
+        </a>
+
+        <a href="/dashboard/inquilinos/?tipo=imoveis" class="action-card primary">
+            <div class="action-icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="action-title">Inquilinos Imóveis</div>
+            <div class="action-subtitle">Gerencie inquilinos de imóveis tradicionais</div>
+        </a>
+    </div>
+
+    <!-- Power BI Reports Section -->
+    <div class="powerbi-section" style="margin-bottom: 2rem;">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="bi bi-graph-up"></i>
+            </div>
+            <h2 class="section-title">Relatórios Power BI</h2>
+        </div>
+        
+        <div class="powerbi-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+            <!-- Dashboard Geral -->
+            <div class="powerbi-card" style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid #f0f0f0;">
+                <div class="powerbi-header" style="display: flex; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0f0f0;">
+                    <div class="powerbi-icon" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; margin-right: 0.75rem; font-size: 1rem;">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+                    <h5 style="margin: 0; font-weight: 600; color: #111827;">Dashboard Geral</h5>
+                </div>
+                <div class="powerbi-content" style="height: 300px; background: #f8fafc; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 2px dashed #d1d5db;">
+                    <div style="text-align: center; color: #6b7280;">
+                        <i class="bi bi-bar-chart" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                        <p style="margin: 0; font-size: 0.875rem;">Conecte ao Power BI para visualizar</p>
+                        <small style="color: #9ca3af;">Dashboard com métricas gerais</small>
+                    </div>
+                </div>
+                <div class="powerbi-footer" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.75rem; color: #6b7280;">Última atualização: Agora</span>
+                    <button class="btn btn-sm btn-outline-primary" onclick="refreshPowerBI('dashboard')" style="font-size: 0.75rem;">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Relatório Financeiro -->
+            <div class="powerbi-card" style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid #f0f0f0;">
+                <div class="powerbi-header" style="display: flex; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0f0f0;">
+                    <div class="powerbi-icon" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #10b981, #059669); color: white; margin-right: 0.75rem; font-size: 1rem;">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                    <h5 style="margin: 0; font-weight: 600; color: #111827;">Relatório Financeiro</h5>
+                </div>
+                <div class="powerbi-content" style="height: 300px; background: #f8fafc; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 2px dashed #d1d5db;">
+                    <div style="text-align: center; color: #6b7280;">
+                        <i class="bi bi-graph-up" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                        <p style="margin: 0; font-size: 0.875rem;">Conecte ao Power BI para visualizar</p>
+                        <small style="color: #9ca3af;">Análise de receitas e despesas</small>
+                    </div>
+                </div>
+                <div class="powerbi-footer" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.75rem; color: #6b7280;">Última atualização: Agora</span>
+                    <button class="btn btn-sm btn-outline-success" onclick="refreshPowerBI('financeiro')" style="font-size: 0.75rem;">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Relatório de Imóveis -->
+            <div class="powerbi-card" style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid #f0f0f0;">
+                <div class="powerbi-header" style="display: flex; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0f0f0;">
+                    <div class="powerbi-icon" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; margin-right: 0.75rem; font-size: 1rem;">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <h5 style="margin: 0; font-weight: 600; color: #111827;">Relatório de Imóveis</h5>
+                </div>
+                <div class="powerbi-content" style="height: 300px; background: #f8fafc; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 2px dashed #d1d5db;">
+                    <div style="text-align: center; color: #6b7280;">
+                        <i class="bi bi-house" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                        <p style="margin: 0; font-size: 0.875rem;">Conecte ao Power BI para visualizar</p>
+                        <small style="color: #9ca3af;">Análise do portfólio de imóveis</small>
+                    </div>
+                </div>
+                <div class="powerbi-footer" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.75rem; color: #6b7280;">Última atualização: Agora</span>
+                    <button class="btn btn-sm btn-outline-warning" onclick="refreshPowerBI('imoveis')" style="font-size: 0.75rem;">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Relatório de Contratos -->
+            <div class="powerbi-card" style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid #f0f0f0;">
+                <div class="powerbi-header" style="display: flex; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0f0f0;">
+                    <div class="powerbi-icon" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; margin-right: 0.75rem; font-size: 1rem;">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <h5 style="margin: 0; font-weight: 600; color: #111827;">Relatório de Contratos</h5>
+                </div>
+                <div class="powerbi-content" style="height: 300px; background: #f8fafc; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 2px dashed #d1d5db;">
+                    <div style="text-align: center; color: #6b7280;">
+                        <i class="bi bi-clipboard-data" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                        <p style="margin: 0; font-size: 0.875rem;">Conecte ao Power BI para visualizar</p>
+                        <small style="color: #9ca3af;">Análise de contratos e ocupação</small>
+                    </div>
+                </div>
+                <div class="powerbi-footer" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.75rem; color: #6b7280;">Última atualização: Agora</span>
+                    <button class="btn btn-sm btn-outline-purple" onclick="refreshPowerBI('contratos')" style="font-size: 0.75rem;">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Relatório de Bancas de Feira -->
+            <div class="powerbi-card" style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid #f0f0f0;">
+                <div class="powerbi-header" style="display: flex; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0f0f0;">
+                    <div class="powerbi-icon" style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #ef4444, #dc2626); color: white; margin-right: 0.75rem; font-size: 1rem;">
+                        <i class="bi bi-shop"></i>
+                    </div>
+                    <h5 style="margin: 0; font-weight: 600; color: #111827;">Relatório de Bancas de Feira</h5>
+                </div>
+                <div class="powerbi-content" style="height: 300px; background: #f8fafc; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 2px dashed #d1d5db;">
+                    <div style="text-align: center; color: #6b7280;">
+                        <i class="bi bi-graph-up-arrow" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                        <p style="margin: 0; font-size: 0.875rem;">Conecte ao Power BI para visualizar</p>
+                        <small style="color: #9ca3af;">Análise de bancas, feirantes e receitas</small>
+                    </div>
+                </div>
+                <div class="powerbi-footer" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.75rem; color: #6b7280;">Última atualização: Agora</span>
+                    <button class="btn btn-sm btn-outline-danger" onclick="refreshPowerBI('bancas')" style="font-size: 0.75rem;">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Power BI Configuration Panel -->
+        <div class="powerbi-config" style="margin-top: 1.5rem; background: #f8fafc; border-radius: 12px; padding: 1.5rem; border: 1px solid #e5e7eb;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                <div style="display: flex; align-items: center;">
+                    <i class="bi bi-gear" style="color: #6b7280; margin-right: 0.5rem;"></i>
+                    <span style="font-weight: 600; color: #374151;">Configuração Power BI</span>
+                </div>
+                <button class="btn btn-sm btn-primary" onclick="openPowerBIConfig()">
+                    <i class="bi bi-plus-circle"></i> Configurar Relatórios
+                </button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.875rem; color: #6b7280;">
+                <div>
+                    <strong>Status:</strong> <span class="badge bg-warning">Não Configurado</span>
+                </div>
+                <div>
+                    <strong>Workspace:</strong> <span>Não definido</span>
+                </div>
+                <div>
+                    <strong>Última Sincronização:</strong> <span>Nunca</span>
+                </div>
+                <div>
+                    <strong>APIs Disponíveis:</strong> <span class="badge bg-success">4 Ativas</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contracts Section -->
+    <div class="contracts-section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="bi bi-calendar-check"></i>
+            </div>
+            <h2 class="section-title">Contratos a Vencer</h2>
+        </div>
+
+        
+            <div class="text-center py-4">
+                <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                <h5 class="mt-3 text-success">Nenhum contrato vencendo!</h5>
+                <p class="text-muted">Todos os contratos estão em dia.</p>
+            </div>
+        
+    </div>
+</div>
+
+<!-- IPTUs a Vencer -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="section-title">IPTUs a Vencer</h2>
+                    <span class="badge bg-warning"></span>
+                </div>
+                <div class="table-responsive">
+                    
+                        <div class="text-center py-4">
+                            <i class="fas fa-file-invoice-dollar fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Nenhum IPTU vencendo nos próximos 30 dias</p>
+                        </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 Sistema Imobiliário - ImobiPro. Todos os direitos reservados.</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="mb-0">Versão 1.0.0</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // Sidebar toggle functionality
+        document.getElementById('sidebarToggleTop')?.addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('active');
+            if (overlay) {
+                overlay.classList.toggle('active');
+            }
+        });
+        
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.remove('active');
+            if (overlay) {
+                overlay.classList.remove('active');
+            }
+        });
+        
+        // Close sidebar when clicking overlay
+        document.getElementById('sidebarOverlay')?.addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+        
+        // Close sidebar on window resize if mobile
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 992) {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebarOverlay');
+                if (sidebar) sidebar.classList.remove('active');
+                if (overlay) overlay.classList.remove('active');
+            }
+        });
+
+    </script>
+    
+    <!-- Fix para links problemáticos - TEMPORARIAMENTE DESABILITADO PARA TESTE -->
+    <script src="/static/js/fix-links.js"></script>
+    
+    <!-- Sistema de sincronização de bancas -->
+    <script src="/static/js/bancas_sync.js"></script>
+    
+    
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Adicionar animações suaves aos cards
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.stat-card, .action-card, .powerbi-card');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+    
+    cards.forEach((card) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.6s ease';
+        observer.observe(card);
+    });
+});
+
+// Funções Power BI
+function refreshPowerBI(reportType) {
+    const button = event.target.closest('button');
+    const originalText = button.innerHTML;
+    
+    // Mostrar loading
+    button.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Atualizando...';
+    button.disabled = true;
+    
+    // Simular atualização (substituir por chamada real da API)
+    setTimeout(() => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+        
+        // Mostrar notificação de sucesso
+        showNotification(`Relatório ${reportType} atualizado com sucesso!`, 'success');
+        
+        // Atualizar timestamp
+        const footer = button.closest('.powerbi-footer');
+        const timestamp = footer.querySelector('span');
+        timestamp.textContent = `Última atualização: ${new Date().toLocaleTimeString()}`;
+    }, 2000);
+}
+
+function openPowerBIConfig() {
+    // Carregar configurações atuais
+    fetch('/powerbi/api/config/')
+    .then(response => response.json())
+    .then(config => {
+        // Modal de configuração Power BI
+        const modalHtml = `
+            <div class="modal fade" id="powerbiConfigModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="bi bi-gear me-2"></i>Configuração Power BI
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold mb-3">Configurações de Conexão</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label">Workspace ID</label>
+                                        <input type="text" class="form-control" placeholder="Digite o ID do workspace" value="${config.workspace_id || ''}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Client ID</label>
+                                        <input type="text" class="form-control" placeholder="Digite o Client ID" value="${config.client_id || ''}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Client Secret</label>
+                                        <input type="password" class="form-control" placeholder="Digite o Client Secret">
+                                    </div>
+                                    <div class="mb-3">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="testPowerBIConnection()">
+                                            <i class="bi bi-wifi"></i> Testar Conexão
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold mb-3">Relatórios Disponíveis</h6>
+                                    <div class="list-group">
+                                        ${config.reports.map(report => `
+                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <i class="bi ${report.icon} me-2 text-${report.color}"></i>
+                                                    ${report.name}
+                                                </div>
+                                                <span class="badge ${report.configured ? 'bg-success' : 'bg-warning'}">
+                                                    ${report.configured ? 'Configurado' : 'Não Configurado'}
+                                                </span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Instruções:</strong> Para configurar os relatórios Power BI, você precisa:
+                                <ol class="mb-0 mt-2">
+                                    <li>Criar um workspace no Power BI Service</li>
+                                    <li>Registrar uma aplicação no Azure AD</li>
+                                    <li>Configurar as permissões necessárias</li>
+                                    <li>Inserir as credenciais acima</li>
+                                </ol>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-primary" onclick="savePowerBIConfig()">Salvar Configuração</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Remover modal existente se houver
+        const existingModal = document.getElementById('powerbiConfigModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Adicionar modal ao body
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Mostrar modal
+        const modal = new bootstrap.Modal(document.getElementById('powerbiConfigModal'));
+        modal.show();
+    })
+    .catch(error => {
+        console.error('Erro ao carregar configurações:', error);
+        showNotification('Erro ao carregar configurações', 'error');
+    });
+}
+
+function savePowerBIConfig() {
+    const modal = document.getElementById('powerbiConfigModal');
+    const workspaceId = modal.querySelector('input[placeholder="Digite o ID do workspace"]').value;
+    const clientId = modal.querySelector('input[placeholder="Digite o Client ID"]').value;
+    const clientSecret = modal.querySelector('input[placeholder="Digite o Client Secret"]').value;
+    
+    // Validar campos obrigatórios
+    if (!workspaceId || !clientId || !clientSecret) {
+        showNotification('Todos os campos são obrigatórios!', 'error');
+        return;
+    }
+    
+    // Mostrar loading
+    const saveButton = modal.querySelector('button[onclick="savePowerBIConfig()"]');
+    const originalText = saveButton.innerHTML;
+    saveButton.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Salvando...';
+    saveButton.disabled = true;
+    
+    // Fazer requisição para salvar configuração
+    fetch('/powerbi/api/config/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            workspace_id: workspaceId,
+            client_id: clientId,
+            client_secret: clientSecret
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            
+            // Fechar modal
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            modalInstance.hide();
+            
+            // Atualizar status na interface
+            setTimeout(() => {
+                const statusBadges = document.querySelectorAll('.powerbi-config .badge');
+                statusBadges.forEach(badge => {
+                    if (badge.textContent === 'Não Configurado') {
+                        badge.textContent = 'Configurado';
+                        badge.className = 'badge bg-success';
+                    }
+                });
+                
+                // Atualizar informações de configuração
+                updateConfigInfo(data.config);
+            }, 1000);
+        } else {
+            showNotification(data.error || 'Erro ao salvar configuração', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        showNotification('Erro de conexão. Tente novamente.', 'error');
+    })
+    .finally(() => {
+        saveButton.innerHTML = originalText;
+        saveButton.disabled = false;
+    });
+}
+
+function showNotification(message, type = 'info') {
+    const alertClass = type === 'success' ? 'alert-success' : type === 'error' ? 'alert-danger' : 'alert-info';
+    const iconClass = type === 'success' ? 'bi-check-circle' : type === 'error' ? 'bi-exclamation-triangle' : 'bi-info-circle';
+    
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        <i class="bi ${iconClass} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remover após 5 segundos
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function testPowerBIConnection() {
+    const modal = document.getElementById('powerbiConfigModal');
+    const workspaceId = modal.querySelector('input[placeholder="Digite o ID do workspace"]').value;
+    const clientId = modal.querySelector('input[placeholder="Digite o Client ID"]').value;
+    const clientSecret = modal.querySelector('input[placeholder="Digite o Client Secret"]').value;
+    
+    if (!workspaceId || !clientId || !clientSecret) {
+        showNotification('Preencha todos os campos antes de testar a conexão!', 'error');
+        return;
+    }
+    
+    const testButton = modal.querySelector('button[onclick="testPowerBIConnection()"]');
+    const originalText = testButton.innerHTML;
+    testButton.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Testando...';
+    testButton.disabled = true;
+    
+    fetch('/powerbi/api/test-connection/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            workspace_id: workspaceId,
+            client_id: clientId,
+            client_secret: clientSecret
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Conexão testada com sucesso!', 'success');
+        } else {
+            showNotification(data.error || 'Erro ao testar conexão', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        showNotification('Erro de conexão. Verifique suas credenciais.', 'error');
+    })
+    .finally(() => {
+        testButton.innerHTML = originalText;
+        testButton.disabled = false;
+    });
+}
+
+function updateConfigInfo(config) {
+    // Atualizar informações de configuração na interface
+    if (config && config.workspace_id) {
+        // Atualizar cards de relatórios se necessário
+        const powerbiCards = document.querySelectorAll('.powerbi-card');
+        powerbiCards.forEach(card => {
+            const badge = card.querySelector('.badge');
+            if (badge && badge.textContent === 'Não Configurado') {
+                badge.textContent = 'Configurado';
+                badge.className = 'badge bg-success';
+            }
+        });
+    }
+}
+
+// CSS para animação de loading
+const style = document.createElement('style');
+style.textContent = `
+    .spin {
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .text-purple {
+        color: #8b5cf6 !important;
+    }
+    
+    .btn-outline-purple {
+        color: #8b5cf6;
+        border-color: #8b5cf6;
+    }
+    
+    .btn-outline-purple:hover {
+        color: white;
+        background-color: #8b5cf6;
+        border-color: #8b5cf6;
+    }
+`;
+document.head.appendChild(style);
+</script>
+
+</body>
+</html>

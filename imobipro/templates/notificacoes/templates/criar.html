@@ -1,0 +1,702 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Criar Template{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material.min.css" rel="stylesheet">
+<style>
+    .template-editor {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        overflow: hidden;
+    }
+    
+    .editor-toolbar {
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 10px;
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+    
+    .editor-toolbar .btn {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+    
+    .CodeMirror {
+        height: 400px;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    }
+    
+    .preview-container {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        background: #fff;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    .preview-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 10px 15px;
+        font-weight: 600;
+        display: flex;
+        justify-content: between;
+        align-items: center;
+    }
+    
+    .preview-content {
+        padding: 20px;
+    }
+    
+    .template-type-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .template-type-card {
+        flex: 1;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .template-type-card:hover {
+        border-color: #667eea;
+        background: #f8f9ff;
+    }
+    
+    .template-type-card.active {
+        border-color: #667eea;
+        background: #667eea;
+        color: white;
+    }
+    
+    .template-type-card .icon {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+    
+    .variable-tag {
+        display: inline-block;
+        background: #e9ecef;
+        color: #495057;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        margin: 2px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .variable-tag:hover {
+        background: #667eea;
+        color: white;
+    }
+    
+    .template-preview-tabs {
+        display: flex;
+        border-bottom: 1px solid #dee2e6;
+        background: #f8f9fa;
+    }
+    
+    .preview-tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        border: none;
+        background: none;
+        border-bottom: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .preview-tab.active {
+        border-bottom-color: #667eea;
+        background: white;
+        font-weight: 600;
+    }
+    
+    .form-floating {
+        position: relative;
+    }
+    
+    .floating-label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        padding: 1rem 0.75rem;
+        pointer-events: none;
+        border: 1px solid transparent;
+        transform-origin: 0 0;
+        transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">✨ Criar Novo Template</h2>
+            <p class="text-muted mb-0">Crie templates personalizados para suas notificações</p>
+        </div>
+        <div>
+            <a href="{% url 'notificacoes:listar_templates' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <form method="post" id="template-form">
+        {% csrf_token %}
+        
+        <div class="row">
+            <!-- Coluna Principal - Editor -->
+            <div class="col-lg-8">
+                <!-- Seletor de Tipo de Template -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">🎯 Tipo de Template</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="template-type-selector">
+                            <div class="template-type-card" data-type="vencimento">
+                                <div class="icon">⏰</div>
+                                <h6>Vencimento</h6>
+                                <small>Avisos de vencimento de contrato</small>
+                            </div>
+                            <div class="template-type-card" data-type="cobranca">
+                                <div class="icon">💰</div>
+                                <h6>Cobrança</h6>
+                                <small>Lembretes de pagamento</small>
+                            </div>
+                            <div class="template-type-card" data-type="boas_vindas">
+                                <div class="icon">🎉</div>
+                                <h6>Boas-vindas</h6>
+                                <small>Recepção de novos clientes</small>
+                            </div>
+                            <div class="template-type-card" data-type="manutencao">
+                                <div class="icon">🔧</div>
+                                <h6>Manutenção</h6>
+                                <small>Agendamentos e reparos</small>
+                            </div>
+                            <div class="template-type-card" data-type="personalizado">
+                                <div class="icon">✏️</div>
+                                <h6>Personalizado</h6>
+                                <small>Template do zero</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações Básicas -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">📝 Informações Básicas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="nome" name="nome" 
+                                           placeholder="Nome do Template" required>
+                                    <label for="nome">Nome do Template *</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <select class="form-select" id="categoria" name="categoria" required>
+                                        <option value="">Selecione...</option>
+                                        {% for categoria in categorias %}
+                                            <option value="{{ categoria.id }}">{{ categoria.nome }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="categoria">Categoria *</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <select class="form-select" id="formato" name="formato" required onchange="toggleAssunto()">
+                                        <option value="">Selecione...</option>
+                                        {% for formato_key, formato_label in formatos %}
+                                            <option value="{{ formato_key }}">{{ formato_label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="formato">Formato *</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mt-3">
+                                    <input class="form-check-input" type="checkbox" id="ativo" name="ativo" checked>
+                                    <label class="form-check-label" for="ativo">
+                                        <strong>Template Ativo</strong>
+                                        <small class="d-block text-muted">Disponível para uso</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Assunto (apenas para e-mail) -->
+                        <div class="mb-3" id="campo-assunto" style="display: none;">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="assunto" name="assunto" 
+                                       placeholder="Assunto do E-mail">
+                                <label for="assunto">Assunto do E-mail</label>
+                            </div>
+                            <div class="form-text">
+                                <small class="text-muted">
+                                    <i class="fas fa-lightbulb"></i> 
+                                    Use variáveis como <code>{{ inquilino_nome }}</code>, <code>{{ dias_para_vencer }}</code>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editor de Template -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">🎨 Editor de Template</h5>
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-outline-primary" onclick="toggleEditorMode()">
+                                <i class="fas fa-code"></i> Modo Código
+                            </button>
+                            <button type="button" class="btn btn-outline-success" onclick="previewTemplate()">
+                                <i class="fas fa-eye"></i> Preview
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="template-editor">
+                            <div class="editor-toolbar">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="insertText('**', '**')" title="Negrito">
+                                    <i class="fas fa-bold"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="insertText('*', '*')" title="Itálico">
+                                    <i class="fas fa-italic"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="insertText('\n- ', '')" title="Lista">
+                                    <i class="fas fa-list"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="insertText('\n### ', '')" title="Título">
+                                    <i class="fas fa-heading"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="insertText('\n---\n', '')" title="Linha">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-info" onclick="loadTemplate('base')" title="Template Base">
+                                    <i class="fas fa-file-alt"></i> Base
+                                </button>
+                            </div>
+                            <textarea class="form-control" id="corpo" name="corpo" 
+                                      placeholder="Digite o conteúdo do template..." required></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna Lateral - Ferramentas -->
+            <div class="col-lg-4">
+                <!-- Variáveis Disponíveis -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">🏷️ Variáveis Disponíveis</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-muted mb-3">Clique para inserir no template:</p>
+                        
+                        <div class="mb-3">
+                            <h6 class="small fw-bold text-primary">👤 Dados do Cliente</h6>
+                            <div class="variable-tags">
+                                <span class="variable-tag" onclick="insertVariable('{{ inquilino_nome }}')">inquilino_nome</span>
+                                <span class="variable-tag" onclick="insertVariable('{{ inquilino_email }}')">inquilino_email</span>
+                                <span class="variable-tag" onclick="insertVariable('{{ inquilino_telefone }}')">inquilino_telefone</span>
+                                <span class="variable-tag" onclick="insertVariable('{{ inquilino_endereco }}')">inquilino_endereco</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="small fw-bold text-success">🏠 Dados do Imóvel</h6>
+                            <div class="variable-tags">
+                                <span class="variable-tag" onclick="insertVariable('{{ imovel_endereco }}')">imovel_endereco</span>
+                                <span class="variable-tag" onclick="insertVariable('{{ valor_aluguel }}')">valor_aluguel</span>
+                                <span class="variable-tag" onclick="insertVariable('{{ contrato_numero }}')">contrato_numero</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="small fw-bold text-warning">📅 Datas e Prazos</h6>
+                            <div class="variable-tags">
+                                <span class="variable-tag" onclick="insertVariable('{{ data_vencimento }}')">data_vencimento</span>
+                                <span class="variable-tag" onclick="insertVariable('{{ dias_para_vencer }}')">dias_para_vencer</span>
+                                <span class="variable-tag" onclick="insertVariable('{{ data_atual }}')">data_atual</span>
+                                <span class="variable-tag" onclick="insertVariable('{{ mes_referencia }}')">mes_referencia</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="small fw-bold text-danger">💰 Valores Financeiros</h6>
+                            <div class="variable-tags">
+                                <span class="variable-tag" onclick="insertVariable('{{ valor_devido }}')">valor_devido</span>
+                                <span class="variable-tag" onclick="insertVariable('{{ valor_multa }}')">valor_multa</span>
+                                <span class="variable-tag" onclick="insertVariable('{{ valor_juros }}')">valor_juros</span>
+                                <span class="variable-tag" onclick="insertVariable('{{ valor_total }}')">valor_total</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div class="card">
+                    <div class="preview-container">
+                        <div class="template-preview-tabs">
+                            <button type="button" class="preview-tab active" data-tab="email">
+                                <i class="fas fa-envelope"></i> E-mail
+                            </button>
+                            <button type="button" class="preview-tab" data-tab="whatsapp">
+                                <i class="fab fa-whatsapp"></i> WhatsApp
+                            </button>
+                        </div>
+                        <div class="preview-header">
+                            <span>📱 Preview em Tempo Real</span>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="refreshPreview()">
+                                <i class="fas fa-sync"></i>
+                            </button>
+                        </div>
+                        <div class="preview-content" id="preview-content">
+                            <div class="text-muted text-center py-4">
+                                <i class="fas fa-eye fa-2x mb-2"></i>
+                                <p>Digite no editor para ver o preview</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'notificacoes:listar_templates' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <button type="button" class="btn btn-outline-primary" onclick="saveAsDraft()">
+                        <i class="fas fa-save"></i> Salvar Rascunho
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Criar Template
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+<script>
+let editor;
+let isCodeMode = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar editor
+    initializeEditor();
+    
+    // Event listeners
+    setupEventListeners();
+    
+    // Preview em tempo real
+    setupLivePreview();
+});
+
+function initializeEditor() {
+    const textarea = document.getElementById('corpo');
+    
+    editor = CodeMirror.fromTextArea(textarea, {
+        mode: 'htmlmixed',
+        theme: 'material',
+        lineNumbers: true,
+        lineWrapping: true,
+        autoCloseTags: true,
+        autoCloseBrackets: true,
+        matchBrackets: true,
+        indentUnit: 2,
+        tabSize: 2,
+        extraKeys: {
+            "Ctrl-Space": "autocomplete",
+            "Ctrl-S": function() { document.getElementById('template-form').submit(); }
+        }
+    });
+    
+    editor.on('change', function() {
+        refreshPreview();
+    });
+}
+
+function setupEventListeners() {
+    // Seletor de tipo de template
+    document.querySelectorAll('.template-type-card').forEach(card => {
+        card.addEventListener('click', function() {
+            document.querySelectorAll('.template-type-card').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            loadTemplateType(this.dataset.type);
+        });
+    });
+    
+    // Tabs de preview
+    document.querySelectorAll('.preview-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            refreshPreview();
+        });
+    });
+}
+
+function setupLivePreview() {
+    // Preview em tempo real conforme digita
+    let timeout;
+    editor.on('change', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(refreshPreview, 500);
+    });
+    
+    // Preview do assunto também
+    document.getElementById('assunto').addEventListener('input', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(refreshPreview, 500);
+    });
+}
+
+function toggleAssunto() {
+    const formato = document.getElementById('formato').value;
+    const campoAssunto = document.getElementById('campo-assunto');
+    
+    if (formato === 'HTML') {
+        campoAssunto.style.display = 'block';
+    } else {
+        campoAssunto.style.display = 'none';
+    }
+}
+
+function toggleEditorMode() {
+    isCodeMode = !isCodeMode;
+    
+    if (isCodeMode) {
+        editor.setOption('mode', 'htmlmixed');
+        editor.setOption('theme', 'material');
+    } else {
+        editor.setOption('mode', 'text/plain');
+        editor.setOption('theme', 'default');
+    }
+}
+
+function insertVariable(variable) {
+    const cursor = editor.getCursor();
+    editor.replaceRange(variable, cursor);
+    editor.focus();
+    refreshPreview();
+}
+
+function insertText(before, after) {
+    const cursor = editor.getCursor();
+    const selection = editor.getSelection();
+    
+    if (selection) {
+        editor.replaceSelection(before + selection + after);
+    } else {
+        editor.replaceRange(before + after, cursor);
+        editor.setCursor(cursor.line, cursor.ch + before.length);
+    }
+    
+    editor.focus();
+    refreshPreview();
+}
+
+function loadTemplateType(type) {
+    const templates = {
+        'vencimento': {
+            nome: 'Aviso de Vencimento de Contrato',
+            assunto: '⏰ Vencimento do Contrato em {{ dias_para_vencer }} dias',
+            corpo: `Olá, {{ inquilino_nome }}!
+
+Informamos que o contrato do imóvel **{{ imovel_endereco }}** vencerá em **{{ dias_para_vencer }} dias**, na data de **{{ data_vencimento }}**.
+
+**Detalhes do Contrato:**
+- Número: {{ contrato_numero }}
+- Valor: R$ {{ valor_aluguel }}
+- Vencimento: {{ data_vencimento }}
+
+Entre em contato conosco para renovação.
+
+Atenciosamente,
+Equipe ImobiPro`
+        },
+        'cobranca': {
+            nome: 'Lembrete de Pagamento',
+            assunto: '💰 Lembrete: Pagamento do Aluguel - {{ mes_referencia }}',
+            corpo: `Olá, {{ inquilino_nome }}!
+
+Identificamos pendência no pagamento do aluguel referente a **{{ mes_referencia }}**.
+
+**Detalhes:**
+- Imóvel: {{ imovel_endereco }}
+- Valor: R$ {{ valor_aluguel }}
+- Vencimento: {{ data_vencimento }}
+- Dias em atraso: {{ dias_atraso }}
+
+Regularize sua situação o quanto antes.
+
+Atenciosamente,
+Equipe ImobiPro`
+        },
+        'boas_vindas': {
+            nome: 'Boas-vindas - Novo Cliente',
+            assunto: '🎉 Bem-vindo(a) à ImobiPro, {{ inquilino_nome }}!',
+            corpo: `Olá, {{ inquilino_nome }}!
+
+Seja muito bem-vindo(a) à família ImobiPro! 🎊
+
+**Seu novo imóvel:**
+- Endereço: {{ imovel_endereco }}
+- Contrato: {{ contrato_numero }}
+- Valor: R$ {{ valor_aluguel }}
+
+Estamos aqui para ajudar em tudo que precisar!
+
+Atenciosamente,
+Equipe ImobiPro`
+        },
+        'manutencao': {
+            nome: 'Agendamento de Manutenção',
+            assunto: '🔧 Manutenção Agendada - {{ data_agendamento }}',
+            corpo: `Olá, {{ inquilino_nome }}!
+
+Foi agendada uma manutenção em seu imóvel.
+
+**Detalhes:**
+- Imóvel: {{ imovel_endereco }}
+- Data: {{ data_agendamento }}
+- Horário: {{ horario_agendamento }}
+- Serviço: {{ tipo_servico }}
+
+Por favor, esteja presente no horário agendado.
+
+Atenciosamente,
+Equipe ImobiPro`
+        }
+    };
+    
+    if (templates[type]) {
+        const template = templates[type];
+        document.getElementById('nome').value = template.nome;
+        document.getElementById('assunto').value = template.assunto;
+        editor.setValue(template.corpo);
+        refreshPreview();
+    }
+}
+
+function refreshPreview() {
+    const activeTab = document.querySelector('.preview-tab.active').dataset.tab;
+    const content = editor.getValue();
+    const assunto = document.getElementById('assunto').value;
+    
+    // Dados de exemplo para preview
+    const dadosExemplo = {
+        'inquilino_nome': 'João Silva',
+        'inquilino_email': 'joao@email.com',
+        'inquilino_telefone': '(11) 99999-9999',
+        'imovel_endereco': 'Rua das Flores, 123 - Centro',
+        'valor_aluguel': '1.500,00',
+        'contrato_numero': 'CT-2024-001',
+        'data_vencimento': '15/02/2024',
+        'dias_para_vencer': '7',
+        'data_atual': '08/02/2024',
+        'mes_referencia': 'Janeiro/2024',
+        'valor_devido': '1.500,00',
+        'dias_atraso': '3'
+    };
+    
+    let preview = content;
+    let assuntoPreview = assunto;
+    
+    // Substituir variáveis pelos dados de exemplo
+    Object.keys(dadosExemplo).forEach(key => {
+        const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+        preview = preview.replace(regex, dadosExemplo[key]);
+        if (assuntoPreview) {
+            assuntoPreview = assuntoPreview.replace(regex, dadosExemplo[key]);
+        }
+    });
+    
+    const previewContainer = document.getElementById('preview-content');
+    
+    if (activeTab === 'email') {
+        previewContainer.innerHTML = `
+            ${assuntoPreview ? `<div class="alert alert-info mb-3"><strong>Assunto:</strong> ${assuntoPreview}</div>` : ''}
+            <div style="font-family: Arial, sans-serif; line-height: 1.6; white-space: pre-wrap;">${preview.replace(/\n/g, '<br>')}</div>
+        `;
+    } else {
+        previewContainer.innerHTML = `
+            <div class="bg-success text-white p-2 rounded mb-2" style="max-width: 300px;">
+                <div style="font-family: Arial, sans-serif; font-size: 14px; white-space: pre-wrap;">${preview}</div>
+                <small class="opacity-75">Enviado via WhatsApp</small>
+            </div>
+        `;
+    }
+}
+
+function previewTemplate() {
+    refreshPreview();
+    // Scroll para o preview
+    document.getElementById('preview-content').scrollIntoView({ behavior: 'smooth' });
+}
+
+function saveAsDraft() {
+    // Implementar salvamento como rascunho
+    alert('Funcionalidade de rascunho será implementada em breve!');
+}
+
+function loadTemplate(type) {
+    if (type === 'base') {
+        const baseTemplate = `Olá, {{ inquilino_nome }}!
+
+[Sua mensagem aqui]
+
+**Informações importantes:**
+- Imóvel: {{ imovel_endereco }}
+- Contrato: {{ contrato_numero }}
+- Valor: R$ {{ valor_aluguel }}
+
+Atenciosamente,
+Equipe ImobiPro`;
+        
+        editor.setValue(baseTemplate);
+        refreshPreview();
+    }
+}
+
+// Inicializar preview vazio
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(refreshPreview, 100);
+});
+</script>
+{% endblock %}

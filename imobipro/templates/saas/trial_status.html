@@ -1,0 +1,149 @@
+<!-- Trial Status Component -->
+{% load static %}
+{% load notificacoes_extras %}
+
+<div class="trial-status-banner" id="trialBanner">
+    {% if tenant.is_trial_ativo %}
+        <div class="alert alert-info trial-alert">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="trial-info">
+                    <i class="fas fa-clock me-2"></i>
+                    <strong>Período de Teste Gratuito</strong>
+                    <span class="ms-2">
+                        {% if tenant.dias_restantes_trial > 7 %}
+                            Restam <strong>{{ tenant.dias_restantes_trial }} dias</strong> do seu período gratuito
+                        {% elif tenant.dias_restantes_trial > 1 %}
+                            <span class="text-warning">
+                                Restam apenas <strong>{{ tenant.dias_restantes_trial }} dias</strong> do seu período gratuito
+                            </span>
+                        {% elif tenant.dias_restantes_trial == 1 %}
+                            <span class="text-danger">
+                                <strong>Último dia</strong> do seu período gratuito!
+                            </span>
+                        {% else %}
+                            <span class="text-danger">
+                                Seu período gratuito <strong>expirou hoje</strong>!
+                            </span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="trial-actions">
+                    {% if tenant.dias_restantes_trial <= 7 %}
+                        <a href="{% url 'saas:planos' %}" class="btn btn-primary btn-sm me-2">
+                            <i class="fas fa-credit-card me-1"></i>
+                            Escolher Plano
+                        </a>
+                    {% endif %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            {% if tenant.dias_restantes_trial > 0 %}
+                <div class="trial-progress mt-2">
+                    {% with progress_percent=tenant.dias_restantes_trial|floatformat:0|add:"0"|multiply:3.33 %}
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar {% if tenant.dias_restantes_trial > 15 %}bg-success{% elif tenant.dias_restantes_trial > 7 %}bg-warning{% else %}bg-danger{% endif %}"
+                                role="progressbar" 
+                                style="width: {{ progress_percent }}%"
+                                aria-valuenow="{{ tenant.dias_restantes_trial }}"
+                                aria-valuemin="0" 
+                                aria-valuemax="30">
+                            </div>
+                        </div>
+                    {% endwith %}
+                </div>
+            {% endif %}
+        </div>
+    {% elif tenant.status == 'trial' and not tenant.is_trial_ativo %}
+        <div class="alert alert-danger trial-expired">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="trial-info">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Período de Teste Expirado</strong>
+                    <span class="ms-2">
+                        Seu período gratuito de 7 dias expirou. Escolha um plano para continuar usando o sistema.
+                    </span>
+                </div>
+                <div class="trial-actions">
+                    <a href="{% url 'saas:planos' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-credit-card me-1"></i>
+                        Escolher Plano Agora
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.trial-status-banner {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    margin-bottom: 1rem;
+}
+
+.trial-alert {
+    border-left: 4px solid #17a2b8;
+    margin-bottom: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.trial-expired {
+    border-left: 4px solid #dc3545;
+    margin-bottom: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.trial-info {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+
+.trial-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.trial-progress {
+    max-width: 300px;
+}
+
+@media (max-width: 768px) {
+    .trial-alert .d-flex {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .trial-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+</style>
+
+<script>
+// Auto-hide trial banner after some time (except for urgent cases)
+document.addEventListener('DOMContentLoaded', function() {
+    const trialBanner = document.getElementById('trialBanner');
+    const daysRemaining = {{ tenant.dias_restantes_trial|default:0 }};
+    
+    // Only auto-hide if more than 7 days remaining
+    if (daysRemaining > 7) {
+        setTimeout(function() {
+            const alert = trialBanner.querySelector('.alert');
+            if (alert && !alert.classList.contains('show')) {
+                alert.style.transition = 'opacity 0.5s ease-out';
+                alert.style.opacity = '0';
+                setTimeout(function() {
+                    alert.style.display = 'none';
+                }, 500);
+            }
+        }, 10000); // Hide after 10 seconds
+    }
+});
+</script>

@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}IPTU - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">IPTU</h1>
+            <p class="mb-0 text-muted">Gerencie os IPTUs dos imóveis</p>
+        </div>
+        <a href="{% url 'financeiro:cadastrar_iptu' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Novo IPTU
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" name="search" class="form-control" value="{{ request.GET.search }}" placeholder="Endereço ou código do imóvel...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Ano</label>
+                    <select name="ano" class="form-select">
+                        <option value="">Todos</option>
+                        {% for ano in anos %}
+                            <option value="{{ ano }}" {% if request.GET.ano == ano|stringformat:'s' %}selected{% endif %}>{{ ano }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">Todos</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-search"></i> Filtrar
+                    </button>
+                    <a href="{% url 'financeiro:listar_iptus' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de IPTUs -->
+    <div class="card">
+        <div class="card-body">
+            {% if iptus %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Imóvel</th>
+                                <th>Ano</th>
+                                <th>Valor Total</th>
+                                <th>Forma Pagamento</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for iptu in iptus %}
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <strong>{{ iptu.imovel.codigo }}</strong><br>
+                                            <small class="text-muted">{{ iptu.imovel.endereco|truncatechars:50 }}</small>
+                                        </div>
+                                    </td>
+                                    <td>{{ iptu.ano_exercicio }}</td>
+                                    <td>R$ {{ iptu.valor_total|floatformat:2 }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ iptu.get_forma_pagamento_display }}</span>
+                                    </td>
+                                    <td>
+                                        {% if iptu.status == 'PAGO' %}
+                                            <span class="badge bg-success">{{ iptu.get_status_display }}</span>
+                                        {% elif iptu.status == 'VENCIDO' %}
+                                            <span class="badge bg-danger">{{ iptu.get_status_display }}</span>
+                                        {% elif iptu.status == 'PARCELADO' %}
+                                            <span class="badge bg-warning">{{ iptu.get_status_display }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ iptu.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="btn-group btn-group-sm">
+                                            <a href="{% url 'financeiro:detalhar_iptu' iptu.pk %}" class="btn btn-outline-primary" title="Ver detalhes">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{% url 'financeiro:editar_iptu' iptu.pk %}" class="btn btn-outline-secondary" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'financeiro:excluir_iptu' iptu.pk %}" class="btn btn-outline-danger" title="Excluir">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação -->
+                {% if iptus.has_other_pages %}
+                    <nav aria-label="Paginação">
+                        <ul class="pagination justify-content-center">
+                            {% if iptus.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ iptus.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.ano %}&ano={{ request.GET.ano }}{% endif %}">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in iptus.paginator.page_range %}
+                                {% if iptus.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.ano %}&ano={{ request.GET.ano }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if iptus.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ iptus.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.ano %}&ano={{ request.GET.ano }}{% endif %}">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox display-1 text-muted"></i>
+                    <h4 class="mt-3">Nenhum IPTU encontrado</h4>
+                    <p class="text-muted">Não há IPTUs cadastrados ou que correspondam aos filtros aplicados.</p>
+                    <a href="{% url 'financeiro:cadastrar_iptu' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Cadastrar Primeiro IPTU
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

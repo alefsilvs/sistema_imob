@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Parcela #{{ parcela.pk }} - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Parcela #{{ parcela.pk }}</h1>
+            <p class="mb-0 text-muted">Detalhes da parcela</p>
+        </div>
+        <div>
+            <a href="{% url 'financeiro:listar_parcelas' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Informações da Parcela</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Contrato:</strong> {{ parcela.contrato.numero }}</p>
+                            <p><strong>Inquilino:</strong> {{ parcela.contrato.inquilino.nome }}</p>
+                            <p><strong>Imóvel:</strong> {{ parcela.contrato.imovel.endereco }}</p>
+                            <p><strong>Data de Vencimento:</strong> {{ parcela.data_vencimento|date:"d/m/Y" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Valor do Aluguel:</strong> R$ {{ parcela.valor_aluguel|floatformat:2 }}</p>
+                            <p><strong>Valor Total:</strong> R$ {{ parcela.valor_total|floatformat:2 }}</p>
+                            <p><strong>Status:</strong> 
+                                {% if parcela.status == 'PAGO' %}
+                                    <span class="badge bg-success">{{ parcela.get_status_display }}</span>
+                                {% elif parcela.status == 'VENCIDO' %}
+                                    <span class="badge bg-danger">{{ parcela.get_status_display }}</span>
+                                {% else %}
+                                    <span class="badge bg-warning">{{ parcela.get_status_display }}</span>
+                                {% endif %}
+                            </p>
+                            {% if parcela.data_pagamento %}
+                                <p><strong>Data de Pagamento:</strong> {{ parcela.data_pagamento|date:"d/m/Y" }}</p>
+                                <p><strong>Valor Pago:</strong> R$ {{ parcela.valor_pago|floatformat:2 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if parcela.observacoes %}
+                        <hr>
+                        <p><strong>Observações:</strong></p>
+                        <p>{{ parcela.observacoes }}</p>
+                    {% endif %}
+                    
+                    {% if notas_fiscais %}
+                        <hr>
+                        <h6><strong>Notas Fiscais Relacionadas:</strong></h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Número</th>
+                                        <th>Série</th>
+                                        <th>Data Emissão</th>
+                                        <th>Valor</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for nota in notas_fiscais %}
+                                    <tr>
+                                        <td>{{ nota.numero_formatado }}</td>
+                                        <td>{{ nota.serie }}</td>
+                                        <td>{{ nota.data_emissao|date:"d/m/Y H:i" }}</td>
+                                        <td>R$ {{ nota.valor_total|floatformat:2 }}</td>
+                                        <td>
+                                            {% if nota.status == 'emitida' %}
+                                                <span class="badge bg-success">{{ nota.get_status_display }}</span>
+                                            {% elif nota.status == 'erro' %}
+                                                <span class="badge bg-danger">{{ nota.get_status_display }}</span>
+                                            {% elif nota.status == 'processando' %}
+                                                <span class="badge bg-info">{{ nota.get_status_display }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ nota.get_status_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if nota.arquivo_pdf %}
+                                                <a href="{{ nota.arquivo_pdf.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-file-pdf"></i> PDF
+                                                </a>
+                                            {% endif %}
+                                            {% if nota.arquivo_xml %}
+                                                <a href="{{ nota.arquivo_xml.url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="bi bi-file-code"></i> XML
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <hr>
+                        <p><strong>Notas Fiscais:</strong> Nenhuma nota fiscal relacionada a esta parcela.</p>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    {% if parcela.status != 'PAGO' %}
+                        <form method="post" action="{% url 'financeiro:marcar_pago' parcela.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success" onclick="return confirm('Marcar como pago?')">
+                                <i class="bi bi-check-circle"></i> Marcar como Pago
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">Ações Rápidas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'contratos:detalhes_contrato' parcela.contrato.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-file-text"></i> Ver Contrato
+                        </a>
+                        <a href="{% url 'core:detalhes_inquilino' parcela.contrato.inquilino.pk %}" class="btn btn-outline-info">
+                            <i class="bi bi-person"></i> Ver Inquilino
+                        </a>
+                        <a href="{% url 'imoveis:detalhes_imovel' parcela.contrato.imovel.pk %}" class="btn btn-outline-success">
+                            <i class="bi bi-building"></i> Ver Imóvel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "notificacoes/email_templates/base_email.html" %}
+
+{% block content %}
+<div class="greeting">
+    Olá, {{ inquilino_nome|default:"Cliente" }}!
+</div>
+
+<div class="alert alert-info">
+    <strong>🔧 Manutenção Agendada</strong> - Serviço programado para seu imóvel
+</div>
+
+<div class="message-content">
+    Informamos que foi agendada uma manutenção em seu imóvel. 
+    Por favor, verifique os detalhes abaixo e se organize para receber nossa equipe técnica.
+</div>
+
+<div class="info-card">
+    <h3>🏠 Detalhes da Manutenção</h3>
+    <div class="info-row">
+        <span class="info-label">Imóvel:</span>
+        <span class="info-value">{{ imovel_endereco|default:"N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Tipo de Serviço:</span>
+        <span class="info-value">{{ tipo_servico|default:"Manutenção Geral" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Descrição:</span>
+        <span class="info-value">{{ descricao_servico|default:"N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Data Agendada:</span>
+        <span class="info-value">{{ data_agendamento|date:"d/m/Y"|default:"N/A" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Horário:</span>
+        <span class="info-value">{{ horario_agendamento|default:"A definir" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Duração Estimada:</span>
+        <span class="info-value">{{ duracao_estimada|default:"2-4 horas" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Técnico Responsável:</span>
+        <span class="info-value">{{ tecnico_nome|default:"A definir" }}</span>
+    </div>
+</div>
+
+<div class="message-content">
+    <strong>📋 Preparativos Necessários:</strong>
+    <ul style="margin-left: 20px; margin-top: 15px;">
+        <li>Garanta que alguém esteja presente no horário agendado</li>
+        <li>Libere o acesso à área que será trabalhada</li>
+        <li>Remova objetos pessoais da área de trabalho</li>
+        <li>Mantenha animais de estimação em local seguro</li>
+        {% if preparativos_especiais %}
+        <li>{{ preparativos_especiais }}</li>
+        {% endif %}
+    </ul>
+</div>
+
+{% if urgencia == "ALTA" %}
+<div class="alert alert-warning">
+    <strong>⚠️ Manutenção Urgente:</strong> Este serviço é de alta prioridade e 
+    precisa ser realizado o quanto antes para evitar maiores problemas.
+</div>
+{% endif %}
+
+<div class="info-card">
+    <h3>👷 Equipe Técnica</h3>
+    <div class="info-row">
+        <span class="info-label">Empresa:</span>
+        <span class="info-value">{{ empresa_manutencao|default:"ImobiPro Manutenção" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Contato da Equipe:</span>
+        <span class="info-value">{{ telefone_tecnico|default:"(11) 9999-9999" }}</span>
+    </div>
+    <div class="info-row">
+        <span class="info-label">Protocolo:</span>
+        <span class="info-value">{{ protocolo_manutencao|default:"N/A" }}</span>
+    </div>
+</div>
+
+<div class="btn-container">
+    <a href="#" class="btn btn-success">
+        ✅ Confirmar Presença
+    </a>
+    <a href="#" class="btn btn-warning">
+        📅 Reagendar
+    </a>
+    <a href="#" class="btn btn-secondary">
+        📞 Contato Técnico
+    </a>
+</div>
+
+<div class="message-content">
+    <strong>🛠️ O que será feito:</strong><br>
+    {{ detalhes_servico|default:"Nossa equipe realizará os reparos necessários com qualidade e agilidade, utilizando materiais de primeira linha e seguindo todos os protocolos de segurança." }}
+</div>
+
+<div class="alert alert-info">
+    <strong>💡 Importante:</strong> Caso não seja possível estar presente no horário agendado, 
+    entre em contato conosco com pelo menos 24 horas de antecedência para reagendar.
+</div>
+
+<div class="message-content">
+    Agradecemos sua colaboração e compreensão. Estamos trabalhando para manter 
+    seu imóvel sempre em perfeitas condições!
+</div>
+{% endblock %}

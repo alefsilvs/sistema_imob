@@ -1,0 +1,582 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ documento.nome_arquivo }} - Visualizar Documento{% endblock %}
+
+{% block extra_css %}
+<style>
+    .document-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .document-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+    }
+    
+    .info-card {
+        background: white;
+        border-radius: 15px;
+        border: 1px solid #e9ecef;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .info-value {
+        color: #6c757d;
+    }
+    
+    .viewer-container {
+        background: white;
+        border-radius: 15px;
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+        min-height: 600px;
+    }
+    
+    .viewer-toolbar {
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: between;
+        align-items: center;
+    }
+    
+    .viewer-content {
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .status-badge {
+        border-radius: 20px;
+        padding: 6px 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .confidencialidade-badge {
+        border-radius: 15px;
+        padding: 4px 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .action-btn {
+        border-radius: 10px;
+        padding: 12px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .version-item {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-left: 4px solid #007bff;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: start;
+        padding: 15px 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-size: 1rem;
+    }
+    
+    .pdf-viewer {
+        width: 100%;
+        height: 600px;
+        border: none;
+    }
+    
+    .image-viewer {
+        max-width: 100%;
+        max-height: 600px;
+        border-radius: 8px;
+    }
+    
+    .text-viewer {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        font-family: 'Courier New', monospace;
+        white-space: pre-wrap;
+        text-align: left;
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .no-preview {
+        color: #6c757d;
+        font-size: 1.1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header do Documento -->
+    <div class="row">
+        <div class="col-12">
+            <div class="document-header">
+                <div class="d-flex align-items-center">
+                    <div class="document-icon me-4">
+                        {% if documento.arquivo.name|slice:"-4:" == ".pdf" %}
+                            <i class="bi bi-file-pdf"></i>
+                        {% elif documento.arquivo.name|slice:"-4:" == ".doc" or documento.arquivo.name|slice:"-5:" == ".docx" %}
+                            <i class="bi bi-file-word"></i>
+                        {% elif documento.arquivo.name|slice:"-4:" == ".xls" or documento.arquivo.name|slice:"-5:" == ".xlsx" %}
+                            <i class="bi bi-file-excel"></i>
+                        {% elif documento.arquivo.name|slice:"-4:" == ".jpg" or documento.arquivo.name|slice:"-5:" == ".jpeg" or documento.arquivo.name|slice:"-4:" == ".png" %}
+                            <i class="bi bi-file-image"></i>
+                        {% else %}
+                            <i class="bi bi-file-earmark"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow-1">
+                        <h2 class="mb-2">{{ documento.nome_arquivo }}</h2>
+                        <p class="mb-2 opacity-75">{{ documento.tipo_documento.nome }}</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            {% if documento.categoria %}
+                                <span class="badge" style="background-color: {{ documento.categoria.cor }}20; color: {{ documento.categoria.cor }}">
+                                    <i class="{{ documento.categoria.icone }}"></i>
+                                    {{ documento.categoria.nome }}
+                                </span>
+                            {% endif %}
+                            
+                            <span class="status-badge 
+                                {% if documento.status == 'ATIVO' %}bg-success text-white
+                                {% elif documento.status == 'ARQUIVADO' %}bg-secondary text-white
+                                {% elif documento.status == 'VENCIDO' %}bg-danger text-white
+                                {% endif %}">
+                                {{ documento.get_status_display }}
+                            </span>
+                            
+                            {% if documento.confidencialidade == 'CONFIDENCIAL' %}
+                                <span class="confidencialidade-badge bg-danger text-white">
+                                    <i class="bi bi-lock"></i> Confidencial
+                                </span>
+                            {% elif documento.confidencialidade == 'RESTRITO' %}
+                                <span class="confidencialidade-badge bg-warning text-dark">
+                                    <i class="bi bi-shield"></i> Restrito
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="d-flex gap-2 mb-3">
+                            <a href="{% url 'documentos:download_documento' documento.id %}" 
+                               class="btn btn-light action-btn">
+                                <i class="bi bi-download"></i>
+                                Download
+                            </a>
+                            <button class="btn btn-light action-btn" onclick="compartilharDocumento()">
+                                <i class="bi bi-share"></i>
+                                Compartilhar
+                            </button>
+                            <button class="btn btn-light action-btn" onclick="imprimirDocumento()">
+                                <i class="bi bi-printer"></i>
+                                Imprimir
+                            </button>
+                        </div>
+                        <a href="{% url 'documentos:listar_documentos' %}" class="btn btn-outline-light">
+                            <i class="bi bi-arrow-left"></i>
+                            Voltar à Lista
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Visualizador Principal -->
+        <div class="col-lg-8">
+            <div class="viewer-container">
+                <div class="viewer-toolbar">
+                    <div class="d-flex align-items-center">
+                        <h5 class="mb-0 me-3">Visualização</h5>
+                        <span class="badge bg-light text-dark">
+                            Versão {{ documento.versao }}
+                        </span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="zoomOut()">
+                            <i class="bi bi-zoom-out"></i>
+                        </button>
+                        <span class="align-self-center mx-2" id="zoomLevel">100%</span>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="zoomIn()">
+                            <i class="bi bi-zoom-in"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="fullscreen()">
+                            <i class="bi bi-fullscreen"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="viewer-content" id="viewerContent">
+                    {% if documento.arquivo.name|slice:"-4:" == ".pdf" %}
+                        <iframe src="{{ documento.arquivo.url }}" class="pdf-viewer" id="documentViewer"></iframe>
+                    {% elif documento.arquivo.name|slice:"-4:" == ".jpg" or documento.arquivo.name|slice:"-5:" == ".jpeg" or documento.arquivo.name|slice:"-4:" == ".png" %}
+                        <img src="{{ documento.arquivo.url }}" class="image-viewer" id="documentViewer" alt="{{ documento.nome_arquivo }}">
+                    {% elif documento.arquivo.name|slice:"-4:" == ".txt" %}
+                        <div class="text-viewer" id="documentViewer">
+                            <!-- Conteúdo do texto será carregado via JavaScript -->
+                            <div class="text-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Carregando...</span>
+                                </div>
+                                <p class="mt-2">Carregando conteúdo...</p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="no-preview">
+                            <i class="bi bi-file-earmark-x fs-1 mb-3"></i>
+                            <h5>Visualização não disponível</h5>
+                            <p>Este tipo de arquivo não pode ser visualizado no navegador.</p>
+                            <a href="{% url 'documentos:download_documento' documento.id %}" class="btn btn-primary">
+                                <i class="bi bi-download"></i>
+                                Fazer Download
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações Laterais -->
+        <div class="col-lg-4">
+            <!-- Informações Básicas -->
+            <div class="info-card">
+                <h5 class="mb-3">
+                    <i class="bi bi-info-circle text-primary"></i>
+                    Informações
+                </h5>
+                
+                <div class="info-item">
+                    <span class="info-label">Tamanho:</span>
+                    <span class="info-value">{{ documento.arquivo.size|filesizeformat }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Criado em:</span>
+                    <span class="info-value">{{ documento.created_at|date:"d/m/Y H:i" }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">Modificado em:</span>
+                    <span class="info-value">{{ documento.updated_at|date:"d/m/Y H:i" }}</span>
+                </div>
+                
+                {% if documento.data_documento %}
+                <div class="info-item">
+                    <span class="info-label">Data do documento:</span>
+                    <span class="info-value">{{ documento.data_documento|date:"d/m/Y" }}</span>
+                </div>
+                {% endif %}
+                
+                {% if documento.data_vencimento %}
+                <div class="info-item">
+                    <span class="info-label">Vencimento:</span>
+                    <span class="info-value {% if documento.is_vencido %}text-danger{% endif %}">
+                        {{ documento.data_vencimento|date:"d/m/Y" }}
+                        {% if documento.is_vencido %}
+                            <i class="bi bi-exclamation-triangle text-danger"></i>
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+                
+                {% if documento.tags %}
+                <div class="info-item">
+                    <span class="info-label">Tags:</span>
+                    <div class="info-value">
+                        {% for tag in documento.tags.split:',' %}
+                            <span class="badge bg-light text-dark me-1">{{ tag.strip }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Relacionamentos -->
+            {% if documento.imovel or documento.contrato %}
+            <div class="info-card">
+                <h5 class="mb-3">
+                    <i class="bi bi-link-45deg text-primary"></i>
+                    Relacionamentos
+                </h5>
+                
+                {% if documento.imovel %}
+                <div class="info-item">
+                    <span class="info-label">Imóvel:</span>
+                    <span class="info-value">
+                        <a href="#" class="text-decoration-none">
+                            {{ documento.imovel.endereco_completo }}
+                        </a>
+                    </span>
+                </div>
+                {% endif %}
+                
+                {% if documento.contrato %}
+                <div class="info-item">
+                    <span class="info-label">Contrato:</span>
+                    <span class="info-value">
+                        <a href="#" class="text-decoration-none">
+                            {{ documento.contrato.numero }}
+                        </a>
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Descrição -->
+            {% if documento.descricao %}
+            <div class="info-card">
+                <h5 class="mb-3">
+                    <i class="bi bi-card-text text-primary"></i>
+                    Descrição
+                </h5>
+                <p class="mb-0">{{ documento.descricao }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Versões -->
+            <div class="info-card">
+                <h5 class="mb-3">
+                    <i class="bi bi-clock-history text-primary"></i>
+                    Histórico de Versões
+                </h5>
+                
+                <div class="version-item">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong>Versão {{ documento.versao }}</strong>
+                        <span class="badge bg-primary">Atual</span>
+                    </div>
+                    <small class="text-muted">
+                        {{ documento.updated_at|date:"d/m/Y H:i" }} - {{ documento.created_by.get_full_name|default:documento.created_by.username }}
+                    </small>
+                </div>
+            </div>
+
+            <!-- Atividade Recente -->
+            <div class="info-card">
+                <h5 class="mb-3">
+                    <i class="bi bi-activity text-primary"></i>
+                    Atividade Recente
+                </h5>
+                
+                <div class="activity-item">
+                    <div class="activity-icon bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-upload"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">Documento criado</div>
+                        <small class="text-muted">
+                            {{ documento.created_at|date:"d/m/Y H:i" }}
+                        </small>
+                    </div>
+                </div>
+                
+                {% if documento.updated_at != documento.created_at %}
+                <div class="activity-item">
+                    <div class="activity-icon bg-info bg-opacity-10 text-info">
+                        <i class="bi bi-pencil"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">Documento atualizado</div>
+                        <small class="text-muted">
+                            {{ documento.updated_at|date:"d/m/Y H:i" }}
+                        </small>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Compartilhamento -->
+<div class="modal fade" id="compartilharModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Compartilhar Documento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="compartilharForm">
+                    <div class="mb-3">
+                        <label class="form-label">Email do destinatário</label>
+                        <input type="email" class="form-control" name="email_externo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de acesso</label>
+                        <select class="form-select" name="tipo_acesso">
+                            <option value="LEITURA">Somente Leitura</option>
+                            <option value="DOWNLOAD">Leitura e Download</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Data de expiração (opcional)</label>
+                        <input type="date" class="form-control" name="data_expiracao">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="enviarCompartilhamento()">Compartilhar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentZoom = 100;
+
+// Carregar conteúdo de texto se necessário
+document.addEventListener('DOMContentLoaded', function() {
+    {% if documento.arquivo.name|slice:"-4:" == ".txt" %}
+        fetch('{{ documento.arquivo.url }}')
+            .then(response => response.text())
+            .then(text => {
+                document.getElementById('documentViewer').innerHTML = text;
+            })
+            .catch(error => {
+                document.getElementById('documentViewer').innerHTML = 
+                    '<div class="text-center text-danger"><i class="bi bi-exclamation-triangle"></i><br>Erro ao carregar o arquivo</div>';
+            });
+    {% endif %}
+});
+
+function compartilharDocumento() {
+    new bootstrap.Modal(document.getElementById('compartilharModal')).show();
+}
+
+function enviarCompartilhamento() {
+    const form = document.getElementById('compartilharForm');
+    const formData = new FormData(form);
+    
+    const data = {
+        email_externo: formData.get('email_externo'),
+        tipo_acesso: formData.get('tipo_acesso'),
+        data_expiracao: formData.get('data_expiracao')
+    };
+    
+    fetch(`{% url 'documentos:compartilhar_documento' documento.id %}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Documento compartilhado com sucesso!');
+            bootstrap.Modal.getInstance(document.getElementById('compartilharModal')).hide();
+        } else {
+            alert('Erro ao compartilhar documento: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Erro ao compartilhar documento');
+        console.error(error);
+    });
+}
+
+function imprimirDocumento() {
+    window.print();
+}
+
+function zoomIn() {
+    currentZoom += 10;
+    updateZoom();
+}
+
+function zoomOut() {
+    if (currentZoom > 50) {
+        currentZoom -= 10;
+        updateZoom();
+    }
+}
+
+function updateZoom() {
+    const viewer = document.getElementById('documentViewer');
+    if (viewer) {
+        viewer.style.transform = `scale(${currentZoom / 100})`;
+        viewer.style.transformOrigin = 'top center';
+        document.getElementById('zoomLevel').textContent = currentZoom + '%';
+    }
+}
+
+function fullscreen() {
+    const viewer = document.getElementById('documentViewer');
+    if (viewer.requestFullscreen) {
+        viewer.requestFullscreen();
+    } else if (viewer.webkitRequestFullscreen) {
+        viewer.webkitRequestFullscreen();
+    } else if (viewer.msRequestFullscreen) {
+        viewer.msRequestFullscreen();
+    }
+}
+
+// Registrar visualização
+fetch(`{% url 'documentos:visualizar_documento' documento.id %}`, {
+    method: 'POST',
+    headers: {
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+    }
+});
+</script>
+{% endblock %}

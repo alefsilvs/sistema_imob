@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ordem #{{ ordem.id }} - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Ordem de Serviço #{{ ordem.id }}</h1>
+            <p class="mb-0 text-muted">Detalhes da ordem de serviço</p>
+        </div>
+        <div>
+            <a href="{% url 'manutencao:editar_ordem' ordem.pk %}" class="btn btn-warning me-2">
+                <i class="bi bi-pencil"></i> Editar
+            </a>
+            <a href="{% url 'manutencao:listar_ordens' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Dados Principais -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Dados da Ordem</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Imóvel:</strong></p>
+                            <p class="text-muted">{{ ordem.imovel.endereco }}<br>{{ ordem.imovel.bairro }} - {{ ordem.imovel.cidade }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Fornecedor:</strong></p>
+                            <p class="text-muted">{{ ordem.fornecedor.nome|default:"Não definido" }}</p>
+                            {% if ordem.fornecedor %}
+                                <p class="small text-muted">{{ ordem.fornecedor.telefone }}<br>{{ ordem.fornecedor.email }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <p><strong>Descrição:</strong></p>
+                            <p class="text-muted">{{ ordem.descricao }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if ordem.observacoes %}
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <p><strong>Observações:</strong></p>
+                            <p class="text-muted">{{ ordem.observacoes }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Status e Informações -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Status e Datas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <p class="mb-1"><strong>Status:</strong></p>
+                        {% if ordem.status == 'pendente' %}
+                            <span class="badge bg-warning fs-6">Pendente</span>
+                        {% elif ordem.status == 'em_andamento' %}
+                            <span class="badge bg-info fs-6">Em Andamento</span>
+                        {% elif ordem.status == 'concluida' %}
+                            <span class="badge bg-success fs-6">Concluída</span>
+                        {% elif ordem.status == 'cancelada' %}
+                            <span class="badge bg-danger fs-6">Cancelada</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="mb-1"><strong>Prioridade:</strong></p>
+                        {% if ordem.prioridade == 'baixa' %}
+                            <span class="badge bg-secondary">Baixa</span>
+                        {% elif ordem.prioridade == 'media' %}
+                            <span class="badge bg-primary">Média</span>
+                        {% elif ordem.prioridade == 'alta' %}
+                            <span class="badge bg-warning">Alta</span>
+                        {% elif ordem.prioridade == 'urgente' %}
+                            <span class="badge bg-danger">Urgente</span>
+                        {% endif %}
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-2">
+                        <p class="mb-1"><strong>Data Abertura:</strong></p>
+                        <p class="text-muted small">{{ ordem.data_abertura|date:"d/m/Y H:i" }}</p>
+                    </div>
+                    
+                    {% if ordem.data_prevista %}
+                    <div class="mb-2">
+                        <p class="mb-1"><strong>Data Prevista:</strong></p>
+                        <p class="text-muted small">{{ ordem.data_prevista|date:"d/m/Y" }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if ordem.data_conclusao %}
+                    <div class="mb-2">
+                        <p class="mb-1"><strong>Data Conclusão:</strong></p>
+                        <p class="text-muted small">{{ ordem.data_conclusao|date:"d/m/Y H:i" }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Valores -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Valores</h6>
+                </div>
+                <div class="card-body">
+                    {% if ordem.valor_estimado %}
+                    <div class="mb-2">
+                        <p class="mb-1"><strong>Valor Estimado:</strong></p>
+                        <p class="text-success h5">R$ {{ ordem.valor_estimado|floatformat:2 }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if ordem.valor_real %}
+                    <div class="mb-2">
+                        <p class="mb-1"><strong>Valor Real:</strong></p>
+                        <p class="text-primary h5">R$ {{ ordem.valor_real|floatformat:2 }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

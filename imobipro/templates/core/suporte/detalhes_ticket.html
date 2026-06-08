@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket #{{ ticket.numero }} - Sistema IMO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .ticket-header {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .ticket-title {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .ticket-title h2 {
+            font-size: 1.8rem;
+            color: #495057;
+            margin-bottom: 0.5rem;
+            flex: 1;
+        }
+
+        .ticket-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .ticket-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .meta-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        .meta-value {
+            font-size: 1rem;
+            color: #495057;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-aberto { background-color: #e3f2fd; color: #1976d2; }
+        .status-em_andamento { background-color: #fff3e0; color: #f57c00; }
+        .status-aguardando_cliente { background-color: #fce4ec; color: #c2185b; }
+        .status-aguardando_terceiro { background-color: #f3e5f5; color: #7b1fa2; }
+        .status-resolvido { background-color: #e8f5e8; color: #388e3c; }
+        .status-fechado { background-color: #f5f5f5; color: #616161; }
+        .status-cancelado { background-color: #ffebee; color: #d32f2f; }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .priority-baixa { background-color: #e8f5e8; color: #388e3c; }
+        .priority-normal { background-color: #e3f2fd; color: #1976d2; }
+        .priority-alta { background-color: #fff3e0; color: #f57c00; }
+        .priority-critica { background-color: #ffebee; color: #d32f2f; }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .card-header h3 {
+            color: #495057;
+            font-size: 1.3rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-header i {
+            margin-right: 0.5rem;
+            color: #667eea;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .description {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            white-space: pre-wrap;
+            line-height: 1.7;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e9ecef;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.75rem;
+            top: 1.5rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #667eea;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px #e9ecef;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .timeline-user {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .timeline-date {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .timeline-content {
+            color: #495057;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .attachments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #495057;
+            transition: all 0.3s ease;
+        }
+
+        .attachment-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .attachment-icon {
+            margin-right: 0.75rem;
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+
+        .attachment-info {
+            flex: 1;
+        }
+
+        .attachment-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .attachment-meta {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .info-list {
+            list-style: none;
+        }
+
+        .info-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+        }
+
+        .info-value {
+            color: #495057;
+            text-align: right;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+        .response-form {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .ticket-meta {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Detalhes do Ticket</h1>
+        <p>Visualize e gerencie todas as informações do ticket</p>
+    </div>
+
+    <div class="container">
+        <!-- Cabeçalho do Ticket -->
+        <div class="ticket-header">
+            <div class="ticket-title">
+                <div>
+                    <h2>{{ ticket.titulo }}</h2>
+                    <div class="ticket-number">#{{ ticket.numero }}</div>
+                </div>
+            </div>
+
+            <div class="ticket-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Status</span>
+                    <span class="meta-value">
+                        <span class="status-badge status-{{ ticket.status }}">
+                            {{ ticket.get_status_display }}
+                        </span>
+                    </span>
+                </div>
+
+                <div class="meta-item">
+                    <span class="meta-label">Prioridade</span>
+                    <span class="meta-value">
+                        <span class="priority-badge priority-{{ ticket.prioridade }}">
+                            {{ ticket.get_prioridade_display }}
+                        </span>
+                    </span>
+                </div>
+
+                <div class="meta-item">
+                    <span class="meta-label">Categoria</span>
+                    <span class="meta-value">{{ ticket.categoria.nome }}</span>
+                </div>
+
+                <div class="meta-item">
+                    <span class="meta-label">Canal</span>
+                    <span class="meta-value">{{ ticket.get_canal_display }}</span>
+                </div>
+
+                <div class="meta-item">
+                    <span class="meta-label">Solicitante</span>
+                    <span class="meta-value">{{ ticket.solicitante.get_full_name|default:ticket.solicitante.username }}</span>
+                </div>
+
+                <div class="meta-item">
+                    <span class="meta-label">Responsável</span>
+                    <span class="meta-value">
+                        {% if ticket.responsavel %}
+                            {{ ticket.responsavel.get_full_name|default:ticket.responsavel.username }}
+                        {% else %}
+                            <em>Não atribuído</em>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            {% if pode_editar %}
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="toggleResponseForm()">
+                        <i class="fas fa-reply"></i> Responder
+                    </button>
+                    <button class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Editar Status
+                    </button>
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-user-plus"></i> Atribuir
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="content-grid">
+            <!-- Conteúdo Principal -->
+            <div class="main-content">
+                <!-- Descrição -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-file-text"></i> Descrição</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="description">{{ ticket.descricao }}</div>
+                    </div>
+                </div>
+
+                <!-- Formulário de Resposta (oculto por padrão) -->
+                {% if pode_editar %}
+                    <div id="response-form" class="card" style="display: none;">
+                        <div class="card-header">
+                            <h3><i class="fas fa-reply"></i> Nova Resposta</h3>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" action="{% url 'responder_ticket' ticket.id %}">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="conteudo">Resposta</label>
+                                    <textarea id="conteudo" name="conteudo" class="form-control" 
+                                              placeholder="Digite sua resposta..." required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" name="visivel_cliente" checked> 
+                                        Visível para o cliente
+                                    </label>
+                                </div>
+                                <div class="actions">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane"></i> Enviar Resposta
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="toggleResponseForm()">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Timeline de Interações -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-comments"></i> Histórico de Interações</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if interacoes %}
+                            <div class="timeline">
+                                {% for interacao in interacoes %}
+                                    <div class="timeline-item">
+                                        <div class="timeline-header">
+                                            <span class="timeline-user">
+                                                {{ interacao.usuario.get_full_name|default:interacao.usuario.username }}
+                                                <small>({{ interacao.get_tipo_display }})</small>
+                                            </span>
+                                            <span class="timeline-date">
+                                                {{ interacao.criado_em|date:"d/m/Y H:i" }}
+                                            </span>
+                                        </div>
+                                        <div class="timeline-content">{{ interacao.conteudo }}</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-comments"></i>
+                                <p>Nenhuma interação registrada ainda.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Informações Gerais -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-info-circle"></i> Informações</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="info-list">
+                            <li>
+                                <span class="info-label">Criado em</span>
+                                <span class="info-value">{{ ticket.criado_em|date:"d/m/Y H:i" }}</span>
+                            </li>
+                            <li>
+                                <span class="info-label">Atualizado em</span>
+                                <span class="info-value">{{ ticket.atualizado_em|date:"d/m/Y H:i" }}</span>
+                            </li>
+                            {% if ticket.primeira_resposta_em %}
+                                <li>
+                                    <span class="info-label">Primeira resposta</span>
+                                    <span class="info-value">{{ ticket.primeira_resposta_em|date:"d/m/Y H:i" }}</span>
+                                </li>
+                            {% endif %}
+                            {% if ticket.resolvido_em %}
+                                <li>
+                                    <span class="info-label">Resolvido em</span>
+                                    <span class="info-value">{{ ticket.resolvido_em|date:"d/m/Y H:i" }}</span>
+                                </li>
+                            {% endif %}
+                            {% if ticket.tempo_estimado_resolucao %}
+                                <li>
+                                    <span class="info-label">Tempo estimado</span>
+                                    <span class="info-value">{{ ticket.tempo_estimado_resolucao }}h</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Anexos -->
+                {% if anexos %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-paperclip"></i> Anexos ({{ anexos|length }})</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="attachments-list">
+                                {% for anexo in anexos %}
+                                    <a href="{% url 'download_anexo' anexo.id %}" class="attachment-item">
+                                        <i class="fas fa-file attachment-icon"></i>
+                                        <div class="attachment-info">
+                                            <div class="attachment-name">{{ anexo.nome_original }}</div>
+                                            <div class="attachment-meta">
+                                                {{ anexo.tamanho_formatado }} • {{ anexo.criado_em|date:"d/m/Y" }}
+                                            </div>
+                                        </div>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Relacionamentos -->
+                {% if ticket.proprietario or ticket.inquilino or ticket.banca %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-users"></i> Relacionamentos</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul class="info-list">
+                                {% if ticket.proprietario %}
+                                    <li>
+                                        <span class="info-label">Proprietário</span>
+                                        <span class="info-value">{{ ticket.proprietario.nome }}</span>
+                                    </li>
+                                {% endif %}
+                                {% if ticket.inquilino %}
+                                    <li>
+                                        <span class="info-label">Inquilino</span>
+                                        <span class="info-value">{{ ticket.inquilino.nome }}</span>
+                                    </li>
+                                {% endif %}
+                                {% if ticket.banca %}
+                                    <li>
+                                        <span class="info-label">Banca</span>
+                                        <span class="info-value">{{ ticket.banca.nome }}</span>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Escalações -->
+                {% if escalacoes %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-arrow-up"></i> Escalações</h3>
+                        </div>
+                        <div class="card-body">
+                            {% for escalacao in escalacoes %}
+                                <div class="timeline-item" style="margin-bottom: 1rem;">
+                                    <div class="timeline-header">
+                                        <span class="timeline-user">{{ escalacao.get_motivo_display }}</span>
+                                        <span class="timeline-date">{{ escalacao.criado_em|date:"d/m/Y H:i" }}</span>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <strong>De:</strong> {{ escalacao.responsavel_origem.get_full_name }}<br>
+                                        <strong>Para:</strong> {{ escalacao.responsavel_destino.get_full_name }}
+                                        {% if escalacao.observacoes %}
+                                            <br><strong>Observações:</strong> {{ escalacao.observacoes }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleResponseForm() {
+            const form = document.getElementById('response-form');
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+                form.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                form.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

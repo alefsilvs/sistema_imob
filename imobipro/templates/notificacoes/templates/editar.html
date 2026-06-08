@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Editar Template{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">✏️ Editar Template: {{ template.nome }}</h3>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <!-- Estatísticas de Uso -->
+                                <div class="alert alert-info mb-4">
+                                    <h6>📊 Estatísticas de Uso:</h6>
+                                    <div class="row text-center">
+                                        <div class="col-3">
+                                            <strong>{{ stats.total_enviadas|default:0 }}</strong><br>
+                                            <small>Enviadas</small>
+                                        </div>
+                                        <div class="col-3">
+                                            <strong>{{ stats.total_entregues|default:0 }}</strong><br>
+                                            <small>Entregues</small>
+                                        </div>
+                                        <div class="col-3">
+                                            <strong>{{ stats.total_lidas|default:0 }}</strong><br>
+                                            <small>Lidas</small>
+                                        </div>
+                                        <div class="col-3">
+                                            <strong>{{ stats.total_falhas|default:0 }}</strong><br>
+                                            <small>Falhas</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Informações Básicas -->
+                                <div class="mb-3">
+                                    <label for="nome" class="form-label">Nome do Template *</label>
+                                    <input type="text" class="form-control" id="nome" name="nome" 
+                                           value="{{ template.nome }}" required>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="categoria" class="form-label">Categoria *</label>
+                                            <select class="form-select" id="categoria" name="categoria" required>
+                                                <option value="">Selecione uma categoria...</option>
+                                                {% for categoria in categorias %}
+                                                    <option value="{{ categoria.id }}" 
+                                                            {% if categoria.id == template.categoria.id %}selected{% endif %}>
+                                                        {{ categoria.nome }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="formato" class="form-label">Formato *</label>
+                                            <select class="form-select" id="formato" name="formato" required>
+                                                <option value="">Selecione o formato...</option>
+                                                {% for formato_key, formato_label in formatos %}
+                                                    <option value="{{ formato_key }}" 
+                                                            {% if formato_key == template.formato %}selected{% endif %}>
+                                                        {{ formato_label }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Assunto (apenas para e-mail) -->
+                                <div class="mb-3" id="campo-assunto" {% if template.formato != 'HTML' %}style="display: none;"{% endif %}>
+                                    <label for="assunto" class="form-label">Assunto</label>
+                                    <input type="text" class="form-control" id="assunto" name="assunto" 
+                                           value="{{ template.assunto_template }}">
+                                    <div class="form-text">
+                                        <small class="text-muted">Use variáveis como {{ inquilino.nome }}, {{ dias_para_vencer }}, etc.</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Corpo da Mensagem -->
+                                <div class="mb-3">
+                                    <label for="corpo" class="form-label">Corpo da Mensagem *</label>
+                                    <textarea class="form-control" id="corpo" name="corpo" rows="10" required>{{ template.corpo_template }}</textarea>
+                                    <div class="form-text">
+                                        <small class="text-muted">Use as variáveis disponíveis para personalizar a mensagem.</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Status -->
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="ativo" name="ativo" 
+                                           {% if template.ativo %}checked{% endif %}>
+                                    <label class="form-check-label" for="ativo">
+                                        Template ativo (disponível para uso)
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <!-- Variáveis Disponíveis -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="card-title mb-0">🏷️ Variáveis Disponíveis</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="small text-muted mb-2">Clique para inserir:</p>
+                                        <div class="d-grid gap-1">
+                                            {% for variavel in variaveis_disponiveis %}
+                                                <button type="button" class="btn btn-sm btn-outline-secondary text-start variavel-btn" 
+                                                        data-variavel="{{ variavel }}">
+                                                    <code>{{ variavel }}</code>
+                                                </button>
+                                            {% endfor %}
+                                        </div>
+                                        
+                                        <hr>
+                                        <h6 class="small">📝 Exemplos de Uso:</h6>
+                                        <div class="small text-muted">
+                                            <p><strong>WhatsApp:</strong><br>
+                                            Olá {{ inquilino.nome }}! Seu contrato vence em {{ dias_para_vencer }} dias.</p>
+                                            
+                                            <p><strong>E-mail:</strong><br>
+                                            Prezado(a) {{ inquilino.nome }}, informamos que o contrato {{ contrato.numero }} vencerá em {{ data_vencimento }}.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Preview -->
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h6 class="card-title mb-0">👁️ Preview</h6>
+                                    </div>
+                                    <div class="card-body" id="preview-container">
+                                        <p class="text-muted small">Preview será atualizado conforme você edita...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'notificacoes:listar_templates' %}" class="btn btn-secondary">
+                                ← Voltar
+                            </a>
+                            <div>
+                                <a href="{% url 'notificacoes:testar_template' template.id %}" class="btn btn-outline-info me-2">
+                                    🧪 Testar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    💾 Salvar Alterações
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Mostrar/ocultar campo assunto baseado no formato
+document.getElementById('formato').addEventListener('change', function() {
+    const campoAssunto = document.getElementById('campo-assunto');
+    if (this.value === 'HTML') {
+        campoAssunto.style.display = 'block';
+    } else {
+        campoAssunto.style.display = 'none';
+    }
+});
+
+// Inserir variáveis no textarea
+document.querySelectorAll('.variavel-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const variavel = this.dataset.variavel;
+        const textarea = document.getElementById('corpo');
+        const cursorPos = textarea.selectionStart;
+        const textBefore = textarea.value.substring(0, cursorPos);
+        const textAfter = textarea.value.substring(cursorPos);
+        
+        textarea.value = textBefore + variavel + textAfter;
+        textarea.focus();
+        textarea.setSelectionRange(cursorPos + variavel.length, cursorPos + variavel.length);
+        
+        // Atualizar preview
+        atualizarPreview();
+    });
+});
+
+// Preview em tempo real
+function atualizarPreview() {
+    const assunto = document.getElementById('assunto').value;
+    const corpo = document.getElementById('corpo').value;
+    const formato = document.getElementById('formato').value;
+    const previewContainer = document.getElementById('preview-container');
+    
+    if (!corpo.trim()) {
+        previewContainer.innerHTML = '<p class="text-muted small">Digite o conteúdo para ver o preview...</p>';
+        return;
+    }
+    
+    let preview = '';
+    
+    if (assunto && formato === 'HTML') {
+        preview += `<strong>Assunto:</strong> ${assunto}<br><br>`;
+    }
+    
+    if (formato === 'HTML') {
+        preview += corpo.replace(/\n/g, '<br>');
+    } else {
+        preview += `<pre class="small">${corpo}</pre>`;
+    }
+    
+    previewContainer.innerHTML = preview;
+}
+
+// Atualizar preview quando o conteúdo mudar
+document.getElementById('assunto').addEventListener('input', atualizarPreview);
+document.getElementById('corpo').addEventListener('input', atualizarPreview);
+document.getElementById('formato').addEventListener('change', atualizarPreview);
+
+// Carregar preview inicial
+document.addEventListener('DOMContentLoaded', atualizarPreview);
+</script>
+{% endblock %}

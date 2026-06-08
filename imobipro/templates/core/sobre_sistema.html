@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sobre o Sistema - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .feature-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        height: 100%;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #007bff;
+    }
+    
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4rem 0;
+        margin-bottom: 3rem;
+    }
+    
+    .section-title {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        position: relative;
+        padding-bottom: 10px;
+    }
+    
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50px;
+        height: 3px;
+        background: #007bff;
+    }
+    
+    .feature-description {
+        color: #666;
+        line-height: 1.6;
+    }
+    
+    .stats-section {
+        background: #f8f9fa;
+        padding: 3rem 0;
+        margin: 3rem 0;
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #007bff;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 mb-4">Sistema Imobiliário Completo</h1>
+                <p class="lead mb-4">
+                    Uma solução completa e moderna para gestão imobiliária, 
+                    desenvolvida com as melhores tecnologias e práticas de segurança.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="stat-item">
+                            <div class="stat-number">100%</div>
+                            <div class="stat-label text-white">Seguro</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-item">
+                            <div class="stat-number">24/7</div>
+                            <div class="stat-label text-white">Suporte</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-item">
+                            <div class="stat-number">3</div>
+                            <div class="stat-label text-white">Plataformas</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Características do Sistema -->
+<div class="container">
+    <div class="row">
+        <div class="col-12 text-center mb-5">
+            <h2 class="section-title">Características do Gestor Fácil</h2>
+            <p class="lead text-muted">
+                Conheça todas as funcionalidades que fazem do nosso sistema a melhor escolha para sua imobiliária
+            </p>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        {% for key, caracteristica in caracteristicas.items %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card feature-card h-100 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon">
+                        <i class="bi {{ caracteristica.icone }}"></i>
+                    </div>
+                    <h5 class="card-title mb-3">{{ caracteristica.titulo }}</h5>
+                    <p class="card-text feature-description">{{ caracteristica.descricao }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Seção de Segurança e Confiabilidade -->
+<div class="stats-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <h3 class="section-title">Segurança e Confiabilidade</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card border-0 h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-shield-check text-success me-3" style="font-size: 2rem;"></i>
+                            <h5 class="mb-0">Certificado SSL</h5>
+                        </div>
+                        <p class="text-muted">
+                            Todos os dados são transmitidos com criptografia SSL de 256 bits, 
+                            garantindo máxima segurança nas informações dos seus clientes e propriedades.
+                        </p>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i> Criptografia de ponta a ponta</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i> Proteção contra ataques</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i> Conformidade com LGPD</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-headset text-primary me-3" style="font-size: 2rem;"></i>
+                            <h5 class="mb-0">Suporte 24x7</h5>
+                        </div>
+                        <p class="text-muted">
+                            Nossa equipe está sempre disponível para ajudar você, 
+                            oferecendo suporte completo através de múltiplos canais.
+                        </p>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-envelope text-primary me-2"></i> Atendimento por email</li>
+                            <li><i class="bi bi-telephone text-primary me-2"></i> Atendimento por telefone</li>
+                            <li><i class="bi bi-clock text-primary me-2"></i> Suporte total 24 horas</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Seção de Plataformas -->
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <h3 class="section-title">Disponível em Todas as Plataformas</h3>
+            <p class="lead text-muted">Acesse seu sistema de qualquer lugar, a qualquer momento</p>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-4 col-md-6 text-center mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <i class="bi bi-laptop text-primary mb-3" style="font-size: 3rem;"></i>
+                    <h5>Plataforma WEB</h5>
+                    <p class="text-muted">Acesse através de qualquer navegador moderno com interface responsiva</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 text-center mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <i class="bi bi-phone text-success mb-3" style="font-size: 3rem;"></i>
+                    <h5>Android</h5>
+                    <p class="text-muted">Aplicativo nativo para dispositivos Android com todas as funcionalidades</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 text-center mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <i class="bi bi-phone text-dark mb-3" style="font-size: 3rem;"></i>
+                    <h5>iOS</h5>
+                    <p class="text-muted">Aplicativo otimizado para iPhone e iPad com design elegante</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                <h3 class="mb-4">Pronto para começar?</h3>
+                <p class="lead mb-4">
+                    Experimente todas essas funcionalidades e transforme a gestão da sua imobiliária
+                </p>
+                <a href="{% url 'core:dashboard' %}" class="btn btn-light btn-lg me-3">
+                    <i class="bi bi-speedometer2 me-2"></i>Ir para Dashboard
+                </a>
+                <a href="mailto:suporte@sistemaimo.com" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-envelope me-2"></i>Entrar em Contato
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

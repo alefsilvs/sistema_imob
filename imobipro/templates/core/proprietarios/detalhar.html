@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ proprietario.nome }} - ImobiPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">{{ proprietario.nome }}</h1>
+            <p class="mb-0 text-muted">Detalhes do proprietário</p>
+        </div>
+        <div>
+            <a href="{% url 'core:listar_proprietarios' %}" class="btn btn-secondary me-2">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+            <a href="{% url 'core:editar_proprietario' proprietario.id %}" class="btn btn-primary">
+                <i class="bi bi-pencil"></i> Editar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Dados Pessoais -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-person"></i> Dados Pessoais
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-muted">Nome Completo</label>
+                            <p class="mb-0 fw-bold">{{ proprietario.nome }}</p>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label text-muted">Tipo</label>
+                            <p class="mb-0">
+                                <span class="badge bg-{% if proprietario.tipo == 'PF' %}primary{% else %}info{% endif %}">
+                                    {{ proprietario.get_tipo_display }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label text-muted">Data de Nascimento</label>
+                            <p class="mb-0">{{ proprietario.data_nascimento|date:"d/m/Y"|default:"-" }}</p>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-muted">Profissão</label>
+                            <p class="mb-0">{{ proprietario.profissao|default:"-" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documentos -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-file-text"></i> Documentos
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-muted">CPF/CNPJ</label>
+                            <p class="mb-0 fw-bold">{{ proprietario.cpf_cnpj }}</p>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-muted">RG/IE</label>
+                            <p class="mb-0">{{ proprietario.rg_ie|default:"-" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contato -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-telephone"></i> Contato
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-muted">Telefone</label>
+                            <p class="mb-0">
+                                <a href="tel:{{ proprietario.telefone }}" class="text-decoration-none">
+                                    <i class="bi bi-telephone me-1"></i>{{ proprietario.telefone }}
+                                </a>
+                            </p>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-muted">E-mail</label>
+                            <p class="mb-0">
+                                <a href="mailto:{{ proprietario.email }}" class="text-decoration-none">
+                                    <i class="bi bi-envelope me-1"></i>{{ proprietario.email }}
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Endereço -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-geo-alt"></i> Endereço
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-muted">Endereço</label>
+                            <p class="mb-0">{{ proprietario.endereco }}</p>
+                        </div>
+                        <div class="col-4 mb-3">
+                            <label class="form-label text-muted">CEP</label>
+                            <p class="mb-0">{{ proprietario.cep }}</p>
+                        </div>
+                        <div class="col-5 mb-3">
+                            <label class="form-label text-muted">Cidade</label>
+                            <p class="mb-0">{{ proprietario.cidade }}</p>
+                        </div>
+                        <div class="col-3 mb-3">
+                            <label class="form-label text-muted">Estado</label>
+                            <p class="mb-0">{{ proprietario.estado }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dados Financeiros -->
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-credit-card"></i> Dados Financeiros
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label text-muted">Renda</label>
+                            <p class="mb-0 fw-bold text-success">
+                                {% if proprietario.renda %}
+                                    R$ {{ proprietario.renda|floatformat:2 }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label text-muted">Banco</label>
+                            <p class="mb-0">{{ proprietario.banco|default:"-" }}</p>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label text-muted">Agência</label>
+                            <p class="mb-0">{{ proprietario.agencia|default:"-" }}</p>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label text-muted">Conta</label>
+                            <p class="mb-0">{{ proprietario.conta|default:"-" }}</p>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label text-muted">PIX</label>
+                            <p class="mb-0">{{ proprietario.pix|default:"-" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Observações -->
+        {% if proprietario.observacoes %}
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-chat-text"></i> Observações
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ proprietario.observacoes|linebreaks }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Imóveis do Proprietário -->
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-house"></i> Imóveis ({{ proprietario.imovel_set.count }})
+                    </h6>
+                    <a href="{% url 'imoveis:cadastrar' %}?proprietario={{ proprietario.id }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-plus"></i> Novo Imóvel
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if proprietario.imovel_set.exists %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Endereço</th>
+                                        <th>Tipo</th>
+                                        <th>Status</th>
+                                        <th>Valor</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for imovel in proprietario.imovel_set.all %}
+                                    <tr>
+                                        <td>{{ imovel.codigo }}</td>
+                                        <td>{{ imovel.endereco }}</td>
+                                        <td>{{ imovel.get_tipo_display }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if imovel.status == 'Disponível' %}success{% elif imovel.status == 'Alugado' %}warning{% else %}danger{% endif %}">
+                                                {{ imovel.status }}
+                                            </span>
+                                        </td>
+                                        <td>R$ {{ imovel.valor_aluguel|floatformat:2 }}</td>
+                                        <td>
+                                            <a href="{% url 'imoveis:detalhes_imovel' imovel.id %}" class="btn btn-sm btn-outline-primary" title="Ver detalhes">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-house text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-2">Nenhum imóvel cadastrado para este proprietário.</p>
+                            <a href="{% url 'imoveis:cadastrar' %}?proprietario={{ proprietario.id }}" class="btn btn-primary">
+                                <i class="bi bi-plus"></i> Cadastrar Primeiro Imóvel
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações do Sistema -->
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="bi bi-info-circle"></i> Informações do Sistema
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Data de Cadastro</label>
+                            <p class="mb-0">{{ proprietario.data_cadastro|date:"d/m/Y H:i" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Última Atualização</label>
+                            <p class="mb-0">{{ proprietario.data_atualizacao|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

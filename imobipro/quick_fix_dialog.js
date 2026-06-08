@@ -1,0 +1,3 @@
+// CORREÇÃO RÁPIDA - Cole esta linha no console do Evolution Manager (F12):
+
+(function(){const e=console.warn,o=console.error,n=["DialogContent requires a DialogTitle","DialogContent requires a DialogTitle for the component to be accessible","MUI: The `DialogContent` component requires a `DialogTitle`","Warning: DialogContent"];console.warn=function(...o){const r=o.join(" ");n.some(e=>r.toLowerCase().includes(e.toLowerCase()))||e.apply(console,o)},console.error=function(...e){const r=e.join(" ");n.some(e=>r.toLowerCase().includes(e.toLowerCase()))||o.apply(console,e)},console.log("✅ DialogContent warnings suprimidos")})();

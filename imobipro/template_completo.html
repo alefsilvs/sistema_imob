@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .info-box { background: white; padding: 20px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .highlight { background: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 15px 0; }
+        .payment-section { background: #f1f8e9; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .qr-code { text-align: center; margin: 20px 0; }
+        .footer { text-align: center; margin-top: 30px; padding: 20px; color: #666; }
+        .btn { display: inline-block; padding: 12px 24px; background: #4caf50; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Cobrança - Banca de Feira</h1>
+            <p>{{empresa_nome}}</p>
+        </div>
+        
+        <div class="content">
+            <p>Prezado(a) <strong>{{inquilino_nome}}</strong>,</p>
+            
+            <p>Esperamos que esteja bem!</p>
+            
+            <p>Temos uma cobrança pendente referente à sua banca de feira. Confira os detalhes abaixo:</p>
+            
+            <div class="info-box">
+                <h3>📋 DADOS DA BANCA</h3>
+                <ul>
+                    <li><strong>Código:</strong> {{banca_codigo}}</li>
+                    <li><strong>Localização:</strong> {{banca_localizacao}}</li>
+                    <li><strong>Tipo:</strong> {{banca_tipo}}</li>
+                </ul>
+            </div>
+            
+            <div class="info-box">
+                <h3>📅 DADOS DA COBRANÇA</h3>
+                <ul>
+                    <li><strong>Contrato:</strong> {{contrato_numero}}</li>
+                    <li><strong>Data de Vencimento:</strong> {{data_vencimento}}</li>
+                    <li><strong>Valor Total:</strong> <span style="font-size: 1.2em; color: #d32f2f;">{{valor_total}}</span></li>
+                </ul>
+            </div>
+            
+            <div class="payment-section">
+                <h3>💰 FORMAS DE PAGAMENTO</h3>
+                
+                {% if pix.disponivel %}
+                <div class="highlight">
+                    <h4>🔸 PIX - Pagamento Instantâneo</h4>
+                    <p><strong>Código PIX (Copie e Cole):</strong></p>
+                    <div style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-family: monospace; word-break: break-all; font-size: 12px;">
+                        {{pix.codigo_pix}}
+                    </div>
+                    
+                    <div class="qr-code">
+                        <p><strong>📱 QR Code PIX:</strong></p>
+                        <img src="data:image/png;base64,{{pix.qr_code_base64}}" alt="QR Code PIX" style="max-width: 200px; border: 2px solid #ddd; padding: 10px; background: white;">
+                        <p style="font-size: 12px; color: #666;">Escaneie com o app do seu banco</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <p><strong>🔸 Outras opções:</strong></p>
+                <ul>
+                    <li><a href="{{link_pagamento}}" class="btn">💳 Link de Pagamento Online</a></li>
+                    <li>🏦 Transferência bancária</li>
+                    <li>📄 Boleto bancário</li>
+                </ul>
+            </div>
+            
+            {% if pix.disponivel %}
+            <div class="info-box">
+                <h4>📱 COMO PAGAR VIA PIX:</h4>
+                <ol>
+                    <li>Abra o aplicativo do seu banco</li>
+                    <li>Escaneie o QR Code acima OU copie e cole o código PIX</li>
+                    <li>Confirme os dados e efetue o pagamento</li>
+                </ol>
+            </div>
+            {% endif %}
+            
+            <div class="info-box">
+                <h3>📞 DÚVIDAS OU NEGOCIAÇÃO</h3>
+                <p>Se precisar de esclarecimentos ou negociar condições de pagamento:</p>
+                <ul>
+                    <li><strong>📱 Telefone:</strong> {{empresa_telefone}}</li>
+                    <li><strong>📧 Email:</strong> {{empresa_email}}</li>
+                </ul>
+            </div>
+            
+            <div class="warning">
+                <p><strong>⚠️ IMPORTANTE:</strong> Mantenha sua banca em dia para evitar problemas e garantir a continuidade do seu negócio!</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Atenciosamente,<br>
+            <strong>{{empresa_nome}}</strong><br>
+            Gestão de Bancas de Feira</p>
+            
+            <p style="font-size: 12px; color: #999;">
+                Este é um email automático. Para dúvidas, entre em contato pelos canais informados acima.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

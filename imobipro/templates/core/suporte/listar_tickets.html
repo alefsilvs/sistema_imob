@@ -1,0 +1,454 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lista de Tickets - Suporte{% endblock %}
+
+{% block extra_css %}
+<style>
+    .suporte-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px 0;
+        margin-bottom: 30px;
+        border-radius: 15px;
+    }
+    
+    .suporte-header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 600;
+    }
+    
+    .suporte-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    .filtros-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+    
+    .filtros-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #ecf0f1;
+    }
+    
+    .filtros-header h3 {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 1.3rem;
+    }
+    
+    .filtros-header i {
+        margin-right: 10px;
+        color: #3498db;
+    }
+    
+    .tickets-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    
+    .tickets-header {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        padding: 20px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .tickets-header h3 {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 600;
+    }
+    
+    .tickets-count {
+        background: rgba(255,255,255,0.2);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .ticket-item {
+        padding: 20px 25px;
+        border-bottom: 1px solid #ecf0f1;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .ticket-item:hover {
+        background-color: #f8f9fa;
+        transform: translateX(5px);
+    }
+    
+    .ticket-item:last-child {
+        border-bottom: none;
+    }
+    
+    .ticket-main {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+    
+    .ticket-info {
+        flex: 1;
+    }
+    
+    .ticket-numero {
+        font-weight: bold;
+        color: #3498db;
+        text-decoration: none;
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+        display: inline-block;
+    }
+    
+    .ticket-numero:hover {
+        color: #2980b9;
+        text-decoration: none;
+    }
+    
+    .ticket-titulo {
+        color: #2c3e50;
+        font-size: 1rem;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+    
+    .ticket-descricao {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+    
+    .ticket-badges {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+    }
+    
+    .ticket-status {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-aberto { background: #e8f5e8; color: #27ae60; }
+    .status-em-andamento { background: #fff3cd; color: #f39c12; }
+    .status-aguardando { background: #d1ecf1; color: #17a2b8; }
+    .status-resolvido { background: #d4edda; color: #28a745; }
+    .status-fechado { background: #f8d7da; color: #dc3545; }
+    
+    .ticket-prioridade {
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .prioridade-baixa { background: #d5f4e6; color: #27ae60; }
+    .prioridade-normal { background: #d1ecf1; color: #17a2b8; }
+    .prioridade-alta { background: #fff3cd; color: #f39c12; }
+    .prioridade-urgente { background: #f8d7da; color: #dc3545; }
+    
+    .ticket-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        color: #7f8c8d;
+    }
+    
+    .ticket-responsavel {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .ticket-tempo {
+        font-style: italic;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #7f8c8d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .empty-state h4 {
+        margin-bottom: 10px;
+        color: #2c3e50;
+    }
+    
+    .btn-novo-ticket {
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        border: none;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-novo-ticket:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(46, 204, 113, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .pagination-container {
+        padding: 25px;
+        background: #f8f9fa;
+        border-top: 1px solid #ecf0f1;
+    }
+    
+    @media (max-width: 768px) {
+        .suporte-header h1 {
+            font-size: 2rem;
+        }
+        
+        .ticket-main {
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .ticket-badges {
+            flex-direction: row;
+            align-items: flex-start;
+        }
+        
+        .filtros-card {
+            padding: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="suporte-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-list"></i> Lista de Tickets</h1>
+                    <p>Gerencie e acompanhe todos os tickets de suporte</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="{% url 'suporte:criar_ticket' %}" class="btn-novo-ticket">
+                        <i class="fas fa-plus"></i> Novo Ticket
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filtros -->
+    <div class="filtros-card">
+        <div class="filtros-header">
+            <h3><i class="fas fa-filter"></i> Filtros</h3>
+        </div>
+        
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">Todos os Status</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if filtros_ativos.status == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">Prioridade</label>
+                <select name="prioridade" class="form-select">
+                    <option value="">Todas as Prioridades</option>
+                    {% for value, label in prioridade_choices %}
+                        <option value="{{ value }}" {% if filtros_ativos.prioridade == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">Categoria</label>
+                <select name="categoria" class="form-select">
+                    <option value="">Todas as Categorias</option>
+                    {% for categoria in categorias %}
+                        <option value="{{ categoria.id }}" {% if filtros_ativos.categoria == categoria.id|stringformat:"s" %}selected{% endif %}>
+                            {{ categoria.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">Responsável</label>
+                <select name="responsavel" class="form-select">
+                    <option value="">Todos os Responsáveis</option>
+                    <option value="meus" {% if filtros_ativos.responsavel == 'meus' %}selected{% endif %}>
+                        Meus Tickets
+                    </option>
+                </select>
+            </div>
+            
+            <div class="col-md-9">
+                <label class="form-label">Buscar</label>
+                <input type="text" name="busca" class="form-control" 
+                       placeholder="Buscar por número, título, descrição ou tags..."
+                       value="{{ filtros_ativos.busca }}">
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Filtrar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Lista de Tickets -->
+    <div class="tickets-container">
+        <div class="tickets-header">
+            <h3><i class="fas fa-ticket-alt"></i> Tickets</h3>
+            {% if page_obj %}
+                <div class="tickets-count">
+                    {{ page_obj.paginator.count }} ticket{{ page_obj.paginator.count|pluralize }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="tickets-list">
+            {% if page_obj %}
+                {% for ticket in page_obj %}
+                    <div class="ticket-item" onclick="window.location.href='{% url 'suporte:detalhes_ticket' ticket.id %}'">
+                        <div class="ticket-main">
+                            <div class="ticket-info">
+                                <a href="{% url 'suporte:detalhes_ticket' ticket.id %}" class="ticket-numero">
+                                    #{{ ticket.numero }}
+                                </a>
+                                <div class="ticket-titulo">{{ ticket.titulo }}</div>
+                                <div class="ticket-descricao">
+                                    {{ ticket.descricao|truncatechars:150 }}
+                                </div>
+                            </div>
+                            
+                            <div class="ticket-badges">
+                                <span class="ticket-status status-{{ ticket.status }}">
+                                    {{ ticket.get_status_display }}
+                                </span>
+                                <span class="ticket-prioridade prioridade-{{ ticket.prioridade }}">
+                                    {{ ticket.get_prioridade_display }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="ticket-meta">
+                            <div class="ticket-responsavel">
+                                <i class="fas fa-user"></i>
+                                {% if ticket.responsavel %}
+                                    {{ ticket.responsavel.get_full_name|default:ticket.responsavel.username }}
+                                {% else %}
+                                    Não atribuído
+                                {% endif %}
+                            </div>
+                            
+                            <div class="ticket-tempo">
+                                <i class="fas fa-clock"></i>
+                                {{ ticket.criado_em|timesince }} atrás
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <h4>Nenhum ticket encontrado</h4>
+                    <p>Não há tickets que correspondam aos filtros selecionados.</p>
+                    <a href="{% url 'suporte:criar_ticket' %}" class="btn-novo-ticket mt-3">
+                        <i class="fas fa-plus"></i> Criar Primeiro Ticket
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Paginação -->
+        {% if page_obj.has_other_pages %}
+            <div class="pagination-container">
+                <nav aria-label="Navegação de páginas">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.prioridade %}&prioridade={{ request.GET.prioridade }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.responsavel %}&responsavel={{ request.GET.responsavel }}{% endif %}{% if request.GET.busca %}&busca={{ request.GET.busca }}{% endif %}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.prioridade %}&prioridade={{ request.GET.prioridade }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.responsavel %}&responsavel={{ request.GET.responsavel }}{% endif %}{% if request.GET.busca %}&busca={{ request.GET.busca }}{% endif %}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">
+                                {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.prioridade %}&prioridade={{ request.GET.prioridade }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.responsavel %}&responsavel={{ request.GET.responsavel }}{% endif %}{% if request.GET.busca %}&busca={{ request.GET.busca }}{% endif %}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.prioridade %}&prioridade={{ request.GET.prioridade }}{% endif %}{% if request.GET.categoria %}&categoria={{ request.GET.categoria }}{% endif %}{% if request.GET.responsavel %}&responsavel={{ request.GET.responsavel }}{% endif %}{% if request.GET.busca %}&busca={{ request.GET.busca }}{% endif %}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Seguro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-shield-exclamation"></i> Editar Seguro</h2>
+        <div>
+            <a href="{% url 'financeiro:listar_seguros' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Editar Informações do Seguro</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.imovel.id_for_label }}" class="form-label">Imóvel *</label>
+                                {{ form.imovel }}
+                                {% if form.imovel.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.imovel.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.tipo.id_for_label }}" class="form-label">Tipo de Seguro *</label>
+                                {{ form.tipo }}
+                                {% if form.tipo.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.tipo.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.seguradora.id_for_label }}" class="form-label">Seguradora *</label>
+                                {{ form.seguradora }}
+                                {% if form.seguradora.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.seguradora.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.numero_apolice.id_for_label }}" class="form-label">Número da Apólice</label>
+                                {{ form.numero_apolice }}
+                                {% if form.numero_apolice.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.numero_apolice.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="{{ form.data_inicio.id_for_label }}" class="form-label">Data de Início *</label>
+                                {{ form.data_inicio }}
+                                {% if form.data_inicio.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.data_inicio.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.data_fim.id_for_label }}" class="form-label">Data de Fim *</label>
+                                {{ form.data_fim }}
+                                {% if form.data_fim.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.data_fim.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.valor_total.id_for_label }}" class="form-label">Valor Total *</label>
+                                {{ form.valor_total }}
+                                {% if form.valor_total.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.valor_total.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.forma_pagamento.id_for_label }}" class="form-label">Forma de Pagamento</label>
+                                {{ form.forma_pagamento }}
+                                {% if form.forma_pagamento.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.forma_pagamento.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.numero_parcelas.id_for_label }}" class="form-label">Número de Parcelas</label>
+                                {{ form.numero_parcelas }}
+                                {% if form.numero_parcelas.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ form.numero_parcelas.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.observacoes.id_for_label }}" class="form-label">Observações</label>
+                            {{ form.observacoes }}
+                            {% if form.observacoes.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.observacoes.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'financeiro:seguro_detalhar' seguro.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="bi bi-check-circle"></i> Salvar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0"><i class="bi bi-info-circle"></i> Informações Atuais</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-1">Imóvel Atual</h6>
+                        <p class="mb-0">{{ seguro.imovel.endereco_completo }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-1">Vigência Atual</h6>
+                        <p class="mb-0">{{ seguro.data_inicio|date:"d/m/Y" }} - {{ seguro.data_fim|date:"d/m/Y" }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-1">Valor Atual</h6>
+                        <p class="mb-0"><strong>R$ {{ seguro.valor_total|floatformat:2 }}</strong></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0"><i class="bi bi-exclamation-triangle"></i> Atenção</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h6><i class="bi bi-exclamation-triangle"></i> Cuidado ao Editar</h6>
+                        <ul class="mb-0 small">
+                            <li>Alterações nas datas podem afetar a vigência</li>
+                            <li>Mudanças no valor podem impactar parcelas</li>
+                            <li>Verifique se os dados estão corretos</li>
+                            <li>Mantenha backup da apólice original</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

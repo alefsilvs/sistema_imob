@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .info-box { background: white; padding: 20px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .highlight { background: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 15px 0; }
+        .payment-section { background: #f1f8e9; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .qr-code { text-align: center; margin: 20px 0; }
+        .footer { text-align: center; margin-top: 30px; padding: 20px; color: #666; }
+        .btn { display: inline-block; padding: 12px 24px; background: #4caf50; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+        .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Cobrança - Banca de Feira</h1>
+            <p>Imobiliária Teste</p>
+        </div>
+        
+        <div class="content">
+            <p>Prezado(a) <strong>João Silva</strong>,</p>
+            
+            <p>Esperamos que esteja bem!</p>
+            
+            <p>Temos uma cobrança pendente referente à sua banca de feira. Confira os detalhes abaixo:</p>
+            
+            <div class="info-box">
+                <h3>📋 DADOS DA BANCA</h3>
+                <ul>
+                    <li><strong>Código:</strong> </li>
+                    <li><strong>Localização:</strong> </li>
+                    <li><strong>Tipo:</strong> </li>
+                </ul>
+            </div>
+            
+            <div class="info-box">
+                <h3>📅 DADOS DA COBRANÇA</h3>
+                <ul>
+                    <li><strong>Contrato:</strong> </li>
+                    <li><strong>Data de Vencimento:</strong> 25/01/2025</li>
+                    <li><strong>Valor Total:</strong> <span style="font-size: 1.2em; color: #d32f2f;"></span></li>
+                </ul>
+            </div>
+            
+            <div class="payment-section">
+                <h3>💰 FORMAS DE PAGAMENTO</h3>
+                
+                
+                <div class="highlight">
+                    <h4>🔸 PIX - Pagamento Instantâneo</h4>
+                    <p><strong>Código PIX (Copie e Cole):</strong></p>
+                    <div style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-family: monospace; word-break: break-all; font-size: 12px;">
+                        0014BR.GOV.BCB.PIX26330014BR.GOV.BCB.PIX01116198303658652040000530398654071050.005802BR5919alef da silva alves6009SAO PAULO62100506BANCA1630477F9
+                    </div>
+                    
+                    <div class="qr-code">
+                        <p><strong>📱 QR Code PIX:</strong></p>
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAf4AAAH+AQAAAABVFFGIAAAElklEQVR4nO1dXYrjPBAsVQzz6MAeYI6S3OA70rI3Gx9lDrAQPy446ENq/TmZl4myxGuqWEK8lgsrNN2q7pbGeXThyr7nARFABBCBfgMD0QmKACKACCAC/QYGohMUAUSA7RBMLqHecc4NwHS8uvSRLxOOz32Dx8GOZ0WwOYLRByz5v+cB/iOY43kewvUhSOyrc2cAcWS8+9Q3eBh8/FERbIcAya7GYITjYpfVML2/RCM8eO8vcfBiJuo/0hC+fAoUAXZJMA/pY3JvHtMxWF0M1u/el5j8V9/gm+B3HxDBP0JwdThdQmAeF7if/k9eOwbrDDf+/ht8D/zmeBFsOzr7FI4/4ppwfWn2N8awnQK4onMDohMUATLBHPVwCMzjH+c/gmMMgdkuf71Hm7yGG1FUO9MuT32Dh8HHHxXBdgjg75B0Sv3I7tB7nO4G8+VToAiwAwLUWBuDcPoWBXRQzDEIW8SOg4Nhtua4vH4KFAF2QDDkL9fw7bDg9BkUyvxj8Zh/wCH8w9gKFT+5w4Lpv8tGpkARYAcEaPVH9Inm+gBzfUmY1MCc84nyiRVEJygCFMUywJ0tCB98TOB8lbZx5/nNu58xx/PsN3gYfPxREWx4nRiQsjhBsYTiS3aCS/GTsSAThy6vnwJFgL1p50sRy5ZFzKnEk+nppsYnS2xBdIIiQLbEvEQ0qwtiOX3kdWLKcZtPVGZ7BaITFAHu8olN2iYH4WidyTHmdp08fHn9FCgC7IdgclGxpL4vK+o1hb75rbaBJRVjFZgNTUEE/zYBinMrleUcrKN2sXAcBpa8t4Vt+cQKohMUAVbrxKKTa3QugTkJmKxdpFgaEJ2gCNCuE1OhL64ES93ZjDAOTQIm26QsMYPoBEWAshcgiuXclV39ZM3YVGepuvMNiE5QBChWl1tubDlY/J+tHfO4lPwutUBZYgTRCYoA7T6WVGMJi8WsnesGlxiTq56WT2xAdIIiQLNTry4CV53aOYto1RarwMgnrkB0giLAKjrfuMjs99pqnyVwVO1bgegERYC2A6IIk7pibIdgLaDlEwuITlAEuO3FacKxoawT02VRMfKJBUQnKAI0+cTUgVMVS22SLans+8ZZvnwKFAF2WWMZa9/DTaKxJnWU2V6B6ARFgMYSm/0BjTop6e0oqouAkSU2IDpBEWCtWNIS0bxjzhiWwJxTjq2yXl4/BYoAOyBANbhcaElLxJvWnEZP12WjLDGC6ARFgPt9LLnbwe4mT5jidIJ6ttcgOkER4Iue7fXJN2Vvi+3GL70QqvZVEJ2gCHBzLmfZwpfrzknKtOnFmvyWJRqITlAE+OKssByT0wa/ekJJ1S7KbK9AdIIiwP2Zso0cKcE6J3Wa56SdK4hOUAS4I5jshLq6Z+rgnXtf7GDPuo/A/9KOqgKiExQByglNGafPN4/T57DY4Ux2YFNwh9N5WID5uCpDb2EKIsCuLPEQ/7pA0/Lg6/lhwQjdyV/TOcfT8fcAjE96A4oAIsC9di4JxKZntiLtLVAWZwWiExQBnP6WKUQAEUAE+g0MRCcoAogAIoAI9BsYiE5QBBAB8D+jAyQT6/gNagAAAABJRU5ErkJggg==" alt="QR Code PIX" style="max-width: 200px; border: 2px solid #ddd; padding: 10px; background: white;">
+                        <p style="font-size: 12px; color: #666;">Escaneie com o app do seu banco</p>
+                    </div>
+                </div>
+                
+                
+                <p><strong>🔸 Outras opções:</strong></p>
+                <ul>
+                    <li><a href="https://exemplo.com/pagamento" class="btn">💳 Link de Pagamento Online</a></li>
+                    <li>🏦 Transferência bancária</li>
+                    <li>📄 Boleto bancário</li>
+                </ul>
+            </div>
+            
+            
+            <div class="info-box">
+                <h4>📱 COMO PAGAR VIA PIX:</h4>
+                <ol>
+                    <li>Abra o aplicativo do seu banco</li>
+                    <li>Escaneie o QR Code acima OU copie e cole o código PIX</li>
+                    <li>Confirme os dados e efetue o pagamento</li>
+                </ol>
+            </div>
+            
+            
+            <div class="info-box">
+                <h3>📞 DÚVIDAS OU NEGOCIAÇÃO</h3>
+                <p>Se precisar de esclarecimentos ou negociar condições de pagamento:</p>
+                <ul>
+                    <li><strong>📱 Telefone:</strong> </li>
+                    <li><strong>📧 Email:</strong> </li>
+                </ul>
+            </div>
+            
+            <div class="warning">
+                <p><strong>⚠️ IMPORTANTE:</strong> Mantenha sua banca em dia para evitar problemas e garantir a continuidade do seu negócio!</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Atenciosamente,<br>
+            <strong>Imobiliária Teste</strong><br>
+            Gestão de Bancas de Feira</p>
+            
+            <p style="font-size: 12px; color: #999;">
+                Este é um email automático. Para dúvidas, entre em contato pelos canais informados acima.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

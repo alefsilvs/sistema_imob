@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Sistema Imobiliário Completo - Gestão profissional de imóveis, inquilinos e proprietários">
+    <meta name="keywords" content="imobiliária, gestão, inquilinos, proprietários, contratos, financeiro">
+    <meta name="author" content="Sistema Imobiliário">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:title" content="{% block og_title %}Sistema Imobiliário Completo{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Sistema completo de gestão imobiliária{% endblock %}">
+    <meta property="og:image" content="{% load static %}{% static 'img/og-image.png' %}">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.build_absolute_uri }}">
+    <meta property="twitter:title" content="{% block twitter_title %}Sistema Imobiliário Completo{% endblock %}">
+    <meta property="twitter:description" content="{% block twitter_description %}Sistema completo de gestão imobiliária{% endblock %}">
+    <meta property="twitter:image" content="{% load static %}{% static 'img/twitter-image.png' %}">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="application-name" content="Sistema IMO">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Sistema IMO">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-config" content="{% static 'browserconfig.xml' %}">
+    <meta name="msapplication-TileColor" content="#007bff">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="theme-color" content="#007bff">
+    
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'img/favicon-16x16.png' %}">
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <link rel="mask-icon" href="{% static 'img/safari-pinned-tab.svg' %}" color="#007bff">
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
+    
+    <title>{% block title %}Sistema Imobiliário Completo{% endblock %}</title>
+    
+    {% load static %}
+    
+    <!-- CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/fontawesome.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/responsive.css' %}" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="{% static 'js/responsive.js' %}" as="script">
+    <link rel="preload" href="{% static 'webfonts/fa-solid-900.woff2' %}" as="font" type="font/woff2" crossorigin>
+    
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    
+    <style>
+        /* Critical CSS inline para melhor performance */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .offline-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #dc3545;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            z-index: 9999;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .offline-indicator.show {
+            transform: translateY(0);
+        }
+        
+        /* Skeleton loading */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+
+<body class="d-flex flex-column h-100 {% block body_class %}{% endblock %}">
+    <!-- Offline Indicator -->
+    <div id="offline-indicator" class="offline-indicator">
+        <i class="fas fa-wifi"></i>
+        Você está offline. Algumas funcionalidades podem estar limitadas.
+    </div>
+    
+    <!-- Skip to main content -->
+    <a class="visually-hidden-focusable" href="#main-content">Pular para o conteúdo principal</a>
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'core:dashboard' %}">
+                <img src="{% static 'img/icon.svg' %}" alt="Logo" width="32" height="32" class="me-2">
+                <span class="d-none d-sm-inline">Sistema IMO</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'core:dashboard' %}">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span class="d-lg-inline d-none">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'inquilinos' in request.path %}active{% endif %}" href="{% url 'core:listar_inquilinos' %}">
+                            <i class="fas fa-users"></i>
+                            <span class="d-lg-inline d-none">Inquilinos</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'proprietarios' in request.path %}active{% endif %}" href="{% url 'core:listar_proprietarios' %}">
+                            <i class="fas fa-user-tie"></i>
+                            <span class="d-lg-inline d-none">Proprietários</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'bancas' in request.path %}active{% endif %}" href="{% url 'core:listar_bancas' %}">
+                            <i class="fas fa-store"></i>
+                            <span class="d-lg-inline d-none">Bancas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-cog"></i>
+                            <span class="d-lg-inline d-none">Gestão</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            {# <li><a class="dropdown-item" href="/dashboard/indicadores/">
+                                <i class="fas fa-chart-line"></i> Indicadores
+                            </a></li> #}
+                            {# <li><a class="dropdown-item" href="/documentos/repositorio/">
+                                <i class="fas fa-folder"></i> Repositório
+                            </a></li> #}
+                            {# <li><a class="dropdown-item" href="/suporte/dashboard/">
+                                <i class="fas fa-headset"></i> Suporte
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/perfil/">
+                                <i class="fas fa-user-cog"></i> Perfil
+                            </a></li>
+                            <li><a class="dropdown-item" href="/configuracoes/">
+                                <i class="fas fa-cogs"></i> Configurações
+                            </a></li> #}
+                        </ul>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <!-- Notifications -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notification-count">
+                                0
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown" style="width: 300px;">
+                            <li><h6 class="dropdown-header">Notificações</h6></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li id="notifications-list">
+                                <div class="dropdown-item-text text-muted text-center">
+                                    Nenhuma notificação
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    
+                    <!-- User Menu -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="{% static 'img/default-avatar.svg' %}" alt="Avatar" width="24" height="24" class="rounded-circle me-1">
+                            <span class="d-none d-md-inline">{{ user.get_full_name|default:user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'core:perfil' %}">
+                                <i class="fas fa-user"></i> Meu Perfil
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:configuracoes' %}">
+                                <i class="fas fa-cog"></i> Configurações
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'core:sobre_sistema' %}">
+                                <i class="fas fa-info-circle"></i> Sobre
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'suporte:dashboard_suporte' %}">
+                                <i class="fas fa-question-circle"></i> Ajuda
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'security:custom_logout' %}">
+                                <i class="fas fa-sign-out-alt"></i> Sair
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main id="main-content" class="flex-shrink-0">
+        {% block breadcrumb %}
+        <nav aria-label="breadcrumb" class="bg-light border-bottom">
+            <div class="container-fluid">
+                <ol class="breadcrumb mb-0 py-2">
+                    <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Início</a></li>
+                    {% block breadcrumb_items %}{% endblock %}
+                </ol>
+            </div>
+        </nav>
+        {% endblock %}
+        
+        <div class="container-fluid py-3">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-light border-top">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <span class="text-muted">© 2024 Sistema Imobiliário. Todos os direitos reservados.</span>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span class="text-muted">
+                        Versão 1.0.0 
+                        {# | <a href="{% url 'core:sobre_sistema' %}" class="text-decoration-none">Sobre</a> | 
+                        <a href="/suporte/dashboard/" class="text-decoration-none">Suporte</a> #}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-none" style="background: rgba(0,0,0,0.5); z-index: 9998;">
+        <div class="d-flex justify-content-center align-items-center h-100">
+            <div class="text-center text-white">
+                <div class="loading-spinner mb-3"></div>
+                <div>Carregando...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/chart.min.js' %}"></script>
+    <script src="{% static 'js/responsive.js' %}"></script>
+    <!-- <script src="{% static 'js/editable-elements.js' %}"></script> -->
+    <script src="{% static 'js/ai-assistant.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+    
+    <script>
+        // Configurações globais
+        window.APP_CONFIG = {
+            debug: {% if debug %}true{% else %}false{% endif %},
+            csrfToken: '{{ csrf_token }}',
+            userId: {{ user.id|default:'null' }},
+            apiBaseUrl: '{% url "core:dashboard" %}',
+            staticUrl: '{% static "" %}',
+            mediaUrl: '{{ MEDIA_URL }}',
+            language: 'pt-BR',
+            timezone: 'America/Sao_Paulo'
+        };
+        
+        // Detectar status de conexão
+        function updateOnlineStatus() {
+            const indicator = document.getElementById('offline-indicator');
+            if (navigator.onLine) {
+                indicator.classList.remove('show');
+            } else {
+                indicator.classList.add('show');
+            }
+        }
+        
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        
+        // Inicializar quando DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', function() {
+            updateOnlineStatus();
+            
+            // Carregar notificações
+            loadNotifications();
+            
+            // Auto-refresh notificações a cada 5 minutos
+            setInterval(loadNotifications, 5 * 60 * 1000);
+            
+            // Adicionar classe fade-in ao conteúdo - versão segura
+            try {
+                const mainElement = document.querySelector('main');
+                if (mainElement && typeof mainElement.classList !== 'undefined') {
+                    mainElement.classList.add('fade-in');
+                }
+            } catch (mainError) {
+                // Silenciar warning para evitar poluição do console
+                // console.warn('Elemento main não encontrado ou não suportado:', mainError);
+            }
+        });
+        
+        // Carregar notificações
+        function loadNotifications() {
+            // Implementar carregamento de notificações via AJAX
+            // Por enquanto, simular algumas notificações
+            const count = Math.floor(Math.random() * 5);
+            document.getElementById('notification-count').textContent = count;
+            document.getElementById('notification-count').style.display = count > 0 ? 'inline' : 'none';
+        }
+        
+        // Função para mostrar loading
+        function showLoading() {
+            document.getElementById('loading-overlay').classList.remove('d-none');
+        }
+        
+        // Função para esconder loading
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('d-none');
+        }
+        
+        // Interceptar formulários para mostrar loading
+        document.addEventListener('submit', function(e) {
+            if (e.target.tagName === 'FORM' && !e.target.hasAttribute('data-no-loading')) {
+                showLoading();
+            }
+        });
+        
+        // Interceptar links para mostrar loading
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' && e.target.href && !e.target.hasAttribute('data-no-loading')) {
+                // Não mostrar loading para links com href="#" ou com data-bs-toggle
+                if (e.target.getAttribute('href') === '#' || 
+                    e.target.hasAttribute('data-bs-toggle') ||
+                    e.target.hasAttribute('onclick')) {
+                    return;
+                }
+                
+                const url = new URL(e.target.href);
+                if (url.origin === window.location.origin) {
+                    showLoading();
+                }
+            }
+        });
+        
+        // Esconder loading quando página carregar
+        window.addEventListener('load', hideLoading);
+        window.addEventListener('pageshow', hideLoading);
+    </script>
+</body>
+</html>

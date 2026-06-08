@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirmação de Senha - {{ operacao }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Confirmação de Segurança
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Atenção!</strong> Esta é uma operação crítica que requer confirmação de senha.
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="text-muted">Operação solicitada:</h6>
+                        <p class="fw-bold text-primary">{{ operacao }}</p>
+                    </div>
+
+                    <form method="post" action="{{ request_path }}">
+                        {% csrf_token %}
+                        
+                        <!-- Preservar dados originais do POST -->
+                        {% for key, value in post_data.items %}
+                            {% if key != 'csrfmiddlewaretoken' and key != 'senha' %}
+                                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.senha.id_for_label }}" class="form-label">
+                                {{ form.senha.label }}
+                            </label>
+                            {{ form.senha }}
+                            {% if form.senha.help_text %}
+                                <div class="form-text">{{ form.senha.help_text }}</div>
+                            {% endif %}
+                            {% if form.senha.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.senha.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="javascript:history.back()" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-times me-1"></i>
+                                Cancelar
+                            </a>
+                            <button type="submit" name="confirmar_senha" value="1" class="btn btn-warning">
+                                <i class="fas fa-check me-1"></i>
+                                Confirmar e Continuar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>
+                        <i class="fas fa-info-circle me-1"></i>
+                        Por segurança, sua senha será solicitada apenas uma vez por sessão para operações críticas.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    border-bottom: 2px solid #ffc107;
+}
+
+.alert-warning {
+    border-left: 4px solid #ff6b35;
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background-color: #ffca2c;
+    border-color: #ffc720;
+    color: #212529;
+}
+
+.form-control:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+</style>
+{% endblock %}

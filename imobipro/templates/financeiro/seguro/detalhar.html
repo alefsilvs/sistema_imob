@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Seguro{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-shield-check"></i> Detalhes do Seguro</h2>
+        <div>
+            <a href="{% url 'financeiro:seguro_editar' seguro.pk %}" class="btn btn-warning me-2">
+                <i class="bi bi-pencil"></i> Editar
+            </a>
+            <a href="{% url 'financeiro:listar_seguros' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Informações Gerais -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-info-circle"></i> Informações Gerais</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Imóvel</h6>
+                            <p class="mb-3">
+                                <strong>{{ seguro.imovel.endereco_completo }}</strong><br>
+                                <small class="text-muted">{{ seguro.imovel.proprietario.nome }}</small>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Tipo de Seguro</h6>
+                            <p class="mb-3">
+                                <span class="badge bg-info fs-6">{{ seguro.get_tipo_display }}</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Seguradora</h6>
+                            <p class="mb-3">{{ seguro.seguradora }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Número da Apólice</h6>
+                            <p class="mb-3">{{ seguro.numero_apolice|default:"Não informado" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vigência e Valores -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-calendar-range"></i> Vigência e Valores</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Data de Início</h6>
+                            <p class="mb-3">{{ seguro.data_inicio|date:"d/m/Y" }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Data de Fim</h6>
+                            <p class="mb-3">{{ seguro.data_fim|date:"d/m/Y" }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Dias Restantes</h6>
+                            <p class="mb-3">
+                                {% if seguro.dias_restantes > 30 %}
+                                    <span class="badge bg-success">{{ seguro.dias_restantes }} dias</span>
+                                {% elif seguro.dias_restantes > 0 %}
+                                    <span class="badge bg-warning">{{ seguro.dias_restantes }} dias</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Vencido</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Valor Total</h6>
+                            <p class="mb-3">
+                                <strong class="fs-5 text-primary">R$ {{ seguro.valor_total|floatformat:2 }}</strong>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Status</h6>
+                            <p class="mb-3">
+                                {% if seguro.status == 'ativo' %}
+                                    <span class="badge bg-success fs-6">Ativo</span>
+                                {% elif seguro.status == 'vencido' %}
+                                    <span class="badge bg-danger fs-6">Vencido</span>
+                                {% else %}
+                                    <span class="badge bg-secondary fs-6">{{ seguro.get_status_display }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagamento -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-credit-card"></i> Informações de Pagamento</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Forma de Pagamento</h6>
+                            <p class="mb-3">{{ seguro.get_forma_pagamento_display|default:"Não informado" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Número de Parcelas</h6>
+                            <p class="mb-3">{{ seguro.numero_parcelas|default:"À vista" }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if seguro.numero_parcelas %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Valor por Parcela</h6>
+                            <p class="mb-3">
+                                <strong>R$ {{ seguro.valor_parcela|floatformat:2 }}</strong>
+                            </p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Observações -->
+            {% if seguro.observacoes %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-chat-text"></i> Observações</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ seguro.observacoes|linebreaks }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Ações Rápidas -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0"><i class="bi bi-lightning"></i> Ações Rápidas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'financeiro:seguro_editar' seguro.pk %}" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Editar Seguro
+                        </a>
+                        <a href="{% url 'imoveis:detalhes_imovel' seguro.imovel.pk %}" class="btn btn-outline-primary">
+                            <i class="bi bi-house"></i> Ver Imóvel
+                        </a>
+                        <a href="{% url 'core:detalhes_proprietario' seguro.imovel.proprietario.pk %}" class="btn btn-outline-info">
+                            <i class="bi bi-person"></i> Ver Proprietário
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informações do Sistema -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0"><i class="bi bi-gear"></i> Informações do Sistema</h6>
+                </div>
+                <div class="card-body">
+                    <small class="text-muted">
+                        <strong>Cadastrado em:</strong> {{ seguro.data_cadastro|date:"d/m/Y H:i" }}<br>
+                        <strong>Última atualização:</strong> {{ seguro.data_atualizacao|date:"d/m/Y H:i" }}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

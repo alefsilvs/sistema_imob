@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Repositório Digital - Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .repo-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 15px;
+        color: white;
+        transition: transform 0.3s ease;
+    }
+    
+    .repo-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .category-badge {
+        border-radius: 20px;
+        padding: 5px 12px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .activity-item {
+        border-left: 3px solid #007bff;
+        padding-left: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .upload-zone {
+        border: 2px dashed #007bff;
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+    
+    .upload-zone:hover {
+        background: #e9ecef;
+        border-color: #0056b3;
+    }
+    
+    .document-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .document-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .document-card:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="repo-card card p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-2">
+                            <i class="bi bi-archive"></i>
+                            Repositório Digital
+                        </h2>
+                        <p class="mb-0 opacity-75">
+                            Gerencie todos os seus documentos de forma segura e organizada
+                        </p>
+                    </div>
+                    <div class="text-end">
+                        <a href="{% url 'documentos:upload_documento' %}" class="btn btn-light btn-lg">
+                            <i class="bi bi-cloud-upload"></i>
+                            Enviar Documento
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card card p-3">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                            <i class="bi bi-files text-primary fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="text-muted mb-1">Total de Documentos</h6>
+                        <h3 class="mb-0">{{ total_documentos }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="stat-card card p-3">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                            <i class="bi bi-file-plus text-success fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="text-muted mb-1">Novos (30 dias)</h6>
+                        <h3 class="mb-0">{{ documentos_recentes }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="stat-card card p-3">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle">
+                            <i class="bi bi-clock text-warning fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="text-muted mb-1">Vencendo</h6>
+                        <h3 class="mb-0">{{ documentos_vencendo|length }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="stat-card card p-3">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="bg-info bg-opacity-10 p-3 rounded-circle">
+                            <i class="bi bi-folder text-info fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="text-muted mb-1">Tipos</h6>
+                        <h3 class="mb-0">{{ tipos_stats|length }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning"></i>
+                        Ações Rápidas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'documentos:listar_documentos' %}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-center">
+                                <i class="bi bi-search fs-2 mb-2"></i>
+                                <span>Buscar Documentos</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'documentos:upload_documento' %}" class="btn btn-outline-success w-100 h-100 d-flex flex-column justify-content-center">
+                                <i class="bi bi-cloud-upload fs-2 mb-2"></i>
+                                <span>Upload Documento</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'documentos:gerenciar_categorias' %}" class="btn btn-outline-info w-100 h-100 d-flex flex-column justify-content-center">
+                                <i class="bi bi-folder-plus fs-2 mb-2"></i>
+                                <span>Gerenciar Tipos</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <button class="btn btn-outline-warning w-100 h-100 d-flex flex-column justify-content-center" onclick="gerarRelatorio()">
+                                <i class="bi bi-file-earmark-text fs-2 mb-2"></i>
+                                <span>Relatórios</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Tipos Mais Utilizados -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pie-chart"></i>
+                        Tipos Mais Utilizados
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if tipos_stats %}
+                        {% for tipo in tipos_stats %}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-file-text me-2 text-primary"></i>
+                                <span>{{ tipo.nome }}</span>
+                            </div>
+                            <span class="badge bg-primary">
+                                {{ tipo.total_docs }} doc{{ tipo.total_docs|pluralize }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-folder-x fs-1"></i>
+                            <p class="mt-2">Nenhum tipo encontrado</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Documentos Vencendo -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle text-warning"></i>
+                        Documentos Vencendo
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if documentos_vencendo %}
+                        {% for documento in documentos_vencendo %}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h6 class="mb-1">{{ documento.nome_arquivo }}</h6>
+                                <small class="text-muted">{{ documento.tipo_documento.nome }}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-warning">
+                                    {{ documento.data_vencimento|date:"d/m/Y" }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-check-circle fs-1"></i>
+                            <p class="mt-2">Nenhum documento vencendo</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Atividade Recente -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-activity"></i>
+                        Atividade Recente
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if atividades_recentes %}
+                        {% for atividade in atividades_recentes %}
+                        <div class="activity-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">
+                                        {% if atividade.acao == 'VISUALIZAR' %}
+                                            <i class="bi bi-eye text-info"></i>
+                                        {% elif atividade.acao == 'DOWNLOAD' %}
+                                            <i class="bi bi-download text-success"></i>
+                                        {% elif atividade.acao == 'UPLOAD' %}
+                                            <i class="bi bi-upload text-primary"></i>
+                                        {% elif atividade.acao == 'COMPARTILHAR' %}
+                                            <i class="bi bi-share text-warning"></i>
+                                        {% else %}
+                                            <i class="bi bi-file text-secondary"></i>
+                                        {% endif %}
+                                        {{ atividade.get_acao_display }}
+                                    </h6>
+                                    <p class="mb-1">{{ atividade.documento.nome_arquivo }}</p>
+                                    <small class="text-muted">
+                                        por {{ atividade.usuario.first_name|default:atividade.usuario.username }}
+                                    </small>
+                                </div>
+                                <small class="text-muted">
+                                    {{ atividade.data_acesso|timesince }} atrás
+                                </small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-clock-history fs-1"></i>
+                            <p class="mt-2">Nenhuma atividade recente</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function gerarRelatorio() {
+    // Implementar geração de relatórios
+    alert('Funcionalidade de relatórios em desenvolvimento');
+}
+
+// Atualizar estatísticas a cada 5 minutos
+setInterval(function() {
+    location.reload();
+}, 300000);
+</script>
+{% endblock %}

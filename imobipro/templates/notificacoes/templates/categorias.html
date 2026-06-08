@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Gerenciar Categorias{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">🏷️ Gerenciar Categorias</h3>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaCategoria">
+                        ➕ Nova Categoria
+                    </button>
+                </div>
+                
+                <div class="card-body">
+                    {% if categorias %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Descrição</th>
+                                        <th>Templates</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for categoria in categorias %}
+                                        <tr>
+                                            <td><strong>{{ categoria.nome }}</strong></td>
+                                            <td>{{ categoria.descricao|default:'-' }}</td>
+                                            <td>
+                                                <span class="badge bg-info">{{ categoria.total_templates }} template{{ categoria.total_templates|pluralize }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                            onclick="editarCategoria({{ categoria.id }}, '{{ categoria.nome }}', '{{ categoria.descricao|default:'' }}')">
+                                                        ✏️ Editar
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="excluirCategoria({{ categoria.id }}, '{{ categoria.nome }}', {{ categoria.total_templates }})">
+                                                        🗑️ Excluir
+                                                    </button>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <h5 class="text-muted">Nenhuma categoria encontrada</h5>
+                            <p class="text-muted">Crie sua primeira categoria de templates!</p>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovaCategoria">
+                                ➕ Criar Categoria
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="card-footer">
+                    <a href="{% url 'notificacoes:listar_templates' %}" class="btn btn-secondary">
+                        ← Voltar para Templates
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nova Categoria -->
+<div class="modal fade" id="modalNovaCategoria" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="criar">
+                <div class="modal-header">
+                    <h5 class="modal-title">➕ Nova Categoria</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nome-nova" class="form-label">Nome *</label>
+                        <input type="text" class="form-control" id="nome-nova" name="nome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descricao-nova" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="descricao-nova" name="descricao" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Criar Categoria</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Categoria -->
+<div class="modal fade" id="modalEditarCategoria" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="editar">
+                <input type="hidden" name="categoria_id" id="categoria-id-editar">
+                <div class="modal-header">
+                    <h5 class="modal-title">✏️ Editar Categoria</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nome-editar" class="form-label">Nome *</label>
+                        <input type="text" class="form-control" id="nome-editar" name="nome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descricao-editar" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="descricao-editar" name="descricao" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Excluir Categoria -->
+<div class="modal fade" id="modalExcluirCategoria" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="excluir">
+                <input type="hidden" name="categoria_id" id="categoria-id-excluir">
+                <div class="modal-header">
+                    <h5 class="modal-title">🗑️ Excluir Categoria</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir a categoria <strong id="categoria-nome-excluir"></strong>?</p>
+                    <div id="aviso-templates" class="alert alert-warning" style="display: none;">
+                        <strong>Atenção:</strong> Esta categoria possui templates associados e não pode ser excluída.
+                    </div>
+                    <p class="text-danger"><small>Esta ação não pode ser desfeita.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger" id="btn-confirmar-exclusao">Excluir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function editarCategoria(id, nome, descricao) {
+    document.getElementById('categoria-id-editar').value = id;
+    document.getElementById('nome-editar').value = nome;
+    document.getElementById('descricao-editar').value = descricao;
+    new bootstrap.Modal(document.getElementById('modalEditarCategoria')).show();
+}
+
+function excluirCategoria(id, nome, totalTemplates) {
+    document.getElementById('categoria-id-excluir').value = id;
+    document.getElementById('categoria-nome-excluir').textContent = nome;
+    
+    const avisoTemplates = document.getElementById('aviso-templates');
+    const btnConfirmar = document.getElementById('btn-confirmar-exclusao');
+    
+    if (totalTemplates > 0) {
+        avisoTemplates.style.display = 'block';
+        btnConfirmar.disabled = true;
+    } else {
+        avisoTemplates.style.display = 'none';
+        btnConfirmar.disabled = false;
+    }
+    
+    new bootstrap.Modal(document.getElementById('modalExcluirCategoria')).show();
+}
+</script>
+{% endblock %}

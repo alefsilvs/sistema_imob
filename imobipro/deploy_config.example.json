@@ -1,0 +1,57 @@
+{
+  "servidor": {
+    "tipo": "digitalocean",
+    "ip": "SEU_IP_DO_SERVIDOR",
+    "usuario": "root",
+    "porta": 22,
+    "chave_ssh": "/caminho/para/sua/chave.pem"
+  },
+  
+  "repositorio": {
+    "url": "https://github.com/SEU_USUARIO/sistema-imobiliario.git",
+    "branch": "main",
+    "webhook_secret": "sua_chave_secreta_aqui"
+  },
+  
+  "aplicacao": {
+    "nome": "sistema-imobiliario",
+    "diretorio": "/opt/sistema_imobiliario",
+    "usuario_app": "www-data",
+    "porta": 8000
+  },
+  
+  "banco": {
+    "tipo": "postgresql",
+    "host": "localhost",
+    "porta": 5432,
+    "nome": "sistema_imo_db",
+    "usuario": "sistema_imo_user",
+    "senha": "SUA_SENHA_SEGURA"
+  },
+  
+  "evolution_api": {
+    "porta": 8081,
+    "diretorio": "/opt/sistema_imobiliario/evolution-api",
+    "chave_api": "F8A3B2C9D4E5F6A7B8C9D0E1F2A3B4C5"
+  },
+  
+  "nginx": {
+    "dominio": "seudominio.com.br",
+    "ssl": true,
+    "certificado": "/etc/letsencrypt/live/seudominio.com.br/fullchain.pem",
+    "chave_privada": "/etc/letsencrypt/live/seudominio.com.br/privkey.pem"
+  },
+  
+  "backup": {
+    "diretorio": "/opt/backups/sistema_imobiliario",
+    "manter_backups": 5,
+    "backup_automatico": true,
+    "horario": "02:00"
+  },
+  
+  "monitoramento": {
+    "webhook_discord": "https://discord.com/api/webhooks/SEU_WEBHOOK",
+    "email_notificacao": "seu@email.com",
+    "alertas_erro": true
+  }
+}

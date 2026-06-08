@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Planos de Assinatura - ImobilPro{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Escolha seu Plano</h2>
+            <p class="lead">Selecione o plano que melhor atende às suas necessidades</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        {% for plano in planos %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 {% if plano.destaque %}border-primary{% endif %}">
+                {% if plano.destaque %}
+                <div class="card-header bg-primary text-white text-center">
+                    <strong>MAIS POPULAR</strong>
+                </div>
+                {% endif %}
+                
+                <div class="card-body text-center">
+                    <h4 class="card-title">{{ plano.nome }}</h4>
+                    <h2 class="text-primary mb-3">
+                        R$ {{ plano.preco|floatformat:2 }}
+                        <small class="text-muted">/mês</small>
+                    </h2>
+                    
+                    <p class="card-text">{{ plano.descricao }}</p>
+                    
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> {{ plano.limite_imoveis }} imóveis</li>
+                        <li><i class="fas fa-check text-success"></i> {{ plano.limite_contratos }} contratos</li>
+                        {% if plano.recursos_extras %}
+                            {% for recurso in plano.recursos_extras.splitlines %}
+                            <li><i class="fas fa-check text-success"></i> {{ recurso }}</li>
+                            {% endfor %}
+                        {% endif %}
+                    </ul>
+                </div>
+                
+                <div class="card-footer">
+                    <a href="{% url 'assinaturas:assinar' plano.id %}" 
+                       class="btn {% if plano.destaque %}btn-primary{% else %}btn-outline-primary{% endif %} btn-block">
+                        Assinar Agora
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Gratuito por 7 dias</h5>
+                    <p class="card-text">
+                        Cancele a qualquer momento sem cobrança.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

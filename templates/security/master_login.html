@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login Master - Sistema Seguro{% endblock %}
+
+{% block extra_css %}
+<style>
+.master-login-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    max-width: 450px;
+    width: 100%;
+    margin: 20px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-header h2 {
+    color: #333;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.login-header .subtitle {
+    color: #666;
+    font-size: 14px;
+}
+
+.security-badge {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-control {
+    border: 2px solid #e1e5e9;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn-master-login {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 12px 30px;
+    font-weight: 600;
+    color: white;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.btn-master-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.security-info {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+    font-size: 12px;
+    color: #666;
+}
+
+.security-info ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.alert {
+    border-radius: 10px;
+    border: none;
+    margin-bottom: 20px;
+}
+
+.hardware-info {
+    background: #e3f2fd;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 15px;
+    font-size: 11px;
+    color: #1976d2;
+}
+
+.ip-info {
+    background: #f3e5f5;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: #7b1fa2;
+}
+
+.loading-spinner {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.spinner-border {
+    color: #667eea;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="master-login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="security-badge">
+                <i class="fas fa-shield-alt"></i> ACESSO MASTER
+            </div>
+            <h2>Sistema Seguro</h2>
+            <p class="subtitle">Autenticação de Usuário Master</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" id="masterLoginForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Usuário Master</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.username.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">Senha Master</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.password.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if form.two_factor_code %}
+            <div class="form-group">
+                <label for="{{ form.two_factor_code.id_for_label }}">Código 2FA</label>
+                {{ form.two_factor_code }}
+                <small class="form-text text-muted">
+                    Digite o código de 6 dígitos do seu aplicativo autenticador<br>
+                    <strong>Ou</strong> use um código de backup (formato: XX-XX-XX-XX)
+                </small>
+                {% if form.two_factor_code.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.two_factor_code.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-master-login">
+                <i class="fas fa-sign-in-alt"></i> Acessar Sistema
+            </button>
+
+            <div class="loading-spinner">
+                <div class="spinner-border" role="status">
+                    <span class="sr-only">Verificando...</span>
+                </div>
+                <p class="mt-2">Verificando credenciais e hardware...</p>
+            </div>
+        </form>
+
+        <div class="security-info">
+            <strong><i class="fas fa-info-circle"></i> Informações de Segurança:</strong>
+            <ul>
+                <li>Este é um acesso restrito ao usuário master</li>
+                <li>Todas as tentativas de login são registradas</li>
+                <li>Hardware e IP são validados automaticamente</li>
+                <li>Múltiplas tentativas falhas resultam em bloqueio</li>
+            </ul>
+        </div>
+
+        <div class="hardware-info">
+            <strong><i class="fas fa-desktop"></i> Hardware ID:</strong>
+            <code id="hardwareFingerprint">Carregando...</code>
+        </div>
+
+        <div class="ip-info">
+            <strong><i class="fas fa-globe"></i> Seu IP:</strong>
+            <code id="clientIP">{{ request.META.REMOTE_ADDR|default:'Desconhecido' }}</code>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('masterLoginForm');
+    const loadingSpinner = document.querySelector('.loading-spinner');
+    const submitBtn = document.querySelector('.btn-master-login');
+    
+    // Gerar fingerprint do hardware (simplificado para demo)
+    function generateHardwareFingerprint() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillText('Hardware fingerprint', 2, 2);
+        
+        const fingerprint = [
+            navigator.userAgent,
+            navigator.language,
+            screen.width + 'x' + screen.height,
+            new Date().getTimezoneOffset(),
+            canvas.toDataURL()
+        ].join('|');
+        
+        // Simular hash
+        let hash = 0;
+        for (let i = 0; i < fingerprint.length; i++) {
+            const char = fingerprint.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash;
+        }
+        
+        return Math.abs(hash).toString(16).substring(0, 16);
+    }
+    
+    // Exibir fingerprint
+    document.getElementById('hardwareFingerprint').textContent = generateHardwareFingerprint();
+    
+    // Manipular envio do formulário
+    form.addEventListener('submit', function(e) {
+        submitBtn.style.display = 'none';
+        loadingSpinner.style.display = 'block';
+        
+        // Adicionar fingerprint ao formulário
+        const fingerprintInput = document.createElement('input');
+        fingerprintInput.type = 'hidden';
+        fingerprintInput.name = 'hardware_fingerprint';
+        fingerprintInput.value = generateHardwareFingerprint();
+        form.appendChild(fingerprintInput);
+    });
+    
+    // Auto-focus no primeiro campo
+    const firstInput = form.querySelector('input[type="text"], input[type="password"]');
+    if (firstInput) {
+        firstInput.focus();
+    }
+    
+    // Validação em tempo real
+    const inputs = form.querySelectorAll('input');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            if (this.value.length > 0) {
+                this.classList.add('is-valid');
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+});
+
+// Detectar tentativas de injeção ou manipulação
+window.addEventListener('beforeunload', function() {
+    // Log de saída (pode ser enviado para o servidor)
+    console.log('Master login page unloaded');
+});
+
+// Prevenir inspeção de elementos (básico)
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+        e.preventDefault();
+        alert('Inspeção de elementos não permitida nesta página de segurança.');
+        return false;
+    }
+});
+
+// Prevenir clique direito
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+});
+</script>
+{% endblock %}

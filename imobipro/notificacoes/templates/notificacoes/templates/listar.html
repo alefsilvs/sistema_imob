@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load notificacoes_extras %}
+
+{% block title %}Templates de Notificação{% endblock %}
+
+{% block extra_css %}
+<style>
+    .template-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .template-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .template-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .template-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #333;
+        margin: 0;
+    }
+    
+    .template-category {
+        background: #007bff;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        margin-left: 10px;
+    }
+    
+    .template-type {
+        background: #28a745;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        margin-left: 5px;
+    }
+    
+    .template-stats {
+        display: flex;
+        gap: 20px;
+        margin: 10px 0;
+        font-size: 0.9em;
+        color: #666;
+    }
+    
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .template-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 0.8em;
+    }
+    
+    .search-filters {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+    }
+    
+    .status-ativo {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-inativo {
+        background: #f8d7da;
+        color: #721c24;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-file-alt"></i> Templates de Notificação</h2>
+                <a href="{% url 'notificacoes:criar_template' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Novo Template
+                </a>
+            </div>
+
+            <!-- Filtros de Busca -->
+            <div class="search-filters">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="search" class="form-label">Buscar</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ search }}" placeholder="Nome, assunto ou conteúdo...">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="categoria" class="form-label">Categoria</label>
+                        <select class="form-select" id="categoria" name="categoria">
+                            <option value="">Todas as categorias</option>
+                            {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}" 
+                                        {% if categoria.id|stringformat:"s" == categoria_selecionada %}selected{% endif %}>
+                                    {{ categoria.nome }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="formato" class="form-label">Formato</label>
+                        <select class="form-select" id="formato" name="formato">
+                            <option value="">Todos os formatos</option>
+                            {% for valor, nome in formatos %}
+                                <option value="{{ valor }}" 
+                                        {% if valor == formato_selecionado %}selected{% endif %}>
+                                    {{ nome }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="fas fa-search"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Lista de Templates -->
+            {% if page_obj %}
+                {% for template in page_obj %}
+                    <div class="template-card">
+                        <div class="template-header">
+                            <div class="d-flex align-items-center">
+                                <h3 class="template-title">{{ template.nome }}</h3>
+                                <span class="template-category">{{ template.categoria.nome }}</span>
+                                <span class="template-type">{{ template.get_tipo_display }}</span>
+                                <span class="status-badge {% if template.ativo %}status-ativo{% else %}status-inativo{% endif %}">
+                                    {% if template.ativo %}Ativo{% else %}Inativo{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="template-content">
+                            <p><strong>Assunto:</strong> {{ template.assunto_template|truncatechars:100 }}</p>
+                            <p><strong>Formato:</strong> {{ template.get_formato_display }}</p>
+                            <p><strong>Conteúdo:</strong> {{ template.corpo_template|truncatechars:200|striptags }}</p>
+                        </div>
+                        
+                        {% if template.id in templates_stats %}
+                            <div class="template-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-paper-plane text-primary"></i>
+                                    <span>{{ templates_stats|get_item:template.id.total_enviadas|default:0 }} enviadas</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-check-circle text-success"></i>
+                                    <span>{{ templates_stats|get_item:template.id.total_entregues|default:0 }} entregues</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-eye text-info"></i>
+                                    <span>{{ templates_stats|get_item:template.id.total_lidas|default:0 }} lidas</span>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="template-actions">
+                            <a href="{% url 'notificacoes:preview_template' template.id %}" 
+                               class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-eye"></i> Preview
+                            </a>
+                            <a href="{% url 'notificacoes:editar_template' template.id %}" 
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            <a href="{% url 'notificacoes:duplicar_template' template.id %}" 
+                               class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-copy"></i> Duplicar
+                            </a>
+                            <a href="{% url 'notificacoes:testar_template' template.id %}" 
+                               class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-vial"></i> Testar
+                            </a>
+                            <a href="{% url 'notificacoes:excluir_template' template.id %}" 
+                               class="btn btn-outline-danger btn-sm"
+                               onclick="return confirm('Tem certeza que deseja excluir este template?')">
+                                <i class="fas fa-trash"></i> Excluir
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <!-- Paginação -->
+                {% if page_obj.has_other_pages %}
+                    <nav aria-label="Paginação de templates">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}{% if formato_selecionado %}&formato={{ formato_selecionado }}{% endif %}">
+                                        Primeira
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}{% if formato_selecionado %}&formato={{ formato_selecionado }}{% endif %}">
+                                        Anterior
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}{% if formato_selecionado %}&formato={{ formato_selecionado }}{% endif %}">
+                                        Próxima
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}{% if formato_selecionado %}&formato={{ formato_selecionado }}{% endif %}">
+                                        Última
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle"></i>
+                    Nenhum template encontrado. 
+                    <a href="{% url 'notificacoes:criar_template' %}" class="alert-link">Criar primeiro template</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-submit do formulário de filtros quando mudar seleção
+document.addEventListener('DOMContentLoaded', function() {
+    const selects = document.querySelectorAll('#categoria, #formato');
+    selects.forEach(select => {
+        select.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Minha Assinatura - ImobilPro{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">Minha Assinatura</h2>
+        </div>
+    </div>
+    
+    {% if assinatura %}
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-{% if assinatura.ativa %}success{% else %}warning{% endif %} text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-{% if assinatura.ativa %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
+                        Status: {% if assinatura.ativa %}Ativa{% else %}Inativa{% endif %}
+                    </h5>
+                </div>
+                
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Plano Atual</h6>
+                            <p class="h4 text-primary">{{ assinatura.plano.nome }}</p>
+                            <p>{{ assinatura.plano.descricao }}</p>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>Informações da Assinatura</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Data de início:</strong> {{ assinatura.data_inicio|date:"d/m/Y" }}</li>
+                                <li><strong>Próxima cobrança:</strong> {{ assinatura.data_fim|date:"d/m/Y" }}</li>
+                                <li><strong>Valor mensal:</strong> R$ {{ assinatura.plano.preco|floatformat:2 }}</li>
+                                <li><strong>Método de pagamento:</strong> {{ assinatura.get_metodo_pagamento_display }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Recursos Inclusos</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> {{ assinatura.plano.limite_imoveis }} imóveis</li>
+                                <li><i class="fas fa-check text-success"></i> {{ assinatura.plano.limite_contratos }} contratos</li>
+                                {% if assinatura.plano.recursos_extras %}
+                                    {% for recurso in assinatura.plano.recursos_extras.splitlines %}
+                                    <li><i class="fas fa-check text-success"></i> {{ recurso }}</li>
+                                    {% endfor %}
+                                {% endif %}
+                            </ul>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>Uso Atual</h6>
+                            <div class="mb-2">
+                                <small>Imóveis: {{ uso_imoveis }}/{{ assinatura.plano.limite_imoveis }}</small>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: {{ percentual_imoveis }}%"></div>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <small>Contratos: {{ uso_contratos }}/{{ assinatura.plano.limite_contratos }}</small>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: {{ percentual_contratos }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'assinaturas:planos' %}" class="btn btn-primary">
+                            <i class="fas fa-arrow-up"></i> Fazer Upgrade
+                        </a>
+                        {% if assinatura.ativa %}
+                        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#cancelarModal">
+                            <i class="fas fa-times"></i> Cancelar Assinatura
+                        </button>
+                        {% else %}
+                        <a href="{% url 'assinaturas:renovar_assinatura' %}" class="btn btn-success">
+                            <i class="fas fa-refresh"></i> Renovar Assinatura
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Histórico de Pagamentos</h6>
+                </div>
+                <div class="card-body">
+                    {% if historico_pagamentos %}
+                        {% for pagamento in historico_pagamentos %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <small>{{ pagamento.data_pagamento|date:"d/m/Y" }}</small><br>
+                                <span class="badge badge-{% if pagamento.status == 'pago' %}success{% elif pagamento.status == 'pendente' %}warning{% else %}danger{% endif %}">
+                                    {{ pagamento.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="text-right">
+                                <strong>R$ {{ pagamento.valor|floatformat:2 }}</strong>
+                            </div>
+                        </div>
+                        <hr>
+                        {% endfor %}
+                        <a href="{% url 'assinaturas:historico_pagamentos' %}" class="btn btn-sm btn-outline-primary btn-block">
+                            Ver Histórico Completo
+                        </a>
+                    {% else %}
+                        <p class="text-muted">Nenhum pagamento encontrado.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Cancelamento -->
+    <div class="modal fade" id="cancelarModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cancelar Assinatura</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja cancelar sua assinatura?</p>
+                    <div class="alert alert-warning">
+                        <strong>Atenção:</strong> Após o cancelamento, você terá acesso até {{ assinatura.data_fim|date:"d/m/Y" }}.
+                        Seus dados serão mantidos por 7 dias para possível reativação.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Manter Assinatura</button>
+                    <a href="{% url 'assinaturas:cancelar_assinatura' %}" class="btn btn-danger">
+                        Confirmar Cancelamento
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h5>Você não possui uma assinatura ativa</h5>
+                <p>Para acessar todas as funcionalidades do ImobilPro, você precisa de uma assinatura.</p>
+                <a href="{% url 'assinaturas:planos' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Ver Planos Disponíveis
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pagamento Realizado com Sucesso{% endblock %}
+
+{% block extra_css %}
+<style>
+    .success-container {
+        max-width: 600px;
+        margin: 50px auto;
+        text-align: center;
+        padding: 40px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .success-icon {
+        color: #28a745;
+        font-size: 5rem;
+        margin-bottom: 30px;
+        animation: checkmark 0.6s ease-in-out;
+    }
+    @keyframes checkmark {
+        0% { transform: scale(0); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    .payment-details {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 30px 0;
+        text-align: left;
+    }
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .detail-row:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    .btn-actions {
+        margin-top: 30px;
+    }
+    .btn-actions .btn {
+        margin: 0 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-container">
+    <i class="fas fa-check-circle success-icon"></i>
+    
+    <h2 class="text-success mb-3">Pagamento Realizado com Sucesso!</h2>
+    <p class="lead">Sua parcela foi paga e já está sendo processada em nosso sistema.</p>
+    
+    <div class="payment-details">
+        <h5 class="mb-3"><i class="fas fa-receipt"></i> Detalhes do Pagamento</h5>
+        
+        <div class="detail-row">
+            <span><strong>Inquilino:</strong></span>
+            <span>{{ pagamento.parcela.contrato.inquilino.nome }}</span>
+        </div>
+        
+        <div class="detail-row">
+            <span><strong>Imóvel:</strong></span>
+            <span>{{ pagamento.parcela.contrato.imovel.endereco_completo }}</span>
+        </div>
+        
+        <div class="detail-row">
+            <span><strong>Tipo de Parcela:</strong></span>
+            <span>{{ pagamento.parcela.get_tipo_display }}</span>
+        </div>
+        
+        <div class="detail-row">
+            <span><strong>Vencimento:</strong></span>
+            <span>{{ pagamento.parcela.data_vencimento|date:"d/m/Y" }}</span>
+        </div>
+        
+        <div class="detail-row">
+            <span><strong>Valor Pago:</strong></span>
+            <span class="text-success font-weight-bold">R$ {{ pagamento.valor_total|floatformat:2 }}</span>
+        </div>
+        
+        <div class="detail-row">
+            <span><strong>Método de Pagamento:</strong></span>
+            <span>{{ pagamento.get_metodo_pagamento_display }}</span>
+        </div>
+        
+        <div class="detail-row">
+            <span><strong>Data do Pagamento:</strong></span>
+            <span>{{ pagamento.data_aprovacao|date:"d/m/Y H:i" }}</span>
+        </div>
+        
+        {% if pagamento.transacao_id %}
+        <div class="detail-row">
+            <span><strong>ID da Transação:</strong></span>
+            <span><code>{{ pagamento.transacao_id }}</code></span>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        <strong>Importante:</strong> Guarde este comprovante para seus registros. 
+        O status da parcela será atualizado automaticamente em nosso sistema.
+    </div>
+    
+    <div class="btn-actions">
+        <a href="#" onclick="window.print()" class="btn btn-outline-primary">
+            <i class="fas fa-print"></i> Imprimir Comprovante
+        </a>
+        
+        <a href="mailto:{{ sistema.email }}?subject=Comprovante de Pagamento - {{ pagamento.parcela.contrato.numero }}" class="btn btn-outline-secondary">
+            <i class="fas fa-envelope"></i> Enviar por Email
+        </a>
+    </div>
+    
+    <div class="mt-4">
+        <small class="text-muted">
+            Em caso de dúvidas, entre em contato conosco:<br>
+            <i class="fas fa-phone"></i> {{ sistema.telefone }}<br>
+            <i class="fas fa-envelope"></i> {{ sistema.email }}
+        </small>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-refresh da página após 30 segundos para verificar atualizações
+setTimeout(function() {
+    if (confirm('Deseja atualizar a página para verificar o status mais recente?')) {
+        location.reload();
+    }
+}, 30000);
+</script>
+{% endblock %}
