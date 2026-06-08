@@ -458,17 +458,23 @@ class RegistroView(TemplateView):
             usuario=user,
             defaults={'email_verificado': False}
         )
-        try:
-            verificacao.enviar_email_verificacao(self.request)
-        except Exception:
-            pass
+        email_enviado = verificacao.enviar_email_verificacao(self.request)
 
         self.request.session['registro_pendente'] = {
             'user_id': user.id,
             'tenant_id': tenant.id,
             'email': user.email
         }
-        messages.success(self.request, 'Conta criada com sucesso! Confirme seu e-mail para entrar.')
+        self.request.session['email_verificacao_enviado'] = email_enviado
+
+        if email_enviado:
+            messages.success(self.request, 'Conta criada com sucesso! Confirme seu e-mail para entrar.')
+        else:
+            messages.warning(
+                self.request,
+                'Conta criada, mas o e-mail de confirmacao nao foi enviado agora. '
+                'Use o botao de reenviar nesta pagina apos ajustarmos o SMTP.'
+            )
         return redirect('saas:email_enviado')
 
 class EscolherPagamentoView(TemplateView):
@@ -884,6 +890,7 @@ class EmailEnviadoView(TemplateView):
         registro_pendente = self.request.session.get('registro_pendente')
         if registro_pendente:
             context['email'] = registro_pendente.get('email')
+        context['email_enviado'] = bool(self.request.session.get('email_verificacao_enviado', True))
         return context
 
 def verificar_email(request, token):
@@ -898,27 +905,42 @@ def verificar_email(request, token):
         # Verificar email
         verificacao.verificar_email()
         
+        tenant = Tenant.objects.filter(usuario_admin=verificacao.usuario).first()
+        if tenant:
+            request.session['tenant_id'] = tenant.id
+            if tenant.plano_id:
+                request.session['plano_selecionado'] = str(tenant.plano_id)
+
+        pagamento_pendente = PagamentoPlano.objects.filter(
+            usuario=verificacao.usuario,
+            status='pendente'
+        ).order_by('-data_criacao').first()
+        if pagamento_pendente:
+            request.session['pagamento_token'] = pagamento_pendente.token_pagamento
+
         # Obter informações do registro pendente
         registro_pendente = request.session.get('registro_pendente')
-        pagamento_token = request.session.get('pagamento_token')
-        
+
         if registro_pendente and registro_pendente.get('user_id') == verificacao.usuario.id:
             # Limpar sessão de registro pendente
             del request.session['registro_pendente']
-            
-            # Fazer login automático do usuário
-            login(request, verificacao.usuario)
-            
+        request.session.pop('email_verificacao_enviado', None)
+
+        # O link de verificacao pode ser aberto em outro navegador/dispositivo.
+        login(request, verificacao.usuario, backend='django.contrib.auth.backends.ModelBackend')
+
+        if tenant:
+            if tenant.status == 'ativo':
+                messages.success(request, 'Email verificado com sucesso! Sua conta ja esta ativa.')
+                return redirect('/dashboard/')
+
             messages.success(
-                request, 
-                'Email verificado com sucesso! Agora você pode escolher sua forma de pagamento.'
+                request,
+                'Email verificado com sucesso! Agora voce pode escolher sua forma de pagamento.'
             )
-            
-            # Redirecionar para escolha de pagamento
             return redirect('saas:escolher_pagamento')
-        else:
-            messages.success(request, 'Email verificado com sucesso! Agora você pode fazer login.')
-        
+
+        messages.success(request, 'Email verificado com sucesso! Agora voce pode fazer login.')
         return redirect('login')
         
     except VerificacaoEmail.DoesNotExist:
